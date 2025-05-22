@@ -24,9 +24,9 @@
                 <option value="kabupaten">Kabupaten</option>
             </select>
             <select class="form-select me-2" style="width: 200px;">
-                <option selected>Wilayah</option>
-                <option value="tegal_selatan">Tegal Selatan</option>
-                <option value="tegal_utara">Tegal Timur</option>
+                <option selected>Harga</option>
+                <option value="termurah">Termurah</option>
+                <option value="termahal">Termahal</option>
             </select>
             <button class="btn btn-primary">Konfirmasi</button>
         </div>
@@ -44,7 +44,7 @@
                         <p><i class="bi bi-geo-alt-fill"></i> Kramat</p>
                     </div>
                     <div class="text-center">
-              <a class="btn btn-primary mt-auto" href="#">Sewa</a>
+              <a class="btn btn-primary mt-auto" href="{{ route('frontend.detail') }}">Sewa</a>
               <a
                 class="btn btn-info mt-auto text-white"
                 href="{{ route('frontend.detail2') }}">Detail</a>
@@ -63,7 +63,7 @@
                         <p><i class="bi bi-geo-alt-fill"></i> Kramat</p>
                     </div>
                     <div class="text-center">
-              <a class="btn btn-primary mt-auto" href="#">Sewa</a>
+              <a class="btn btn-primary mt-auto" href="{{ route('frontend.detail') }}">Sewa</a>
               <a
                 class="btn btn-info mt-auto text-white"
                 href="{{ route('frontend.detail2') }}">Detail</a>
