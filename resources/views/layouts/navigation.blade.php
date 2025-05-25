@@ -1,104 +1,224 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
-    <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <div class="flex">
-                <!-- Logo -->
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ route('frontend.homepage') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
-                    </a>
-                </div>
+<nav class="navbar navbar-expand-lg bg-white navbar-dark bg-gradient shadow-sm fixed-top" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container-fluid">
+        <!-- Brand/Logo -->
+        <a class="navbar-brand fw-bold d-flex align-items-center" href="{{ route('dashboard') ?? '#' }}">
+            <div class="bg-white bg-opacity-20 rounded-3 p-2 me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                <i class="fas fa-cube text-black"></i>
+            </div>
+            <span class="text-black">Laravel Admin</span>
+        </a>
 
-                <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
+        <!-- Mobile Toggle Button -->
+        <button class="navbar-toggler border-0 shadow-none d-md-none" type="button" data-bs-toggle="offcanvas"
+                data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar">
+            <i class="fas fa-bars text-black"></i>
+        </button>
 
-                    <x-nav-link :href="route('admin.products.index')" :active="request()->routeIs('admin.products.index')">
-                        {{ __('Tambah Produk') }}
-                    </x-nav-link>
+        <!-- Right Side Navigation -->
+        <div class="navbar-nav ms-auto d-flex flex-row align-items-center">
+            <!-- Search Bar (Hidden on mobile) -->
+            <div class="nav-item me-3 d-none d-lg-block">
+                <div class="input-group" style="width: 250px;">
+                    <span class="input-group-text bg-opacity-20 border-0">
+                        <i class="fas fa-search "></i>
+                    </span>
+                    <input type="text" class="form-control bg-white bg-opacity-20 border-0 text-white placeholder-white-50"
+                           placeholder="Search..." style="--bs-bg-opacity: 0.2;">
                 </div>
             </div>
 
-            <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <x-dropdown align="right" width="48">
-                    <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                            <div>{{ Auth::user()->name }}</div>
+            <!-- Notifications -->
+            <div class="nav-item dropdown me-3">
+                <a class="nav-link position-relative p-2 rounded-3 bg-white bg-opacity-10 hover-bg-opacity-20 transition-all"
+                   href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-bell text-black"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger animate-pulse"
+                          style="font-size: 0.6rem;">3</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3" style="min-width: 300px;" aria-labelledby="notificationDropdown">
+                    <li class="dropdown-header bg-light py-3 rounded-top-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 text-dark fw-semibold">Notifications</h6>
+                            <span class="badge bg-primary rounded-pill">3</span>
+                        </div>
+                    </li>
+                    <li><hr class="dropdown-divider my-0"></li>
+                    <li>
+                        <a class="dropdown-item text-center py-3 text-primary fw-semibold" href="#">
+                            <i class="fas fa-eye me-2"></i>View All Notifications
+                        </a>
+                    </li>
+                </ul>
+            </div>
 
-                            <div class="ms-1">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
+            <!-- Messages -->
+            <div class="nav-item dropdown me-3">
+                <a class="nav-link position-relative p-2 rounded-3 bg-white bg-opacity-10 hover-bg-opacity-20 transition-all"
+                   href="#" id="messageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-envelope text-black"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success animate-pulse"
+                          style="font-size: 0.6rem;">2</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3" style="min-width: 320px;" aria-labelledby="messageDropdown">
+                    <li class="dropdown-header bg-light py-3 rounded-top-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 text-dark fw-semibold">Messages</h6>
+                            <span class="badge bg-success rounded-pill">2</span>
+                        </div>
+                    </li>
+                    <li><a class="dropdown-item py-3 border-bottom" href="#">
+                        <div class="d-flex align-items-center">
+                            <div class="position-relative me-3">
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                                     style="width: 45px; height: 45px; font-size: 14px;">JS</div>
+                                <span class="position-absolute bottom-0 end-0 bg-success border border-white rounded-circle"
+                                      style="width: 12px; height: 12px;"></span>
                             </div>
-                        </button>
-                    </x-slot>
-
-                    <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
-                        </x-dropdown-link>
-
-                        <!-- Authentication -->
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-
-                            <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
-                                                this.closest('form').submit();">
-                                {{ __('Log Out') }}
-                            </x-dropdown-link>
-                        </form>
-                    </x-slot>
-                </x-dropdown>
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold text-dark">John Smith</div>
+                                <div class="text-muted small">How can I help you with the new project?</div>
+                                <div class="text-muted small mt-1">
+                                    <i class="fas fa-clock me-1"></i>Just now
+                                </div>
+                            </div>
+                        </div>
+                    </a></li>
+                    <li><a class="dropdown-item py-3" href="#">
+                        <div class="d-flex align-items-center">
+                            <div class="position-relative me-3">
+                                <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                                     style="width: 45px; height: 45px; font-size: 14px;">MD</div>
+                                <span class="position-absolute bottom-0 end-0 bg-warning border border-white rounded-circle"
+                                      style="width: 12px; height: 12px;"></span>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold text-dark">Maria Davis</div>
+                                <div class="text-muted small">Thanks for the quick response!</div>
+                                <div class="text-muted small mt-1">
+                                    <i class="fas fa-clock me-1"></i>5 min ago
+                                </div>
+                            </div>
+                        </div>
+                    </a></li>
+                    <li><hr class="dropdown-divider my-0"></li>
+                    <li>
+                        <a class="dropdown-item text-center py-3 text-primary fw-semibold" href="#">
+                            <i class="fas fa-comments me-2"></i>View All Messages
+                        </a>
+                    </li>
+                </ul>
             </div>
 
-            <!-- Hamburger -->
-            <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Responsive Navigation Menu -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
-            </x-responsive-nav-link>
-        </div>
-
-        <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-gray-200">
-            <div class="px-4">
-                <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
-                <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
-            </div>
-
-            <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile.edit')">
-                    {{ __('Profile') }}
-                </x-responsive-nav-link>
-
-                <!-- Authentication -->
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-
-                    <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault();
-                                        this.closest('form').submit();">
-                        {{ __('Log Out') }}
-                    </x-responsive-nav-link>
-                </form>
+            <!-- User Profile -->
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle d-flex align-items-center p-2 rounded-3 bg-white bg-opacity-10 hover-bg-opacity-20 transition-all"
+                   href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <div class="bg-white text-primary rounded-circle d-flex align-items-center justify-content-center me-2 fw-bold"
+                         style="width: 35px; height: 35px; font-size: 12px;">
+                        {{ substr(Auth::user()->name ?? 'Admin', 0, 2) }}
+                    </div>
+                    <div class="d-none d-lg-block text-white">
+                        <div class="fw-semibold small">{{ Auth::user()->name ?? 'Admin' }}</div>
+                        <div class="small opacity-75">Administrator</div>
+                    </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3" style="min-width: 250px;" aria-labelledby="userDropdown">
+                    <li class="dropdown-header bg-light py-3 rounded-top-3">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 fw-bold"
+                                 style="width: 40px; height: 40px; font-size: 14px;">
+                                {{ substr(Auth::user()->name ?? 'Admin', 0, 2) }}
+                            </div>
+                            <div>
+                                <div class="fw-bold text-dark">{{ Auth::user()->name ?? 'Admin' }}</div>
+                                <small class="text-muted">{{ Auth::user()->email ?? 'admin@example.com' }}</small>
+                            </div>
+                        </div>
+                    </li>
+                    <li><hr class="dropdown-divider my-0"></li>
+                    <li><a class="dropdown-item py-2 rounded-2 mx-2 my-1" href="#">
+                        <i class="fas fa-user me-3 text-primary"></i>My Profile
+                    </a></li>
+                    <li><a class="dropdown-item py-2 rounded-2 mx-2 my-1" href="#">
+                        <i class="fas fa-cog me-3 text-success"></i>Account Settings
+                    </a></li>
+                    <li><a class="dropdown-item py-2 rounded-2 mx-2 my-1" href="#">
+                        <i class="fas fa-bell me-3 text-warning"></i>Notifications
+                    </a></li>
+                    <li><a class="dropdown-item py-2 rounded-2 mx-2 my-1" href="#">
+                        <i class="fas fa-question-circle me-3 text-info"></i>Help & Support
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li class="px-2">
+                        @if(Route::has('logout'))
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="dropdown-item py-2 rounded-2 text-danger fw-semibold">
+                                    <i class="fas fa-sign-out-alt me-3"></i>Sign Out
+                                </button>
+                            </form>
+                        @else
+                            <a class="dropdown-item py-2 rounded-2 text-danger fw-semibold" href="#">
+                                <i class="fas fa-sign-out-alt me-3"></i>Sign Out
+                            </a>
+                        @endif
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
 </nav>
+
+<!-- Mobile Offcanvas Sidebar -->
+<div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="offcanvasSidebar" aria-labelledby="offcanvasSidebarLabel"
+     style="background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);">
+    <div class="offcanvas-header border-bottom border-white border-opacity-20 pb-4">
+        <div class="d-flex align-items-center">
+            <div class="bg-white bg-opacity-20 rounded-3 p-2 me-3 d-flex align-items-center justify-content-center"
+                 style="width: 40px; height: 40px;">
+                <i class="fas fa-cube text-white"></i>
+            </div>
+            <h5 class="offcanvas-title text-white fw-bold mb-0" id="offcanvasSidebarLabel">Laravel Admin</h5>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body p-0 pt-3">
+        <div class="px-3 mb-4">
+            <div class="d-flex align-items-center bg-white bg-opacity-10 rounded-3 p-3">
+                <div class="bg-white text-primary rounded-circle d-flex align-items-center justify-content-center me-3 fw-bold"
+                     style="width: 40px; height: 40px; font-size: 14px;">
+                    {{ substr(Auth::user()->name ?? 'Admin', 0, 2) }}
+                </div>
+                <div class="text-white">
+                    <div class="fw-semibold">{{ Auth::user()->name ?? 'Admin' }}</div>
+                    <small class="opacity-75">Administrator</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav flex-column px-3">
+            <a href="{{ route('dashboard') ?? '#' }}" class="nav-link text-white rounded-3 mb-1 py-3 px-3 active"
+               style="background: rgba(255,255,255,0.1);">
+                <i class="fas fa-tachometer-alt me-3"></i>Dashboard
+            </a>
+            <a href="#" class="nav-link text-white rounded-3 mb-1 py-3 px-3 hover-bg-white-10">
+                <i class="fas fa-users me-3"></i>Users Management
+            </a>
+            <a href="{{ route('admin.products.index') ?? '#' }}" class="nav-link text-white rounded-3 mb-1 py-3 px-3 hover-bg-white-10">
+                <i class="fas fa-box me-3"></i>Products
+            </a>
+            <a href="#" class="nav-link text-white rounded-3 mb-1 py-3 px-3 hover-bg-white-10">
+                <i class="fas fa-shopping-cart me-3"></i>Orders
+            </a>
+            <a href="#" class="nav-link text-white rounded-3 mb-1 py-3 px-3 hover-bg-white-10">
+                <i class="fas fa-chart-bar me-3"></i>Analytics
+            </a>
+            <a href="#" class="nav-link text-white rounded-3 mb-1 py-3 px-3 hover-bg-white-10">
+                <i class="fas fa-credit-card me-3"></i>Payments
+            </a>
+            <a href="#" class="nav-link text-white rounded-3 mb-1 py-3 px-3 hover-bg-white-10">
+                <i class="fas fa-cog me-3"></i>Settings
+            </a>
+        </div>
+    </div>
+</div>
