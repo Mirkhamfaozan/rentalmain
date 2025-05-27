@@ -2,139 +2,159 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    // Tampilkan semua produk dengan filter
-    public function index(Request $request)
+    private $products = [
+        [
+            'id' => 1,
+            'name' => 'Honda Beat',
+            'vendor' => 'Ale Sewa Motor',
+            'price' => 60000,
+            'location' => 'Kramat',
+            'image' => 'images/beat.jpg',
+            'fuel' => 'Bensin',
+            'cc' => '110',
+            'transmission' => 'Matic',
+            'available' => false,
+            'description' => 'Honda Beat, motor matic compact dengan konsumsi bahan bakar irit, cocok untuk aktivitas sehari-hari di dalam kota.',
+            'detail_route' => 'frontend.detail1',
+        ],
+        [
+            'id' => 2,
+            'name' => 'Honda Vario',
+            'vendor' => 'Ale Sewa Motor',
+            'price' => 90000,
+            'location' => 'Kramat',
+            'image' => 'images/vario.jpg',
+            'fuel' => 'Bensin',
+            'cc' => '150',
+            'transmission' => 'Matic',
+            'available' => true,
+            'description' => 'Motor matic Honda Vario dengan performa handal, nyaman untuk perjalanan dalam kota dengan konsumsi bahan bakar irit.',
+            'detail_route' => 'frontend.detail2',
+        ],
+        [
+            'id' => 3,
+            'name' => 'Honda Scoopy',
+            'vendor' => 'Sewa Motor ASRI TIGA',
+            'price' => 60000,
+            'location' => 'Tegal Timur',
+            'image' => 'images/scoopy.jpg',
+            'fuel' => 'Bensin',
+            'cc' => '110',
+            'transmission' => 'Matic',
+            'available' => true,
+            'description' => 'Honda Scoopy, motor compact dan mudah dikendarai, cocok untuk pemula dan aktivitas sehari-hari.',
+            'detail_route' => 'frontend.detail3',
+        ],
+        [
+            'id' => 4,
+            'name' => 'Yamaha Aerox 2018',
+            'vendor' => 'Lavanya Motor',
+            'price' => 80000,
+            'location' => 'Tegal Timur',
+            'image' => 'images/aerox1.png',
+            'fuel' => 'Bensin',
+            'cc' => '155',
+            'transmission' => 'Matic',
+            'available' => true,
+            'description' => 'Yamaha Aerox 2018, motor sporty dengan tenaga besar dan desain modern untuk para pecinta kecepatan.',
+            'detail_route' => 'frontend.detail4',
+        ],
+        [
+            'id' => 5,
+            'name' => 'Yamaha NMAX 2021',
+            'vendor' => 'Sewa Motor ASRI TIGA',
+            'price' => 100000,
+            'location' => 'Tegal Timur',
+            'image' => 'images/nmax21.png',
+            'fuel' => 'Bensin',
+            'cc' => '155',
+            'transmission' => 'Matic',
+            'available' => true,
+            'description' => 'Yamaha NMAX 2021, skuter matic dengan kenyamanan dan performa tinggi, ideal untuk perjalanan jauh.',
+            'detail_route' => 'frontend.detail5',
+        ],
+        [
+            'id' => 6,
+            'name' => 'Honda PCX 2023',
+            'vendor' => 'Sewa Motor ASRI TIGA',
+            'price' => 100000,
+            'location' => 'Tegal Timur',
+            'image' => 'images/pcx23.jpeg',
+            'fuel' => 'Bensin',
+            'cc' => '160',
+            'transmission' => 'Matic',
+            'available' => true,
+            'description' => 'Honda PCX terbaru tahun 2023 dengan teknologi terbaru dan desain elegan, cocok untuk gaya hidup modern.',
+            'detail_route' => 'frontend.detail6',
+        ],
+    ];
+
+    // Method public untuk mengakses data produk dari controller lain
+    public function getProducts()
     {
-        $query = Product::query();
-
-        // Filter berdasarkan pencarian nama motor
-        if ($request->filled('search')) {
-            $query->where('nama_motor', 'LIKE', '%' . $request->search . '%');
-        }
-
-        // Filter berdasarkan range CC
-        if ($request->filled('cc_range')) {
-            switch ($request->cc_range) {
-                case '0-150':
-                    $query->whereBetween('cc_motor', [0, 150]);
-                    break;
-                case '151-250':
-                    $query->whereBetween('cc_motor', [151, 250]);
-                    break;
-                case '251-400':
-                    $query->whereBetween('cc_motor', [251, 400]);
-                    break;
-                case '400+':
-                    $query->where('cc_motor', '>', 400);
-                    break;
-            }
-        }
-
-        // Filter berdasarkan transmisi
-        if ($request->filled('transmission')) {
-            $query->where('transmisi_motor', $request->transmission);
-        }
-
-        // Filter berdasarkan range harga
-        if ($request->filled('price_range')) {
-            switch ($request->price_range) {
-                case '0-100000':
-                    $query->whereBetween('harga', [0, 20000000]);
-                    break;
-                case '100000-50000000':
-                    $query->whereBetween('harga', [20000000, 50000000]);
-                    break;
-                case '50000000+':
-                    $query->where('harga', '>', 50000000);
-                    break;
-            }
-        }
-
-        // Ambil data dengan urutan nama motor A-Z
-        $products = $query->orderBy('nama_motor', 'asc')->get();
-
-        return view('admin.products.index', compact('products'));
+        return $this->products;
     }
 
-    // Tampilkan form tambah produk
-    public function create()
+    public function index()
     {
-        return view('admin.products.create');
+        return view('frontend.product', [
+            'products' => $this->products
+        ]);
     }
 
-    // Simpan produk baru
-    public function store(Request $request)
+    public function detail($id)
     {
-        $request->validate([
-            'nama_motor' => 'required|string|max:255',
-            'cc_motor' => 'required|integer|min:50|max:2000',
-            'harga' => 'required|numeric|min:10000',
-            'transmisi_motor' => 'required|string|in:Manual,Automatic,CVT',
-        ], [
-            'nama_motor.required' => 'Nama motor wajib diisi',
-            'cc_motor.required' => 'CC motor wajib diisi',
-            'cc_motor.min' => 'CC motor minimal 50cc',
-            'cc_motor.max' => 'CC motor maksimal 2000cc',
-            'harga.required' => 'Harga wajib diisi',
-            'harga.min' => 'Harga minimal Rp 100.000',
-            'transmisi_motor.required' => 'Transmisi motor wajib dipilih',
-            'transmisi_motor.in' => 'Transmisi motor harus Manual, Automatic, atau CVT',
+        $product = collect($this->products)->firstWhere('id', $id);
+        if (!$product) {
+            abort(404);
+        }
+
+        // Produk rekomendasi: semua produk selain yang sedang dilihat
+        $recommendations = collect($this->products)
+            ->where('id', '!=', $id)
+            ->take(3)
+            ->all();
+
+        return view('frontend.detail', compact('product', 'recommendations'));
+    }
+
+    public function order($id)
+    {
+        $product = collect($this->products)->firstWhere('id', $id);
+        if (!$product) {
+            abort(404);
+        }
+
+        return view('frontend.order', compact('product'));
+    }
+
+    public function submitOrder(Request $request)
+    {
+        // Validasi dummy
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
+            'start_date' => 'required|date',
+            'days' => 'required|integer|min:1',
+            'product_id' => 'required|integer',
         ]);
 
-        Product::create($request->all());
-        return redirect()->route('admin.products.index')->with('success', 'Motor berhasil ditambahkan');
-    }
+        // Ambil data produk dari dummy list
+        $product = collect($this->products)->firstWhere('id', $request->product_id);
+        if (!$product) {
+            abort(404);
+        }
 
-    // Tampilkan detail produk
-    public function show(Product $product)
-    {
-        return view('admin.products.show', compact('product'));
-    }
+        $total = $product['price'] * $validated['days'];
 
-    // Tampilkan form edit produk
-    public function edit(Product $product)
-    {
-        return view('admin.products.edit', compact('product'));
-    }
-
-    // Update data produk
-    public function update(Request $request, Product $product)
-    {
-        $request->validate([
-            'nama_motor' => 'required|string|max:255',
-            'cc_motor' => 'required|integer|min:50|max:2000',
-            'harga' => 'required|numeric|min:100000',
-            'transmisi_motor' => 'required|string|in:Manual,Automatic,CVT',
-        ], [
-            'nama_motor.required' => 'Nama motor wajib diisi',
-            'cc_motor.required' => 'CC motor wajib diisi',
-            'cc_motor.min' => 'CC motor minimal 50cc',
-            'cc_motor.max' => 'CC motor maksimal 2000cc',
-            'harga.required' => 'Harga wajib diisi',
-            'harga.min' => 'Harga minimal Rp 100.000',
-            'transmisi_motor.required' => 'Transmisi motor wajib dipilih',
-            'transmisi_motor.in' => 'Transmisi motor harus Manual, Automatic, atau CVT',
+        return view('frontend.order_confirmation', [
+            'order' => $validated,
+            'product' => $product,
+            'total' => $total,
         ]);
-
-        $product->update($request->all());
-        return redirect()->route('admin.products.index')->with('success', 'Motor berhasil diupdate');
-    }
-
-    // Hapus produk
-    public function destroy(Product $product)
-    {
-        $product->delete();
-        return redirect()->route('admin.products.index')->with('success', 'Motor berhasil dihapus');
-    }
-
-    // Method tambahan untuk reset filter
-    public function resetFilters()
-    {
-        return redirect()->route('admin.products.index');
     }
 }

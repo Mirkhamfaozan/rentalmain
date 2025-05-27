@@ -6,43 +6,39 @@ use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
+    private $productController;
+
+    public function __construct()
+    {
+        $this->productController = new ProductController();
+    }
+
     public function index()
     {
-       return view('frontend.homepage');
+        // Ambil data produk dari ProductController
+        $products = $this->productController->getProducts();
+
+        // Batasi hanya 3 produk untuk ditampilkan di home
+        $featuredProducts = collect($products)->take(3)->all();
+
+        return view('frontend.homepage', [
+            'products' => $featuredProducts
+        ]);
     }
 
     public function contact()
     {
         return view('frontend.contact');
     }
-    
+
     public function detail()
     {
         return view('frontend.detail');
     }
 
-    
-    public function detail1()
-    {
-        return view('frontend.detail1');
-    }
-    public function detail2()
-    {
-        return view('frontend.detail2');
-    }
-    public function detail3()
-    {
-        return view('frontend.detail3');
-    }
-
     public function carasewa()
     {
         return view('frontend.carasewa');
-    }
-
-    public function product()
-    {
-        return view('frontend.product');
     }
 
     public function tentang()
@@ -55,4 +51,3 @@ class HomeController extends Controller
         return view('frontend.sewa');
     }
 }
-

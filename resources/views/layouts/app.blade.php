@@ -7,6 +7,7 @@
     <title>@yield('title', 'Dashboard') - Laravel Admin</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ asset('assets/css/sidebar-dashboard.css') }}" rel="stylesheet">
     <style>
         .sidebar {
             position: fixed;

@@ -1,0 +1,205 @@
+/* Enhanced Sidebar Styles */
+.sidebar .nav-link.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    font-weight: 500 !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+}
+
+.sidebar .nav-link.active i {
+    color: white !important;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    padding: 48px 0 0;
+    overflow-y: auto;
+    background: #ffffff;
+    transition: all 0.3s ease;
+}
+
+.sidebar-sticky {
+    position: relative;
+    top: 0;
+    height: calc(100vh - 48px);
+    padding-top: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-header {
+    flex-shrink: 0;
+}
+
+/* Custom Scrollbar */
+.sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: #dee2e6;
+    border-radius: 2px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: #adb5bd;
+}
+
+/* Navigation Styling */
+.nav-pills .nav-link {
+    border-radius: 25px !important;
+    border: none;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-pills .nav-link:not(.active):hover {
+    background-color: #f8f9ff !important;
+    color: #5a67d8 !important;
+    transform: translateX(2px);
+}
+
+.nav-pills .nav-link.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.nav-pills .nav-link.active i {
+    color: white !important;
+}
+
+/* Hover Effects */
+.hover-item {
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.hover-item:hover {
+    transform: translateX(2px);
+}
+
+.hover-item:hover::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 3px;
+    height: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 0 2px 2px 0;
+    transform: translateY(-50%);
+    transition: all 0.2s ease;
+}
+
+/* Badge Styling */
+.badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 0.25em 0.5em;
+}
+
+.bg-success-subtle {
+    background-color: rgba(25, 135, 84, 0.1) !important;
+}
+
+.bg-info-subtle {
+    background-color: rgba(13, 202, 240, 0.1) !important;
+}
+
+/* Role-based styling */
+.role-admin .sidebar-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.role-rental .sidebar-header {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+.role-super_admin .sidebar-header {
+    background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+}
+
+/* Responsive Design */
+@media (max-width: 767.98px) {
+    .sidebar {
+        top: 5rem;
+        width: 100% !important;
+        transform: translateX(-100%);
+    }
+
+    .sidebar.show {
+        transform: translateX(0);
+    }
+}
+
+/* Animation for active state changes */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.nav-link.active {
+    animation: slideIn 0.3s ease;
+}
+
+/* Dropdown customization */
+.dropdown-toggle-no-caret::after {
+    display: none;
+}
+
+.dropdown-menu {
+    border-radius: 12px;
+    padding: 8px;
+}
+
+.dropdown-item {
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+    transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9ff;
+    color: #5a67d8;
+}
+
+/* Status indicator animation */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 6px rgba(40, 167, 69, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+    }
+}
+
+.bg-success {
+    animation: pulse 2s infinite;
+}

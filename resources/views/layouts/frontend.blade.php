@@ -75,8 +75,8 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav ms-auto me-4">
           <li class="nav-item">
-            <a class="nav-link fw-medium position-relative {{ Request::routeIs('frontend.homepage') ? 'text-primary fw-semibold nav-link-active' : '' }}"
-               href="{{ route('frontend.homepage') }}">
+            <a class="nav-link fw-medium position-relative {{ Request::routeIs('frontend.home') ? 'text-primary fw-semibold nav-link-active' : '' }}"
+               href="{{ route('frontend.home') }}">
               <i class="bi bi-house me-1"></i>Home
             </a>
           </li>

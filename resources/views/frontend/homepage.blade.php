@@ -29,91 +29,57 @@
 
 <!-- Section-->
 <section class="py-5">
-  <div class="container px-4 px-lg-5 mt-5">
+  <div class="container px-4 px-lg-2 mt-5">
     <h3 class="text-center mb-5">Daftar Motor</h3>
-    <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
-      <!-- Card 1 -->
+    <div class="row gx-2 gx-lg-2 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
+      @foreach($products as $product)
       <div class="col mb-5">
         <div class="card h-100">
-          <div class="badge badge-custom bg-warning text-white position-absolute" style="top: 0; right: 0">Tidak Tersedia</div>
-          <img class="card-img-top" src="images/beat.jpg" alt="...">
+          <div class="badge badge-custom {{ $product['available'] ? 'bg-success' : 'bg-warning' }} text-white position-absolute" style="top: 0; right: 0">
+            {{ $product['available'] ? 'Tersedia' : 'Tidak Tersedia' }}
+          </div>
+          <img class="card-img-top" src="{{ $product['image'] }}" alt="{{ $product['name'] }}">
           <div class="card-body pt-4">
             <div class="text-center">
-              <h5 class="fw-bolder">Special Item</h5>
+              <h5 class="fw-bolder">{{ $product['name'] }}</h5>
               <div class="rent-price mb-3">
-                <span class="text-primary">Rp.60.000/</span>day
+                <span class="text-primary">Rp.{{ number_format($product['price'], 0, ',', '.') }}/</span>day
               </div>
               <ul class="list-unstyled">
-                <li class="border-bottom p-2 d-flex justify-content-between"><span>Bahan bakar</span><span class="fw-bold">Bensin</span></li>
-                <li class="border-bottom p-2 d-flex justify-content-between"><span>CC</span><span class="fw-bold">110</span></li>
-                <li class="border-bottom p-2 d-flex justify-content-between"><span>Transmisi</span><span class="fw-bold">Matic</span></li>
+                <li class="border-bottom p-2 d-flex justify-content-between">
+                  <span>Bahan bakar</span>
+                  <span class="fw-bold">{{ $product['fuel'] }}</span>
+                </li>
+                <li class="border-bottom p-2 d-flex justify-content-between">
+                  <span>CC</span>
+                  <span class="fw-bold">{{ $product['cc'] }}</span>
+                </li>
+                <li class="border-bottom p-2 d-flex justify-content-between">
+                  <span>Transmisi</span>
+                  <span class="fw-bold">{{ $product['transmission'] }}</span>
+                </li>
               </ul>
             </div>
           </div>
           <div class="card-footer border-top-0 bg-transparent">
             <div class="text-center">
-              <a class="btn btn-primary mt-auto" href="#">Sewa</a>
-              <a class="btn btn-info mt-auto text-white" href="{{ route('frontend.detail1') }}">Detail</a>
+              @if($product['available'])
+                <a class="btn btn-primary mt-auto" href="{{ route('frontend.order', $product['id']) }}">Sewa</a>
+              @else
+                <button class="btn btn-secondary mt-auto" disabled>Tidak Tersedia</button>
+              @endif
+              <a class="btn btn-info mt-auto text-white" href="{{ route('frontend.detail', $product['id']) }}">Detail</a>
             </div>
           </div>
         </div>
       </div>
-      <!-- Card 2 -->
-      <div class="col mb-5">
-        <div class="card h-100">
-          <div class="badge badge-custom bg-success text-white position-absolute" style="top: 0; right: 0">Tersedia</div>
-          <img class="card-img-top" src="images/vario.jpg" alt="...">
-          <div class="card-body pt-4">
-            <div class="text-center">
-              <h5 class="fw-bolder">Special Item</h5>
-              <div class="rent-price mb-3">
-                <span class="text-primary">Rp.90.000/</span>day
-              </div>
-              <ul class="list-unstyled">
-                <li class="border-bottom p-2 d-flex justify-content-between"><span>Bahan bakar</span><span class="fw-bold">Bensin</span></li>
-                <li class="border-bottom p-2 d-flex justify-content-between"><span>CC</span><span class="fw-bold">150</span></li>
-                <li class="border-bottom p-2 d-flex justify-content-between"><span>Transmisi</span><span class="fw-bold">Matic</span></li>
-              </ul>
-            </div>
-          </div>
-          <div class="card-footer border-top-0 bg-transparent">
-            <div class="text-center">
-              <a class="btn btn-primary mt-auto" href="#">Sewa</a>
-              <a class="btn btn-info mt-auto text-white" href="{{ route('frontend.detail2') }}">Detail</a>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- Card 3 -->
-      <div class="col mb-5">
-        <div class="card h-100">
-          <div class="badge badge-custom bg-success text-white position-absolute" style="top: 0; right: 0">Tersedia</div>
-          <img class="card-img-top" src="images/scoopy.jpg" alt="...">
-          <div class="card-body pt-4">
-            <div class="text-center">
-              <h5 class="fw-bolder">Special Item</h5>
-              <div class="rent-price mb-3">
-                <span class="text-primary">Rp.60.000/</span>day
-              </div>
-              <ul class="list-unstyled">
-                <li class="border-bottom p-2 d-flex justify-content-between"><span>Bahan bakar</span><span class="fw-bold">Bensin</span></li>
-                <li class="border-bottom p-2 d-flex justify-content-between"><span>CC</span><span class="fw-bold">110</span></li>
-                <li class="border-bottom p-2 d-flex justify-content-between"><span>Transmisi</span><span class="fw-bold">Matic</span></li>
-              </ul>
-            </div>
-          </div>
-          <div class="card-footer border-top-0 bg-transparent">
-            <div class="text-center">
-              <a class="btn btn-primary mt-auto" href="#">Sewa</a>
-              <a class="btn btn-info mt-auto text-white" href="{{ route('frontend.detail3') }}">Detail</a>
-            </div>
-          </div>
-        </div>
-      </div>
+      @endforeach
+    </div>
+
+    <!-- Link to view all products -->
+    <div class="text-center mt-4">
+      <a href="{{ route('frontend.home') }}" class="btn btn-outline-primary btn-lg">Lihat Semua Motor</a>
     </div>
   </div>
-
-  <!-- About Section -->
-  
 </section>
 @endsection

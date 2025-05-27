@@ -1,96 +1,84 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Form Rental - Popup Modal</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .wallet-option {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 5px;
-        }
-        .wallet-option img {
-            width: 30px;
-            height: 30px;
-        }
-    </style>
-</head>
-<body>
+@extends('layouts.frontend')
 
-<div class="container mt-5 text-center">
-    <h2>Form Rental</h2>
-    <button type="button" class="btn btn-primary" onclick="showModal()">
-        Isi Data Rental
-    </button>
-</div>
-
-<!-- Modal Form di Tengah -->
-<div class="modal fade" id="rentalModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalLabel">Form Pengisian Rental</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form action="proses_rental.php" method="POST">
-                    <div class="mb-3">
-                        <label class="form-label">Alamat Serah Terima</label>
-                        <input type="text" class="form-control" name="alamat_serah" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Alamat Pengembalian</label>
-                        <input type="text" class="form-control" name="alamat_kembali" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Tanggal Mulai Sewa</label>
-                        <input type="date" class="form-control" name="tgl_mulai" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Tanggal Selesai Sewa</label>
-                        <input type="date" class="form-control" name="tgl_selesai" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Jam Mulai</label>
-                        <input type="time" class="form-control" name="jam_mulai" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Jam Selesai</label>
-                        <input type="time" class="form-control" name="jam_selesai" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Jumlah Helm</label>
-                        <input type="number" class="form-control" name="jumlah_helm" min="0" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Rekening Asal</label>
-                        <select class="form-select" name="rekening_asal" required>
-                            <option value="" disabled selected>Pilih Rekening Asal</option>
-                            <option value="Dana">💙 Dana</option>
-                            <option value="OVO">🟣 OVO</option>
-                            <option value="GoPay">🔵 GoPay</option>
-                            <option value="ShopeePay">🟠 ShopeePay</option>
-                            <option value="Bank Transfer">🏦 Bank Transfer</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-success">Simpan</button>
-                </form>
+@section('content')
+    <header class="py-5"
+        style="background-image: url('/images/bgsatu.jpg'); background-size: cover; background-position: center;">
+        <div class="container px-4 px-lg-5 my-5">
+            <div class="text-center text-white">
+                <h1 class="display-4 fw-bolder">Detail Motor</h1>
             </div>
         </div>
-    </div>
-</div>
+    </header>
 
-<!-- Bootstrap & JavaScript -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    function showModal() {
-        var myModal = new bootstrap.Modal(document.getElementById('rentalModal'));
-        myModal.show();
-    }
-</script>
+    <section class="py-5">
+        <div class="container px-4 px-lg-5 mt-5">
+            <div class="row">
+                <div class="col-md-6">
+                    <img src="{{ asset($product['image']) }}" class="img-fluid rounded shadow" alt="{{ $product['name'] }}">
+                </div>
+                <div class="col-md-6">
+                    <h2 class="fw-bold">{{ $product['name'] }}</h2>
+                    <p><strong>Pemilik:</strong> {{ $product['vendor'] }}</p>
+                    <p><strong>Harga Sewa:</strong>
+                        <span class="text-primary fw-bold">Rp. {{ number_format($product['price'], 0, ',', '.') }} / Hari</span>
+                    </p>
+                    <p><strong>Lokasi:</strong> {{ $product['location'] }}</p>
 
-</body>
-</html>
+                    <!-- Tambahan Informasi -->
+                    <hr>
+                    <h5>Spesifikasi:</h5>
+                    <ul class="list-unstyled">
+                        <li><strong>Bahan Bakar:</strong> {{ $product['fuel'] }}</li>
+                        <li><strong>Kapasitas Mesin:</strong> {{ $product['cc'] }} cc</li>
+                        <li><strong>Transmisi:</strong> {{ $product['transmission'] }}</li>
+                        <li>
+                            <strong>Ketersediaan:</strong>
+                            @if($product['available'])
+                                <span class="badge bg-success">Tersedia</span>
+                            @else
+                                <span class="badge bg-danger">Tidak Tersedia</span>
+                            @endif
+                        </li>
+                    </ul>
+
+                    <hr>
+                    <h5>Deskripsi:</h5>
+                    <p>{{ $product['description'] }}</p>
+
+                    <!-- Tombol Aksi -->
+                    @if($product['available'])
+                        <a href="{{ route('frontend.order', ['id' => $product['id']]) }}" class="btn btn-success mt-3">
+                            Sewa Sekarang
+                        </a>
+                    @else
+                        <button class="btn btn-secondary mt-3" disabled>Motor Tidak Tersedia</button>
+                    @endif
+                    <a href="{{ route('frontend.product') }}" class="btn btn-outline-secondary mt-3 ms-2">Kembali</a>
+                </div>
+            </div>
+
+            <!-- Rekomendasi Produk -->
+            <div class="mt-5">
+                <h3 class="mb-4">Rekomendasi Produk Lainnya</h3>
+                <div class="row row-cols-1 row-cols-md-3 g-4">
+                    @foreach ($recommendations as $rec)
+                        <div class="col">
+                            <div class="card h-100 shadow-sm">
+                                <img src="{{ asset($rec['image']) }}" class="card-img-top" alt="{{ $rec['name'] }}">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ $rec['name'] }}</h5>
+                                    <p class="text-primary fw-bold">Rp. {{ number_format($rec['price'], 0, ',', '.') }} / Hari</p>
+                                    <p class="text-muted small">{{ $rec['location'] }}</p>
+                                </div>
+                                <div class="text-center mb-3">
+                                    <a href="{{ route('frontend.detail', ['id' => $rec['id']]) }}"
+                                        class="btn btn-info text-white">Detail</a>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </section>
+@endsection
