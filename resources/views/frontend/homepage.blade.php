@@ -78,7 +78,7 @@
 
     <!-- Link to view all products -->
     <div class="text-center mt-4">
-      <a href="{{ route('frontend.home') }}" class="btn btn-outline-primary btn-lg">Lihat Semua Motor</a>
+      <a href="{{ route('frontend.homepage') }}" class="btn btn-outline-primary btn-lg">Lihat Semua Motor</a>
     </div>
   </div>
 </section>

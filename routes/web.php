@@ -6,7 +6,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 // Frontend routes (accessible to all)
-Route::get('/', [HomeController::class, 'index'])->name('frontend.home');
+Route::get('/', [HomeController::class, 'index'])->name('frontend.homepage'); // Changed from 'frontend.home'
 Route::get('/detail', [HomeController::class, 'detail'])->name('frontend.detail');
 Route::get('/contact', [HomeController::class, 'contact'])->name('frontend.contact');
 Route::get('/carasewa', [HomeController::class, 'carasewa'])->name('frontend.carasewa');

@@ -16,7 +16,7 @@ class VerifyEmailController extends Controller
     public function __invoke(EmailVerificationRequest $request): RedirectResponse
     {
         if ($request->user()->hasVerifiedEmail()) {
-            return redirect()->intended(route('frontend.home', absolute: false));
+            return redirect()->intended(route('frontend.homepage', absolute: false));
         }
 
         if ($request->user()->markEmailAsVerified()) {
@@ -25,7 +25,7 @@ class VerifyEmailController extends Controller
 
         // Jika user sudah login, arahkan ke homepage
         if (Auth::check()) {
-            return redirect()->route('frontend.home')
+            return redirect()->route('frontend.homepage')
                 ->with('status', 'Your email has been successfully verified!');
         }
 
