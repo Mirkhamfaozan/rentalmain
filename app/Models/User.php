@@ -2,18 +2,21 @@
 
 namespace App\Models;
 
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Notifications\CustomVerifyEmail;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
      *
-     * @var list<string>
+     * @var array<int, string>
      */
     protected $fillable = [
         'name',
@@ -25,7 +28,7 @@ class User extends Authenticatable
     /**
      * The attributes that should be hidden for serialization.
      *
-     * @var list<string>
+     * @var array<int, string>
      */
     protected $hidden = [
         'password',
@@ -42,24 +45,29 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            // Remove role casting to integer since it's a string
         ];
     }
 
     /**
-     * Check if user can access dashboard
+     * Send the email verification notification.
      *
-     * @return bool
+     * @return void
+     */
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new CustomVerifyEmail);
+    }
+
+    /**
+     * Check if user can access dashboard based on role
      */
     public function canAccessDashboard(): bool
     {
-        return in_array($this->role, ['admin', 'super_admin', 'rental']);
+        return in_array($this->role, ['admin', 'rental']);
     }
 
     /**
      * Check if user is admin
-     *
-     * @return bool
      */
     public function isAdmin(): bool
     {
@@ -67,19 +75,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if user is super admin
-     *
-     * @return bool
-     */
-    public function isSuperAdmin(): bool
-    {
-        return $this->role === 'super_admin';
-    }
-
-    /**
      * Check if user is rental
-     *
-     * @return bool
      */
     public function isRental(): bool
     {
@@ -88,8 +84,6 @@ class User extends Authenticatable
 
     /**
      * Check if user is regular user
-     *
-     * @return bool
      */
     public function isUser(): bool
     {
