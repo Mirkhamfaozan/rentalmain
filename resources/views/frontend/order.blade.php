@@ -65,7 +65,7 @@
                                         <strong>Bulanan:</strong><br>
                                         <span class="text-warning fw-bold">Rp
                                             {{ number_format($product->harga_bulanan, 0, ',', '.') }}</span>
-                        
+
                                     </div>
                                 </div>
                             </div>
@@ -161,9 +161,10 @@
                                 </div>
 
                                 <div class="mb-3 form-floating">
-                                    <input type="text" class="form-control @error('lokasi_pengambilan') is-invalid @enderror"
-                                        name="lokasi_pengambilan" id="lokasi_pengambilan" value="{{ old('lokasi_pengambilan') }}"
-                                        placeholder="Lokasi Pengambilan">
+                                    <input type="text"
+                                        class="form-control @error('lokasi_pengambilan') is-invalid @enderror"
+                                        name="lokasi_pengambilan" id="lokasi_pengambilan"
+                                        value="{{ old('lokasi_pengambilan') }}" placeholder="Lokasi Pengambilan">
                                     <label for="lokasi_pengambilan">Lokasi Pengambilan</label>
                                     @error('lokasi_pengambilan')
                                         <div class="invalid-feedback">{{ $error }}</div>
@@ -171,9 +172,10 @@
                                 </div>
 
                                 <div class="mb-3 form-floating">
-                                    <input type="text" class="form-control @error('lokasi_pengembalian') is-invalid @enderror"
-                                        name="lokasi_pengembalian" id="lokasi_pengembalian" value="{{ old('lokasi_pengembalian') }}"
-                                        placeholder="Lokasi Pengembalian">
+                                    <input type="text"
+                                        class="form-control @error('lokasi_pengembalian') is-invalid @enderror"
+                                        name="lokasi_pengembalian" id="lokasi_pengembalian"
+                                        value="{{ old('lokasi_pengembalian') }}" placeholder="Lokasi Pengembalian">
                                     <label for="lokasi_pengembalian">Lokasi Pengembalian</label>
                                     @error('lokasi_pengembalian')
                                         <div class="invalid-feedback">{{ $error }}</div>
@@ -404,65 +406,105 @@
                 submitBtn.disabled = true;
             });
 
-            function determineRentalType(days) {
-                if (days >= 30) return 'bulanan';
-                if (days >= 7) return 'mingguan';
-                return 'harian';
-            }
+// Hybrid rental calculation system
+function determineRentalType(days) {
+    if (days > 29) return 'bulanan';  // Lebih dari 29 hari
+    if (days > 7) return 'mingguan';  // Lebih dari 7 hari
+    return 'harian';                  // 7 hari atau kurang
+}
 
-            function calculatePrice() {
-                const startDate = new Date(tanggalMulai.value);
-                const endDate = new Date(tanggalSelesai.value);
+function calculateHybridPrice(days, pricing) {
+    let totalPrice = 0;
+    let breakdown = [];
 
-                if (startDate && endDate && endDate >= startDate) {
-                    const timeDiff = endDate.getTime() - startDate.getTime();
-                    const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+    if (days > 29) {
+        // Bulanan + sisa hari
+        const months = Math.floor(days / 30);
+        const remainingDays = days % 30;
 
-                    const rentalType = determineRentalType(daysDiff);
-                    durasiHari.textContent = daysDiff;
-                    tipeSewaTerpilih.textContent = rentalType.charAt(0).toUpperCase() + rentalType.slice(1);
+        if (months > 0) {
+            totalPrice += months * pricing.bulanan;
+            breakdown.push(`${months} bulan`);
+        }
 
-                    let calculatedPrice;
-                    switch (rentalType) {
-                        case 'harian':
-                            calculatedPrice = daysDiff * pricing.harian;
-                            break;
-                        case 'mingguan':
-                            calculatedPrice = Math.ceil(daysDiff / 7) * pricing.mingguan;
-                            break;
-                        case 'bulanan':
-                            calculatedPrice = Math.ceil(daysDiff / 30) * pricing.bulanan;
-                            break;
-                    }
+        if (remainingDays > 0) {
+            if (remainingDays > 7) {
+                // Sisa hari lebih dari 7, gunakan mingguan + harian
+                const weeks = Math.floor(remainingDays / 7);
+                const extraDays = remainingDays % 7;
 
-                    totalHarga.textContent = calculatedPrice.toLocaleString('id-ID');
-                    showAutoSelectionInfo(daysDiff, rentalType);
-                    priceInfo.style.display = 'block';
-                } else {
-                    priceInfo.style.display = 'none';
+                if (weeks > 0) {
+                    totalPrice += weeks * pricing.mingguan;
+                    breakdown.push(`${weeks} minggu`);
                 }
-            }
 
-            function showAutoSelectionInfo(days, selectedType) {
-                let explanationText = '';
-                switch (selectedType) {
-                    case 'harian':
-                        explanationText = `Durasi ${days} hari - Paket harian dipilih`;
-                        break;
-                    case 'mingguan':
-                        explanationText =
-                            `Durasi ${days} hari (${Math.ceil(days / 7)} minggu) - Paket mingguan lebih hemat`;
-                        break;
-                    case 'bulanan':
-                        explanationText =
-                            `Durasi ${days} hari (${Math.ceil(days / 30)} bulan) - Paket bulanan lebih hemat`;
-                        break;
+                if (extraDays > 0) {
+                    totalPrice += extraDays * pricing.harian;
+                    breakdown.push(`${extraDays} hari`);
                 }
-                autoSelectionText.textContent = explanationText;
-                autoSelectionAlert.style.display = 'block';
+            } else {
+                // Sisa hari 7 atau kurang, gunakan harian
+                totalPrice += remainingDays * pricing.harian;
+                breakdown.push(`${remainingDays} hari`);
             }
+        }
+    } else if (days > 7) {
+        // Mingguan + sisa hari
+        const weeks = Math.floor(days / 7);
+        const remainingDays = days % 7;
 
-            // Event listeners
+        if (weeks > 0) {
+            totalPrice += weeks * pricing.mingguan;
+            breakdown.push(`${weeks} minggu`);
+        }
+
+        if (remainingDays > 0) {
+            totalPrice += remainingDays * pricing.harian;
+            breakdown.push(`${remainingDays} hari`);
+        }
+    } else {
+        // Harian saja
+        totalPrice = days * pricing.harian;
+        breakdown.push(`${days} hari`);
+    }
+
+    return {
+        totalPrice: totalPrice,
+        breakdown: breakdown,
+        mainType: determineRentalType(days)
+    };
+}
+
+function calculatePrice() {
+    const startDate = new Date(tanggalMulai.value);
+    const endDate = new Date(tanggalSelesai.value);
+
+    if (startDate && endDate && endDate >= startDate) {
+        const timeDiff = endDate.getTime() - startDate.getTime();
+        const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+
+        // Hitung dengan sistem hybrid
+        const calculation = calculateHybridPrice(daysDiff, pricing);
+
+        durasiHari.textContent = daysDiff;
+        tipeSewaTerpilih.textContent = calculation.breakdown.join(' + ');
+        totalHarga.textContent = calculation.totalPrice.toLocaleString('id-ID');
+
+        showAutoSelectionInfo(daysDiff, calculation);
+        priceInfo.style.display = 'block';
+    } else {
+        priceInfo.style.display = 'none';
+    }
+}
+
+function showAutoSelectionInfo(days, calculation) {
+    const explanationText = `Durasi ${days} hari = ${calculation.breakdown.join(' + ')} - Sistem perhitungan hybrid`;
+    autoSelectionText.textContent = explanationText;
+    autoSelectionAlert.style.display = 'block';
+}
+
+
+       // Event listeners
             tanggalMulai.addEventListener('change', function() {
                 tanggalSelesai.min = this.value;
                 if (tanggalSelesai.value && tanggalSelesai.value < this.value) {
@@ -480,4 +522,3 @@
         });
     </script>
 @endsection
-
