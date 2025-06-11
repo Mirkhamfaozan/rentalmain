@@ -64,7 +64,7 @@
                 @if($isAdmin)
                 <li class="nav-item mb-1">
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
-                        href="{{ route('admin.users-index') ?? '#' }}">
+                        href="{{ route('dashboard.users.index') ?? '#' }}">
                         <i class="fas fa-users me-3 text-primary" style="width: 16px;"></i>
                         <span>Users Management</span>
                         <span class="badge bg-light text-dark ms-auto small">{{ \App\Models\User::count() ?? '24' }}</span>
@@ -76,14 +76,14 @@
                 @if($isAdmin || $isRental)
                 <li class="nav-item mb-1">
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
-                        href="{{ route('admin.products.index') ?? '#' }}">
+                        href="{{ route('dashboard.products.index') ?? '#' }}">
                         <i class="fas fa-box me-3 text-success" style="width: 16px;"></i>
                         <span>{{ $isRental ? 'Rental Items' : 'Products' }}</span>
                         <span class="badge bg-success-subtle text-success ms-auto small">156</span>
                     </a>
                 </li>
                 @endif
-
+{{--
                 <!-- Categories Management - Available for Admin and Super Admin -->
                 @if($isAdmin)
                 <li class="nav-item mb-1">
@@ -91,40 +91,37 @@
                         href="">
                         <i class="fas fa-tags me-3 text-info" style="width: 16px;"></i>
                         <span>Categories</span>
-                        <span class="badge bg-info-subtle text-info ms-auto small">12</span>
                     </a>
                 </li>
-                @endif
+                @endif --}}
 
                 <!-- Orders Management - Available for Admin, Super Admin, and Rental -->
                 @if($isAdmin || $isRental)
                 <li class="nav-item mb-1">
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
-                        href="{{ route('admin.orders-index') ?? '#' }}">
+                        href="{{ route('dashboard.orders.index') ?? '#' }}">
                         <i class="fas fa-shopping-cart me-3 text-warning" style="width: 16px;"></i>
                         <span>{{ $isRental ? 'Rental Orders' : 'Orders' }}</span>
-                        <span class="badge bg-warning text-dark ms-auto small">12</span>
                     </a>
                 </li>
                 @endif
 
-                <!-- Inventory Management - Available for Admin and Super Admin -->
+                {{-- <!-- Inventory Management - Available for Admin and Super Admin -->
                 @if($isAdmin)
                 <li class="nav-item mb-1">
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
                         href="">
                         <i class="fas fa-warehouse me-3 text-secondary" style="width: 16px;"></i>
                         <span>Inventory</span>
-                        <span class="badge bg-secondary-subtle text-secondary ms-auto small">89</span>
                     </a>
                 </li>
-                @endif
+                @endif --}}
 
                 <!-- Transactions - Available for Admin, Super Admin, and Rental -->
                 @if($isAdmin || $isRental)
                 <li class="nav-item mb-1">
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
-                        href="{{ route('admin.transactions-index') ?? '#' }}">
+                        href="{{ route('dashboard.payments.index') ?? '#' }}">
                         <i class="fas fa-exchange-alt me-3 text-info" style="width: 16px;"></i>
                         <span>{{ $isRental ? 'Rental Transactions' : 'Transactions' }}</span>
                         <span class="badge bg-info-subtle text-info ms-auto small">
@@ -134,7 +131,7 @@
                 </li>
                 @endif
 
-                <!-- Reports & Analytics - Available for Admin, Super Admin, and Rental -->
+                {{-- <!-- Reports & Analytics - Available for Admin, Super Admin, and Rental -->
                 @if($isAdmin || $isRental)
                 <li class="nav-item mb-1">
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
@@ -143,9 +140,9 @@
                         <span>Reports & Analytics</span>
                     </a>
                 </li>
-                @endif
+                @endif --}}
 
-                <!-- Discounts & Coupons - Available for Admin and Super Admin -->
+                {{-- <!-- Discounts & Coupons - Available for Admin and Super Admin -->
                 @if($isAdmin)
                 <li class="nav-item mb-1">
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
@@ -155,8 +152,8 @@
                         <span class="badge bg-danger-subtle text-danger ms-auto small">5</span>
                     </a>
                 </li>
-                @endif
-
+                @endif --}}
+{{--
                 <!-- Notifications - Available for Admin and Super Admin -->
                 @if($isAdmin)
                 <li class="nav-item mb-1">
@@ -167,7 +164,7 @@
                         <span class="badge bg-warning text-dark ms-auto small">3</span>
                     </a>
                 </li>
-                @endif
+                @endif --}}
 
                 <!-- Rental Specific Menu Items -->
                 @if($isRental)
@@ -295,7 +292,7 @@
                     </a>
                 </li>
                 @endif
-            </ul>
+            </ul>   
         </div>
 
         <!-- User Profile Section -->

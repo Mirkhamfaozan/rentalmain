@@ -1,41 +1,40 @@
 @extends('layouts.app')
 
-@section('title', 'Orders')
-@section('page-title', 'Order Management')
-@section('page-description', 'Manage and monitor all orders in your system.')
+@section('title', 'Pesanan')
+@section('page-title', 'Daftar Pesanan')
+@section('page-description', 'Kelola pesanan sewa motor Anda.')
 
 @section('page-actions')
-    <div class="btn-group me-2">
-        <button type="button" class="btn btn-outline-secondary">
-            <i class="fas fa-download me-1"></i>Export Orders
-        </button>
-        <button type="button" class="btn btn-outline-info">
-            <i class="fas fa-filter me-1"></i>Filter
-        </button>
-        <button type="button" class="btn btn-primary">
-            <i class="fas fa-plus me-1"></i>New Order
-        </button>
-    </div>
+    <a href="{{ route('dashboard.orders.create') }}" class="btn btn-primary" data-bs-toggle="tooltip" title="Tambah pesanan baru">
+        <i class="fas fa-plus me-1"></i>Tambah Pesanan
+    </a>
 @endsection
 
 @section('content')
-    <!-- Order Stats Cards -->
-    <div class="row mb-4">
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+    <!-- Kartu Statistik Pesanan -->
+    <div class="row ">
         <div class="col-xl-3 col-md-6 mb-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-shrink-0">
                             <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
-                                style="width: 48px; height: 48px;">
-                                <i class="fas fa-shopping-cart"></i>
+                                 style="width: 48px; height: 48px;">
+                                <i class="fas fa-list-alt"></i>
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <div class="fw-bold h4 mb-1">1,847</div>
-                            <div class="text-muted small">Total Orders</div>
+                            <div class="fw-bold h4 mb-1">{{ $orders->count() }}</div>
+                            <div class="text-muted small">Total Pesanan</div>
                             <div class="text-success small">
-                                <i class="fas fa-arrow-up"></i> +8.3%
+                                <i class="fas fa-arrow-up"></i> +3.5%
                             </div>
                         </div>
                     </div>
@@ -49,15 +48,15 @@
                     <div class="d-flex align-items-center">
                         <div class="flex-shrink-0">
                             <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center"
-                                style="width: 48px; height: 48px;">
+                                 style="width: 48px; height: 48px;">
                                 <i class="fas fa-check-circle"></i>
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <div class="fw-bold h4 mb-1">1,234</div>
-                            <div class="text-muted small">Completed</div>
-                            <div class="text-success small">
-                                <i class="fas fa-arrow-up"></i> +12.1%
+                            <div class="fw-bold h4 mb-1">{{ $orders->where('status', 'confirmed')->count() }}</div>
+                            <div class="text-muted small">Dikonfirmasi</div>
+                            <div class="text-info small">
+                                <i class="fas fa-info-circle"></i> Status
                             </div>
                         </div>
                     </div>
@@ -71,15 +70,15 @@
                     <div class="d-flex align-items-center">
                         <div class="flex-shrink-0">
                             <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center"
-                                style="width: 48px; height: 48px;">
-                                <i class="fas fa-clock"></i>
+                                 style="width: 48px; height: 48px;">
+                                <i class="fas fa-spinner"></i>
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <div class="fw-bold h4 mb-1">421</div>
-                            <div class="text-muted small">Pending</div>
-                            <div class="text-warning small">
-                                <i class="fas fa-arrow-up"></i> +5.7%
+                            <div class="fw-bold h4 mb-1">{{ $orders->where('status', 'ongoing')->count() }}</div>
+                            <div class="text-muted small">Sedang Berlangsung</div>
+                            <div class="text-info small">
+                                <i class="fas fa-info-circle"></i> Status
                             </div>
                         </div>
                     </div>
@@ -92,16 +91,16 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-shrink-0">
-                            <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center"
-                                style="width: 48px; height: 48px;">
-                                <i class="fas fa-dollar-sign"></i>
+                            <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center"
+                                 style="width: 48px; height: 48px;">
+                                <i class="fas fa-money-bill-wave"></i>
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <div class="fw-bold h4 mb-1">$48,532</div>
-                            <div class="text-muted small">Revenue Today</div>
+                            <div class="fw-bold h4 mb-1">Rp {{ number_format($orders->sum('total_harga'), 0, ',', '.') }}</div>
+                            <div class="text-muted small">Total Pendapatan</div>
                             <div class="text-success small">
-                                <i class="fas fa-arrow-up"></i> +18.4%
+                                <i class="fas fa-rupiah-sign"></i> IDR
                             </div>
                         </div>
                     </div>
@@ -110,85 +109,79 @@
         </div>
     </div>
 
-    <!-- Search and Filter Section -->
+    <!-- Filter dan Pencarian -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="fas fa-search"></i>
-                                </span>
-                                <input type="text" class="form-control" placeholder="Search orders...">
+                    <form method="GET" action="{{ route('dashboard.orders.index') }}" id="filterForm">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="searchInput" class="form-label small fw-semibold">Cari Pesanan</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-search"></i>
+                                    </span>
+                                    <input type="text" name="search" id="searchInput" class="form-control"
+                                           placeholder="Cari berdasarkan nama pelanggan atau motor..."
+                                           value="{{ request('search') }}">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="statusSelect" class="form-label small fw-semibold">Status</label>
+                                <select name="status" id="statusSelect" class="form-select">
+                                    <option value="">Semua Status</option>
+                                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                    <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>Dikonfirmasi</option>
+                                    <option value="ongoing" {{ request('status') == 'ongoing' ? 'selected' : '' }}>Sedang Berlangsung</option>
+                                    <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Selesai</option>
+                                    <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Dibatalkan</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="dateRangePicker" class="form-label small fw-semibold">Rentang Tanggal</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-calendar"></i>
+                                    </span>
+                                    <input type="text" name="date_range" class="form-control"
+                                           placeholder="Pilih rentang tanggal"
+                                           value="{{ request('date_range') }}"
+                                           id="dateRangePicker">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-semibold"> </label>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-outline-secondary" id="filterButton">
+                                        <i class="fas fa-filter me-1"></i>Filter
+                                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-2">
-                            <select class="form-select">
-                                <option selected>All Status</option>
-                                <option value="pending">Pending</option>
-                                <option value="processing">Processing</option>
-                                <option value="shipped">Shipped</option>
-                                <option value="delivered">Delivered</option>
-                                <option value="cancelled">Cancelled</option>
-                                <option value="refunded">Refunded</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <select class="form-select">
-                                <option selected>Date Range</option>
-                                <option value="today">Today</option>
-                                <option value="week">This Week</option>
-                                <option value="month">This Month</option>
-                                <option value="quarter">This Quarter</option>
-                                <option value="year">This Year</option>
-                                <option value="custom">Custom Range</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <select class="form-select">
-                                <option selected>Payment Status</option>
-                                <option value="paid">Paid</option>
-                                <option value="unpaid">Unpaid</option>
-                                <option value="partial">Partial</option>
-                                <option value="refunded">Refunded</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <select class="form-select">
-                                <option selected>Amount Range</option>
-                                <option value="0-50">$0 - $50</option>
-                                <option value="50-100">$50 - $100</option>
-                                <option value="100-500">$100 - $500</option>
-                                <option value="500+">$500+</option>
-                            </select>
-                        </div>
-                        <div class="col-md-1">
-                            <button class="btn btn-outline-secondary w-100">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Orders Table -->
+    <!-- Tabel Daftar Pesanan -->
     <div class="row">
         <div class="col-12">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-transparent border-0 pt-3">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">All Orders</h5>
-                        <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-secondary active">
-                                <i class="fas fa-list"></i>
-                            </button>
-                            <button class="btn btn-outline-secondary">
-                                <i class="fas fa-th"></i>
-                            </button>
+                        <h5 class="card-title mb-0">Daftar Pesanan</h5>
+                        <div class="d-flex gap-2">
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-secondary active" data-view="list" title="Tampilan daftar">
+                                    <i class="fas fa-th-list"></i>
+                                </button>
+                                <button class="btn btn-outline-secondary" data-view="grid" title="Tampilan grid">
+                                    <i class="fas fa-th"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -197,181 +190,204 @@
                         <table class="table table-hover mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th class="border-0 fw-semibold">
-                                        <input type="checkbox" class="form-check-input">
+                                    <th class="border-0 fw-semibold" scope="col">
+                                        <input type="checkbox" class="form-check-input" id="selectAll">
                                     </th>
-                                    <th class="border-0 fw-semibold">Order ID</th>
-                                    <th class="border-0 fw-semibold">Customer</th>
-                                    <th class="border-0 fw-semibold">Products</th>
-                                    <th class="border-0 fw-semibold">Amount</th>
-                                    <th class="border-0 fw-semibold">Status</th>
-                                    <th class="border-0 fw-semibold">Payment</th>
-                                    <th class="border-0 fw-semibold">Date</th>
-                                    <th class="border-0 fw-semibold">Action</th>
+                                    <th class="border-0 fw-semibold" scope="col">Pesanan</th>
+                                    <th class="border-0 fw-semibold" scope="col">Pelanggan</th>
+                                    <th class="border-0 fw-semibold" scope="col">Motor</th>
+                                    <th class="border-0 fw-semibold" scope="col">Tanggal Mulai</th>
+                                    <th class="border-0 fw-semibold" scope="col">Tanggal Selesai</th>
+                                    <th class="border-0 fw-semibold" scope="col">Lokasi Pengambilan</th>
+                                    <th class="border-0 fw-semibold" scope="col">Lokasi Pengembalian</th>
+                                    <th class="border-0 fw-semibold" scope="col">Total Harga</th>
+                                    <th class="border-0 fw-semibold" scope="col">Status</th>
+                                    <th class="border-0 fw-semibold" scope="col">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
+                                @forelse($orders as $order)
                                 <tr>
                                     <td>
-                                        <input type="checkbox" class="form-check-input">
+                                        <input type="checkbox" class="form-check-input order-checkbox" value="{{ $order->id }}">
                                     </td>
                                     <td>
-                                        <div class="fw-semibold text-primary">#ORD-001</div>
-                                        <div class="text-muted small">Express</div>
+                                        <div class="fw-semibold">Pesanan #{{ $order->id }}</div>
+                                        <div class="text-muted small">{{ $order->tipe_sewa }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold">{{ $order->name }}</div>
+                                        <div class="text-muted small">{{ $order->email ?? ($order->Hugh1->user->email ?? '-') }}</div>
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <img src="https://via.placeholder.com/32x32/007bff/ffffff?text=JS"
-                                                class="rounded-circle me-2" alt="Avatar" width="32" height="32">
+                                            @if($order->product->gambar_utama)
+                                            <img src="{{ Storage::url($order->product->gambar_utama) }}"
+                                                 class="rounded me-3"
+                                                 style="width: 48px; height: 48px; object-fit: cover;"
+                                                 alt="{{ $order->product->nama_motor }}"
+                                                 loading="lazy">
+                                            @else
+                                            <div class="bg-primary text-white rounded d-flex align-items-center justify-content-center me-3"
+                                                 style="width: 48px; height: 48px; font-size: 18px;">
+                                                <i class="fas fa-motorcycle"></i>
+                                            </div>
+                                            @endif
                                             <div>
-                                                <div class="fw-semibold">John Smith</div>
-                                                <div class="text-muted small">john.smith@example.com</div>
+                                                <div class="fw-semibold">{{ $order->product->nama_motor }}</div>
+                                                <div class="text-muted small">{{ $order->product->brand }}</div>
                                             </div>
                                         </div>
                                     </td>
+                                    <td>{{ \Carbon\Carbon::parse($order->tanggal_mulai)->format('d/m/Y') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($order->tanggal_selesai)->format('d/m/Y') }}</td>
+                                    <td>{{ $order->lokasi_pengambilan ?? '-' }}</td>
+                                    <td>{{ $order->lokasi_pengembalian ?? '-' }}</td>
+                                    <td class="fw-bold">Rp {{ number_format($order->total_harga, 0, ',', '.') }}</td>
                                     <td>
-                                        <div class="fw-semibold">3 items</div>
-                                        <div class="text-muted small">Laptop, Mouse, Keyboard</div>
+                                        <span class="badge
+                                            @if($order->status == 'pending') bg-warning-subtle text-warning
+                                            @elseif($order->status == 'confirmed') bg-success-subtle text-success
+                                            @elseif($order->status == 'ongoing') bg-info-subtle text-info
+                                            @elseif($order->status == 'completed') bg-primary-subtle text-primary
+                                            @else bg-danger-subtle text-danger @endif">
+                                            {{ $order->getStatusLabelAttribute() }}
+                                        </span>
                                     </td>
-                                    <td>
-                                        <div class="fw-semibold">$1,299.99</div>
-                                    </td>
-                                    <td><span class="badge bg-success">Delivered</span></td>
-                                    <td><span class="badge bg-success">Paid</span></td>
-                                    <td class="text-muted">2024-01-20</td>
                                     <td>
                                         <div class="btn-group btn-group-sm">
-                                            <button class="btn btn-outline-primary" title="View">
+                                            <a href="{{ route('dashboard.orders.show', $order) }}"
+                                               class="btn btn-outline-primary" title="Lihat detail pesanan">
                                                 <i class="fas fa-eye"></i>
-                                            </button>
-                                            <button class="btn btn-outline-secondary" title="Edit">
+                                            </a>
+                                            <a href="{{ route('dashboard.orders.edit', $order) }}"
+                                               class="btn btn-outline-secondary" title="Edit pesanan">
                                                 <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-outline-info" title="Track">
-                                                <i class="fas fa-truck"></i>
-                                            </button>
+                                            </a>
+                                            <form action="{{ route('dashboard.orders.destroy', $order) }}"
+                                                  method="POST" class="d-inline"
+                                                  onsubmit="return confirm('Apakah Anda yakin ingin menghapus pesanan ini?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-outline-danger" title="Hapus pesanan">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="11" class="text-center py-4">
+                                        <div class="text-muted">
+                                            <i class="fas fa-list-alt fa-3x mb-3"></i>
+                                            <p>Tidak ada pesanan yang ditemukan</p>
+                                            <a href="{{ route('dashboard.orders.create') }}" class="btn btn-primary">
+                                                <i class="fas fa-plus me-1"></i>Tambah Pesanan Pertama
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
 
-                    <!-- Selected Actions Bar -->
-                    <div class="border-top p-3 bg-light d-none" id="selectedActions">
+                    @if($orders->count() > 0)
+                    <!-- Aksi Massal -->
+                    <div class="card-footer bg-light border-0">
                         <div class="d-flex justify-content-between align-items-center">
-                            <span class="text-muted">
-                                <span id="selectedCount">0</span> orders selected
-                            </span>
-                            <div class="btn-group btn-group-sm">
-                                <button class="btn btn-outline-success">
-                                    <i class="fas fa-check me-1"></i>Mark as Processed
-                                </button>
-                                <button class="btn btn-outline-info">
-                                    <i class="fas fa-truck me-1"></i>Ship Orders
-                                </button>
-                                <button class="btn btn-outline-warning">
-                                    <i class="fas fa-print me-1"></i>Print Labels
-                                </button>
-                                <button class="btn btn-outline-danger">
-                                    <i class="fas fa-times me-1"></i>Cancel Orders
-                                </button>
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="text-muted small">Dengan yang dipilih:</span>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-secondary" id="bulkEdit" disabled>
+                                        <i class="fas fa-edit me-1"></i>Edit
+                                    </button>
+                                    <button class="btn btn-outline-danger" id="bulkDelete" disabled>
+                                        <i class="fas fa-trash me-1"></i>Hapus
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+                                {{ $orders->links() }}
                             </div>
                         </div>
                     </div>
-
-                    <!-- Pagination -->
-                    <div class="card-footer bg-transparent border-0">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="text-muted small">
-                                Showing 1 to 7 of 1,847 entries
-                            </span>
-                            <nav>
-                                <ul class="pagination pagination-sm mb-0">
-                                    <li class="page-item disabled">
-                                        <a class="page-link" href="#" tabindex="-1">Previous</a>
-                                    </li>
-                                    <li class="page-item active">
-                                        <a class="page-link" href="#">1</a>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="#">2</a>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="#">3</a>
-                                    </li>
-                                    <li class="page-item">
-                                        <span class="page-link">...</span>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="#">264</a>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="#">Next</a>
-                                    </li>
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
+                    @endif
                 </div>
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        $(document).ready(function () {
+            // Initialize tooltips
+            $('[data-bs-toggle="tooltip"]').tooltip();
+
+            // Initialize date range picker
+            $('#dateRangePicker').daterangepicker({
+                locale: {
+                    format: 'YYYY-MM-DD',
+                    separator: ' to ',
+                    applyLabel: 'Terapkan',
+                    cancelLabel: 'Batal',
+                    customRangeLabel: 'Kustom',
+                    daysOfWeek: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+                    monthNames: [
+                        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+                    ],
+                    firstDay: 1
+                },
+                autoUpdateInput: false,
+                ranges: {
+                    'Hari Ini': [moment(), moment()],
+                    'Kemarin': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                    '7 Hari Terakhir': [moment().subtract(6, 'days'), moment()],
+                    '30 Hari Terakhir': [moment().subtract(29, 'days'), moment()],
+                    'Bulan Ini': [moment().startOf('month'), moment().endOf('month')],
+                    'Bulan Lalu': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                },
+                alwaysShowCalendars: true,
+                showDropdowns: true
+            });
+
+            $('#dateRangePicker').on('apply.daterangepicker', function(ev, picker) {
+                $(this).val(picker.startDate.format('YYYY-MM-DD') + ' to ' + picker.endDate.format('YYYY-MM-DD'));
+            });
+
+            $('#dateRangePicker').on('cancel.daterangepicker', function(ev, picker) {
+                $(this).val('');
+            });
+
+            // Handle form submission with loading state
+            $('#filterForm').on('submit', function() {
+                $('#filterButton').find('.spinner-border').removeClass('d-none');
+                $('#filterButton').prop('disabled', true);
+            });
+
+            // Handle select all checkbox
+            $('#selectAll').on('change', function() {
+                $('.order-checkbox').prop('checked', this.checked);
+                toggleBulkActions();
+            });
+
+            // Handle individual checkbox changes
+            $('.order-checkbox').on('change', toggleBulkActions);
+
+            function toggleBulkActions() {
+                const checkedCount = $('.order-checkbox:checked').length;
+                $('#bulkEdit, #bulkDelete').prop('disabled', checkedCount === 0);
+            }
+
+            // Handle view toggle (list/grid)
+            $('[data-view]').on('click', function() {
+                $('[data-view]').removeClass('active');
+                $(this).addClass('active');
+                // Add grid view implementation here if needed
+            });
+        });
+    </script>
+    @endpush
 @endsection
-
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Handle select all checkbox
-        const selectAllCheckbox = document.querySelector('thead input[type="checkbox"]');
-        const rowCheckboxes = document.querySelectorAll('tbody input[type="checkbox"]');
-        const selectedActions = document.getElementById('selectedActions');
-        const selectedCount = document.getElementById('selectedCount');
-
-        selectAllCheckbox.addEventListener('change', function() {
-            rowCheckboxes.forEach(checkbox => {
-                checkbox.checked = this.checked;
-            });
-            updateSelectedActions();
-        });
-
-        rowCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', updateSelectedActions);
-        });
-
-        function updateSelectedActions() {
-            const checkedBoxes = document.querySelectorAll('tbody input[type="checkbox"]:checked');
-            const count = checkedBoxes.length;
-
-            if (count > 0) {
-                selectedActions.classList.remove('d-none');
-                selectedCount.textContent = count;
-            } else {
-                selectedActions.classList.add('d-none');
-            }
-
-            // Update select all checkbox state
-            if (count === 0) {
-                selectAllCheckbox.indeterminate = false;
-                selectAllCheckbox.checked = false;
-            } else if (count === rowCheckboxes.length) {
-                selectAllCheckbox.indeterminate = false;
-                selectAllCheckbox.checked = true;
-            } else {
-                selectAllCheckbox.indeterminate = true;
-            }
-        }
-
-        // Handle status badge hover effects
-        document.querySelectorAll('.badge').forEach(badge => {
-            badge.style.cursor = 'pointer';
-            badge.addEventListener('mouseenter', function() {
-                this.style.opacity = '0.8';
-            });
-            badge.addEventListener('mouseleave', function() {
-                this.style.opacity = '1';
-            });
-        });
-    });
-</script>
-@endpush

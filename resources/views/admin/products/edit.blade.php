@@ -1,58 +1,28 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Motor')
-@section('page-title', 'Edit Motor')
-@section('page-description', 'Update motorcycle information in your inventory.')
+@section('title', 'Edit Data Motor')
+@section('page-title', 'Edit Data Motor')
+@section('page-description', 'Perbarui informasi motor dalam inventaris')
 
 @section('page-actions')
-    <div class="btn-group me-2">
-        <a href="{{ route('admin.products.show', $product) }}" class="btn btn-outline-info">
-            <i class="fas fa-eye me-1"></i>View Details
-        </a>
-        <a href="{{ route('admin.products.index') }}" class="btn btn-outline-secondary">
-            <i class="fas fa-list me-1"></i>All Motors
-        </a>
-    </div>
+    <a href="{{ route('dashboard.products.index') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Kembali ke Daftar Motor
+    </a>
 @endsection
 
 @section('content')
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <!-- Current Motor Info Card -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-3"
-                             style="width: 48px; height: 48px;">
-                            <i class="fas fa-motorcycle"></i>
-                        </div>
-                        <div class="flex-grow-1">
-                            <h6 class="mb-1">Currently Editing</h6>
-                            <div class="fw-semibold">{{ $product->nama_motor }}</div>
-                            <div class="text-muted small">
-                                {{ $product->cc_motor }}cc • {{ $product->transmisi_motor }} •
-                                Rp {{ number_format($product->harga, 0, ',', '.') }}
-                            </div>
-                        </div>
-                        <div class="text-end">
-                            <div class="small text-muted">Motor ID</div>
-                            <div class="fw-bold">#{{ $product->id }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Edit Form Card -->
+    <div class="row justify-content-center ">
+        <div class="col-lg-10">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-transparent border-0 pt-4">
                     <div class="d-flex align-items-center">
-                        <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center me-3"
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3"
                              style="width: 48px; height: 48px;">
                             <i class="fas fa-edit"></i>
                         </div>
                         <div>
-                            <h5 class="card-title mb-0">Update Motor Information</h5>
-                            <p class="text-muted small mb-0">Modify the motorcycle details below</p>
+                            <h5 class="card-title mb-0">Edit Informasi Motor</h5>
+                            <p class="text-muted small mb-0">Perbarui detail untuk motor ini</p>
                         </div>
                     </div>
                 </div>
@@ -61,7 +31,7 @@
                     @if ($errors->any())
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
                             <h6 class="alert-heading mb-2">
-                                <i class="fas fa-exclamation-triangle me-1"></i>Please fix the following errors:
+                                <i class="fas fa-exclamation-triangle me-1"></i>Harap perbaiki kesalahan berikut:
                             </h6>
                             <ul class="mb-0 small">
                                 @foreach ($errors->all() as $error)
@@ -72,15 +42,24 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('admin.products.update', $product) }}" method="POST">
+                    <form action="{{ route('admin.products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 
-                        <div class="row g-4">
-                            <!-- Motor Name -->
+                        <!-- Bagian Informasi Dasar -->
+                        <div class="row mb-4">
                             <div class="col-12">
+                                <h6 class="text-primary fw-bold mb-3">
+                                    <i class="fas fa-info-circle me-1"></i>Informasi Dasar
+                                </h6>
+                            </div>
+                        </div>
+
+                        <div class="row g-4">
+                            <!-- Nama Motor -->
+                            <div class="col-md-6">
                                 <label for="nama_motor" class="form-label fw-semibold">
-                                    <i class="fas fa-motorcycle me-1 text-primary"></i>Motor Name
+                                    <i class="fas fa-motorcycle me-1 text-primary"></i>Nama Motor
                                     <span class="text-danger">*</span>
                                 </label>
                                 <input type="text"
@@ -88,18 +67,40 @@
                                        id="nama_motor"
                                        name="nama_motor"
                                        value="{{ old('nama_motor', $product->nama_motor) }}"
-                                       placeholder="e.g., Honda Vario 125, Yamaha NMAX, etc."
+                                       placeholder="Contoh: Honda Vario 125, Yamaha NMAX, dll."
                                        required>
                                 @error('nama_motor')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-                                <div class="form-text">Enter the complete motor name and model</div>
+                            </div>
+
+                            <!-- Merek -->
+                            <div class="col-md-6">
+                                <label for="brand" class="form-label fw-semibold">
+                                    <i class="fas fa-tag me-1 text-primary"></i>Merek
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select @error('brand') is-invalid @enderror"
+                                        id="brand"
+                                        name="brand"
+                                        required>
+                                    <option value="">Pilih merek</option>
+                                    <option value="Honda" {{ old('brand', $product->brand) == 'Honda' ? 'selected' : '' }}>Honda</option>
+                                    <option value="Yamaha" {{ old('brand', $product->brand) == 'Yamaha' ? 'selected' : '' }}>Yamaha</option>
+                                    <option value="Kawasaki" {{ old('brand', $product->brand) == 'Kawasaki' ? 'selected' : '' }}>Kawasaki</option>
+                                    <option value="Suzuki" {{ old('brand', $product->brand) == 'Suzuki' ? 'selected' : '' }}>Suzuki</option>
+                                    <option value="TVS" {{ old('brand', $product->brand) == 'TVS' ? 'selected' : '' }}>TVS</option>
+                                    <option value="Lainnya" {{ old('brand', $product->brand) == 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
+                                </select>
+                                @error('brand')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <!-- CC Motor -->
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label for="cc_motor" class="form-label fw-semibold">
-                                    <i class="fas fa-tachometer-alt me-1 text-success"></i>Engine CC
+                                    <i class="fas fa-tachometer-alt me-1 text-success"></i>Kapasitas Mesin (CC)
                                     <span class="text-danger">*</span>
                                 </label>
                                 <div class="input-group">
@@ -113,127 +114,395 @@
                                            max="2000"
                                            required>
                                     <span class="input-group-text">cc</span>
-                                    @error('cc_motor')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
                                 </div>
-                                <div class="form-text">Engine capacity (50cc - 2000cc)</div>
-                                @if(old('cc_motor', $product->cc_motor) != $product->cc_motor)
-                                    <div class="small text-warning mt-1">
-                                        <i class="fas fa-info-circle me-1"></i>
-                                        Original: {{ $product->cc_motor }}cc
-                                    </div>
-                                @endif
+                                @error('cc_motor')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
-                            <!-- Transmission -->
-                            <div class="col-md-6">
+                            <!-- Transmisi -->
+                            <div class="col-md-4">
                                 <label for="transmisi_motor" class="form-label fw-semibold">
-                                    <i class="fas fa-cogs me-1 text-warning"></i>Transmission
+                                    <i class="fas fa-cogs me-1 text-warning"></i>Transmisi
                                     <span class="text-danger">*</span>
                                 </label>
                                 <select class="form-select @error('transmisi_motor') is-invalid @enderror"
                                         id="transmisi_motor"
                                         name="transmisi_motor"
                                         required>
-                                    <option value="">Choose transmission type</option>
+                                    <option value="">Pilih jenis transmisi</option>
                                     <option value="Manual" {{ old('transmisi_motor', $product->transmisi_motor) == 'Manual' ? 'selected' : '' }}>
                                         Manual
                                     </option>
                                     <option value="Automatic" {{ old('transmisi_motor', $product->transmisi_motor) == 'Automatic' ? 'selected' : '' }}>
-                                        Automatic
+                                        Otomatis
                                     </option>
                                     <option value="CVT" {{ old('transmisi_motor', $product->transmisi_motor) == 'CVT' ? 'selected' : '' }}>
-                                        CVT (Continuously Variable Transmission)
+                                        CVT (Transmisi Variabel Kontinu)
                                     </option>
                                 </select>
                                 @error('transmisi_motor')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-                                @if(old('transmisi_motor', $product->transmisi_motor) != $product->transmisi_motor)
-                                    <div class="small text-warning mt-1">
-                                        <i class="fas fa-info-circle me-1"></i>
-                                        Original: {{ $product->transmisi_motor }}
-                                    </div>
-                                @endif
                             </div>
 
-                            <!-- Price -->
+                            <!-- Tipe Motor -->
+                            <div class="col-md-4">
+                                <label for="tipe_motor" class="form-label fw-semibold">
+                                    <i class="fas fa-list me-1 text-info"></i>Tipe Motor
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select @error('tipe_motor') is-invalid @enderror"
+                                        id="tipe_motor"
+                                        name="tipe_motor"
+                                        required>
+                                    <option value="">Pilih tipe motor</option>
+                                    <option value="Scooter" {{ old('tipe_motor', $product->tipe_motor) == 'Scooter' ? 'selected' : '' }}>Skuter</option>
+                                    <option value="Sport" {{ old('tipe_motor', $product->tipe_motor) == 'Sport' ? 'selected' : '' }}>Sport</option>
+                                    <option value="Naked" {{ old('tipe_motor', $product->tipe_motor) == 'Naked' ? 'selected' : '' }}>Naked</option>
+                                    <option value="Cruiser" {{ old('tipe_motor', $product->tipe_motor) == 'Cruiser' ? 'selected' : '' }}>Cruiser</option>
+                                    <option value="Adventure" {{ old('tipe_motor', $product->tipe_motor) == 'Adventure' ? 'selected' : '' }}>Adventure</option>
+                                    <option value="Standard" {{ old('tipe_motor', $product->tipe_motor) == 'Standard' ? 'selected' : '' }}>Standar</option>
+                                </select>
+                                @error('tipe_motor')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Tahun Produksi -->
+                            <div class="col-md-6">
+                                <label for="tahun_produksi" class="form-label fw-semibold">
+                                    <i class="fas fa-calendar-alt me-1 text-secondary"></i>Tahun Produksi
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input type="number"
+                                       class="form-control @error('tahun_produksi') is-invalid @enderror"
+                                       id="tahun_produksi"
+                                       name="tahun_produksi"
+                                       value="{{ old('tahun_produksi', $product->tahun_produksi) }}"
+                                       min="1900"
+                                       max="{{ date('Y') + 1 }}"
+                                       required>
+                                @error('tahun_produksi')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Warna -->
+                            <div class="col-md-6">
+                                <label for="warna" class="form-label fw-semibold">
+                                    <i class="fas fa-palette me-1 text-danger"></i>Warna
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input type="text"
+                                       class="form-control @error('warna') is-invalid @enderror"
+                                       id="warna"
+                                       name="warna"
+                                       value="{{ old('warna', $product->warna) }}"
+                                       placeholder="Contoh: Merah, Biru, Hitam, dll."
+                                       required>
+                                @error('warna')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <!-- Bagian Registrasi Kendaraan -->
+                        <div class="row mb-4 mt-5">
                             <div class="col-12">
-                                <label for="harga" class="form-label fw-semibold">
-                                    <i class="fas fa-rupiah-sign me-1 text-info"></i>Price
+                                <h6 class="text-primary fw-bold mb-3">
+                                    <i class="fas fa-file-alt me-1"></i>Registrasi Kendaraan
+                                </h6>
+                            </div>
+                        </div>
+
+                        <div class="row g-4">
+                            <!-- Nomor STNK -->
+                            <div class="col-md-6">
+                                <label for="nomor_stnk" class="form-label fw-semibold">
+                                    <i class="fas fa-id-card me-1 text-primary"></i>Nomor STNK
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input type="text"
+                                       class="form-control @error('nomor_stnk') is-invalid @enderror"
+                                       id="nomor_stnk"
+                                       name="nomor_stnk"
+                                       value="{{ old('nomor_stnk', $product->nomor_stnk) }}"
+                                       placeholder="Masukkan nomor STNK"
+                                       required>
+                                @error('nomor_stnk')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Plat Nomor -->
+                            <div class="col-md-6">
+                                <label for="nomor_kendaraan" class="form-label fw-semibold">
+                                    <i class="fas fa-car me-1 text-success"></i>Plat Nomor
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input type="text"
+                                       class="form-control @error('nomor_kendaraan') is-invalid @enderror"
+                                       id="nomor_kendaraan"
+                                       name="nomor_kendaraan"
+                                       value="{{ old('nomor_kendaraan', $product->nomor_kendaraan) }}"
+                                       placeholder="Contoh: B 1234 ABC"
+                                       required>
+                                @error('nomor_kendaraan')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Nomor Mesin -->
+                            <div class="col-md-6">
+                                <label for="no_mesin" class="form-label fw-semibold">
+                                    <i class="fas fa-engine me-1 text-warning"></i>Nomor Mesin
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input type="text"
+                                       class="form-control @error('no_mesin') is-invalid @enderror"
+                                       id="no_mesin"
+                                       name="no_mesin"
+                                       value="{{ old('no_mesin', $product->no_mesin) }}"
+                                       placeholder="Masukkan nomor mesin"
+                                       required>
+                                @error('no_mesin')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Nomor Rangka -->
+                            <div class="col-md-6">
+                                <label for="no_rangka" class="form-label fw-semibold">
+                                    <i class="fas fa-barcode me-1 text-info"></i>Nomor Rangka
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input type="text"
+                                       class="form-control @error('no_rangka') is-invalid @enderror"
+                                       id="no_rangka"
+                                       name="no_rangka"
+                                       value="{{ old('no_rangka', $product->no_rangka) }}"
+                                       placeholder="Masukkan nomor rangka"
+                                       required>
+                                @error('no_rangka')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Foto STNK -->
+                            <div class="col-12">
+                                <label for="foto_stnk" class="form-label fw-semibold">
+                                    <i class="fas fa-camera me-1 text-primary"></i>Foto STNK
+                                </label>
+                                <input type="file"
+                                       class="form-control @error('foto_stnk') is-invalid @enderror"
+                                       id="foto_stnk"
+                                       name="foto_stnk"
+                                       accept="image/jpeg,image/png,image/jpg">
+                                @error('foto_stnk')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <div class="form-text">
+                                    @if($product->foto_stnk)
+                                        <a href="{{ asset('storage/'.$product->foto_stnk) }}" target="_blank" class="me-2">
+                                            <i class="fas fa-eye me-1"></i>Lihat STNK saat ini
+                                        </a>
+                                    @endif
+                                    Kosongkan jika tidak ingin mengubah foto STNK (JPEG, PNG, JPG - Maks 2MB)
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bagian Harga & Stok -->
+                        <div class="row mb-4 mt-5">
+                            <div class="col-12">
+                                <h6 class="text-primary fw-bold mb-3">
+                                    <i class="fas fa-money-bill-wave me-1"></i>Harga & Stok
+                                </h6>
+                            </div>
+                        </div>
+
+                        <div class="row g-4">
+                            <!-- Harga Harian -->
+                            <div class="col-md-4">
+                                <label for="harga_harian" class="form-label fw-semibold">
+                                    <i class="fas fa-rupiah-sign me-1 text-success"></i>Harga Harian
                                     <span class="text-danger">*</span>
                                 </label>
                                 <div class="input-group">
                                     <span class="input-group-text">Rp</span>
                                     <input type="number"
-                                           class="form-control @error('harga') is-invalid @enderror"
-                                           id="harga"
-                                           name="harga"
-                                           value="{{ old('harga', $product->harga) }}"
-                                           placeholder="1500000"
-                                           min="100000"
-                                           step="100000"
+                                           class="form-control @error('harga_harian') is-invalid @enderror"
+                                           id="harga_harian"
+                                           name="harga_harian"
+                                           value="{{ old('harga_harian', $product->harga_harian) }}"
+                                           placeholder="100000"
+                                           min="0"
+                                           step="1000"
                                            required>
-                                    @error('harga')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
                                 </div>
-                                <div class="form-text">Motor price in Indonesian Rupiah (minimum Rp 100,000)</div>
-                                @if(old('harga', $product->harga) != $product->harga)
-                                    <div class="small text-warning mt-1">
-                                        <i class="fas fa-info-circle me-1"></i>
-                                        Original: Rp {{ number_format($product->harga, 0, ',', '.') }}
-                                    </div>
-                                @endif
+                                @error('harga_harian')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Diskon Mingguan -->
+                            <div class="col-md-4">
+                                <label for="diskon_mingguan" class="form-label fw-semibold">
+                                    <i class="fas fa-percentage me-1 text-warning"></i>Diskon Mingguan
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <input type="number"
+                                           class="form-control @error('diskon_mingguan') is-invalid @enderror"
+                                           id="diskon_mingguan"
+                                           name="diskon_mingguan"
+                                           value="{{ old('diskon_mingguan', $product->diskon_mingguan) }}"
+                                           min="0"
+                                           max="6"
+                                           required>
+                                    <span class="input-group-text">hari</span>
+                                </div>
+                                @error('diskon_mingguan')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <div class="form-text">Hari gratis untuk sewa mingguan (0-6 hari)</div>
+                            </div>
+
+                            <!-- Diskon Bulanan -->
+                            <div class="col-md-4">
+                                <label for="diskon_bulanan" class="form-label fw-semibold">
+                                    <i class="fas fa-percentage me-1 text-info"></i>Diskon Bulanan
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <input type="number"
+                                           class="form-control @error('diskon_bulanan') is-invalid @enderror"
+                                           id="diskon_bulanan"
+                                           name="diskon_bulanan"
+                                           value="{{ old('diskon_bulanan', $product->diskon_bulanan) }}"
+                                           min="0"
+                                           max="29"
+                                           required>
+                                    <span class="input-group-text">hari</span>
+                                </div>
+                                @error('diskon_bulanan')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <div class="form-text">Hari gratis untuk sewa bulanan (0-29 hari)</div>
+                            </div>
+
+                            <!-- Stok -->
+                            <div class="col-md-6">
+                                <label for="stok" class="form-label fw-semibold">
+                                    <i class="fas fa-boxes me-1 text-secondary"></i>Jumlah Stok
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input type="number"
+                                       class="form-control @error('stok') is-invalid @enderror"
+                                       id="stok"
+                                       name="stok"
+                                       value="{{ old('stok', $product->stok) }}"
+                                       min="1"
+                                       required>
+                                @error('stok')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Ketersediaan -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    <i class="fas fa-toggle-on me-1 text-success"></i>Ketersediaan
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input @error('is_available') is-invalid @enderror"
+                                           type="checkbox"
+                                           id="is_available"
+                                           name="is_available"
+                                           value="1"
+                                           {{ old('is_available', $product->is_available) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="is_available">
+                                        Tersedia untuk disewa
+                                    </label>
+                                </div>
+                                @error('is_available')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
 
-                        <!-- Comparison Section -->
-                        <div class="row mt-4">
+                        <!-- Bagian Gambar & Deskripsi -->
+                        <div class="row mb-4 mt-5">
+                            <div class="col-12">
+                                <h6 class="text-primary fw-bold mb-3">
+                                    <i class="fas fa-images me-1"></i>Gambar & Deskripsi
+                                </h6>
+                            </div>
+                        </div>
+
+                        <div class="row g-4">
+                            <!-- Gambar Utama -->
+                            <div class="col-12">
+                                <label for="gambar_utama" class="form-label fw-semibold">
+                                    <i class="fas fa-image me-1 text-primary"></i>Gambar Utama
+                                </label>
+                                <input type="file"
+                                       class="form-control @error('gambar_utama') is-invalid @enderror"
+                                       id="gambar_utama"
+                                       name="gambar_utama"
+                                       accept="image/jpeg,image/png,image/jpg">
+                                @error('gambar_utama')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <div class="form-text">
+                                    @if($product->gambar_utama)
+                                        <a href="{{ asset('storage/'.$product->gambar_utama) }}" target="_blank" class="me-2">
+                                            <i class="fas fa-eye me-1"></i>Lihat gambar saat ini
+                                        </a>
+                                    @endif
+                                    Kosongkan jika tidak ingin mengubah gambar utama (JPEG, PNG, JPG - Maks 2MB)
+                                </div>
+                            </div>
+
+                            <!-- Deskripsi -->
+                            <div class="col-12">
+                                <label for="deskripsi" class="form-label fw-semibold">
+                                    <i class="fas fa-align-left me-1 text-secondary"></i>Deskripsi
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <textarea class="form-control @error('deskripsi') is-invalid @enderror"
+                                          id="deskripsi"
+                                          name="deskripsi"
+                                          rows="4"
+                                          placeholder="Deskripsikan fitur motor, kondisi, dan catatan khusus..."
+                                          required>{{ old('deskripsi', $product->deskripsi) }}</textarea>
+                                @error('deskripsi')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <!-- Bagian Pratinjau -->
+                        <div class="row mt-5">
                             <div class="col-12">
                                 <div class="border rounded p-3 bg-light">
                                     <h6 class="text-muted mb-3">
-                                        <i class="fas fa-balance-scale me-1"></i>Before & After Comparison
+                                        <i class="fas fa-eye me-1"></i>Pratinjau
                                     </h6>
-                                    <div class="row">
-                                        <!-- Before -->
-                                        <div class="col-md-6">
-                                            <div class="border rounded p-3 bg-white">
-                                                <div class="small text-muted mb-2">BEFORE (Current)</div>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="bg-secondary text-white rounded d-flex align-items-center justify-content-center me-3"
-                                                         style="width: 40px; height: 40px; font-size: 14px;">
-                                                        <i class="fas fa-motorcycle"></i>
-                                                    </div>
-                                                    <div class="flex-grow-1">
-                                                        <div class="fw-semibold small">{{ $product->nama_motor }}</div>
-                                                        <div class="text-muted small">
-                                                            {{ $product->cc_motor }}cc • {{ $product->transmisi_motor }} •
-                                                            Rp {{ number_format($product->harga, 0, ',', '.') }}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-primary text-white rounded d-flex align-items-center justify-content-center me-3"
+                                             style="width: 48px; height: 48px; font-size: 18px;">
+                                            <i class="fas fa-motorcycle"></i>
                                         </div>
-                                        <!-- After -->
-                                        <div class="col-md-6">
-                                            <div class="border rounded p-3 bg-white">
-                                                <div class="small text-muted mb-2">AFTER (Preview)</div>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="bg-primary text-white rounded d-flex align-items-center justify-content-center me-3"
-                                                         style="width: 40px; height: 40px; font-size: 14px;">
-                                                        <i class="fas fa-motorcycle"></i>
-                                                    </div>
-                                                    <div class="flex-grow-1">
-                                                        <div class="fw-semibold small" id="preview-name">{{ $product->nama_motor }}</div>
-                                                        <div class="text-muted small">
-                                                            <span id="preview-cc">{{ $product->cc_motor }}</span>cc •
-                                                            <span id="preview-trans">{{ $product->transmisi_motor }}</span> •
-                                                            Rp <span id="preview-price">{{ number_format($product->harga, 0, ',', '.') }}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                        <div class="flex-grow-1">
+                                            <div class="fw-semibold" id="preview-name">{{ $product->nama_motor }}</div>
+                                            <div class="text-muted small">
+                                                <span id="preview-brand">{{ $product->brand }}</span> •
+                                                <span id="preview-cc">{{ $product->cc_motor }}</span>cc •
+                                                <span id="preview-trans">{{ $product->transmisi_motor }}</span> •
+                                                Rp <span id="preview-price">{{ number_format($product->harga_harian, 0, ',', '.') }}</span>/hari
                                             </div>
                                         </div>
                                     </div>
@@ -241,27 +510,19 @@
                             </div>
                         </div>
 
-                        <!-- Action Buttons -->
+                        <!-- Tombol Aksi -->
                         <div class="row mt-4">
                             <div class="col-12">
-                                <div class="d-flex gap-2 justify-content-between">
-                                    <div>
-                                        <!-- Danger Zone -->
-                                        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                                            <i class="fas fa-trash me-1"></i>Delete Motor
-                                        </button>
-                                    </div>
-                                    <div class="d-flex gap-2">
-                                        <a href="{{ route('admin.products.show', $product) }}" class="btn btn-outline-secondary">
-                                            <i class="fas fa-times me-1"></i>Cancel
-                                        </a>
-                                        <button type="reset" class="btn btn-outline-warning">
-                                            <i class="fas fa-undo me-1"></i>Reset
-                                        </button>
-                                        <button type="submit" class="btn btn-primary">
-                                            <i class="fas fa-save me-1"></i>Update Motor
-                                        </button>
-                                    </div>
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <a href="{{ route('dashboard.products.index') }}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-times me-1"></i>Batal
+                                    </a>
+                                    <button type="reset" class="btn btn-outline-warning">
+                                        <i class="fas fa-undo me-1"></i>Reset
+                                    </button>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-1"></i>Perbarui Motor
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -269,11 +530,11 @@
                 </div>
             </div>
 
-            <!-- Change History Card -->
+            <!-- Kartu Bantuan -->
             <div class="card border-0 shadow-sm mt-4">
                 <div class="card-body">
                     <h6 class="card-title text-muted">
-                        <i class="fas fa-info-circle me-1"></i>Editing Tips
+                        <i class="fas fa-info-circle me-1"></i>Tips Memperbarui Motor
                     </h6>
                     <div class="row g-3">
                         <div class="col-md-6">
@@ -283,7 +544,7 @@
                                     <i class="fas fa-check"></i>
                                 </div>
                                 <div class="small">
-                                    <strong>Double-check:</strong> Verify all changes before saving
+                                    <strong>Informasi:</strong> Pastikan semua data sesuai dengan dokumen kendaraan
                                 </div>
                             </div>
                         </div>
@@ -294,7 +555,7 @@
                                     <i class="fas fa-check"></i>
                                 </div>
                                 <div class="small">
-                                    <strong>Price Updates:</strong> Consider market fluctuations
+                                    <strong>Gambar:</strong> Unggah foto terbaru untuk tampilan yang lebih baik
                                 </div>
                             </div>
                         </div>
@@ -302,10 +563,10 @@
                             <div class="d-flex">
                                 <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0"
                                      style="width: 24px; height: 24px; font-size: 12px;">
-                                    <i class="fas fa-exclamation"></i>
+                                    <i class="fas fa-check"></i>
                                 </div>
                                 <div class="small">
-                                    <strong>Specifications:</strong> Don't change CC unless correcting errors
+                                    <strong>Harga:</strong> Sesuaikan harga sesuai kondisi pasar saat ini
                                 </div>
                             </div>
                         </div>
@@ -313,124 +574,55 @@
                             <div class="d-flex">
                                 <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0"
                                      style="width: 24px; height: 24px; font-size: 12px;">
-                                    <i class="fas fa-save"></i>
+                                    <i class="fas fa-check"></i>
                                 </div>
                                 <div class="small">
-                                    <strong>Save Changes:</strong> Click Update to apply modifications
+                                    <strong>Stok:</strong> Perbarui stok sesuai ketersediaan unit
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header border-0">
-                    <h5 class="modal-title text-danger" id="deleteModalLabel">
-                        <i class="fas fa-exclamation-triangle me-2"></i>Delete Motor
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="text-center mb-3">
-                        <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3"
-                             style="width: 64px; height: 64px; font-size: 24px;">
-                            <i class="fas fa-trash"></i>
-                        </div>
-                    </div>
-                    <p class="text-center">Are you sure you want to delete this motor?</p>
-                    <div class="bg-light rounded p-3 mb-3">
-                        <div class="d-flex align-items-center">
-                            <div class="bg-secondary text-white rounded d-flex align-items-center justify-content-center me-3"
-                                 style="width: 40px; height: 40px;">
-                                <i class="fas fa-motorcycle"></i>
-                            </div>
-                            <div>
-                                <div class="fw-semibold">{{ $product->nama_motor }}</div>
-                                <div class="text-muted small">
-                                    {{ $product->cc_motor }}cc • {{ $product->transmisi_motor }} •
-                                    Rp {{ number_format($product->harga, 0, ',', '.') }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="alert alert-warning small">
-                        <i class="fas fa-exclamation-triangle me-1"></i>
-                        <strong>Warning:</strong> This action cannot be undone. The motor will be permanently removed from your inventory.
-                    </div>
-                </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i>Cancel
-                    </button>
-                    <form action="{{ route('admin.products.destroy', $product) }}" method="POST" class="d-inline">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fas fa-trash me-1"></i>Yes, Delete Motor
-                        </button>
-                    </form>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Live preview functionality
+        // Fungsi pratinjau langsung
         document.addEventListener('DOMContentLoaded', function() {
             const namaInput = document.getElementById('nama_motor');
+            const brandInput = document.getElementById('brand');
             const ccInput = document.getElementById('cc_motor');
             const transInput = document.getElementById('transmisi_motor');
-            const hargaInput = document.getElementById('harga');
+            const hargaInput = document.getElementById('harga_harian');
 
             const previewName = document.getElementById('preview-name');
+            const previewBrand = document.getElementById('preview-brand');
             const previewCC = document.getElementById('preview-cc');
             const previewTrans = document.getElementById('preview-trans');
             const previewPrice = document.getElementById('preview-price');
 
-            // Original values for comparison
-            const originalName = '{{ $product->nama_motor }}';
-            const originalCC = '{{ $product->cc_motor }}';
-            const originalTrans = '{{ $product->transmisi_motor }}';
-            const originalPrice = '{{ number_format($product->harga, 0, ",", ".") }}';
-
             function updatePreview() {
-                const newName = namaInput.value || originalName;
-                const newCC = ccInput.value || originalCC;
-                const newTrans = transInput.value || originalTrans;
-                const newPrice = hargaInput.value ? parseInt(hargaInput.value).toLocaleString('id-ID') : originalPrice;
+                previewName.textContent = namaInput.value || 'Nama Motor';
+                previewBrand.textContent = brandInput.value || 'Merek';
+                previewCC.textContent = ccInput.value || '000';
+                previewTrans.textContent = transInput.value || 'Transmisi';
 
-                previewName.textContent = newName;
-                previewCC.textContent = newCC;
-                previewTrans.textContent = newTrans;
-                previewPrice.textContent = newPrice;
-
-                // Highlight changes
-                previewName.className = newName !== originalName ? 'fw-semibold small text-primary' : 'fw-semibold small';
-                previewCC.className = newCC !== originalCC ? 'text-primary fw-bold' : '';
-                previewTrans.className = newTrans !== originalTrans ? 'text-primary fw-bold' : '';
-                previewPrice.className = newPrice !== originalPrice ? 'text-primary fw-bold' : '';
+                const price = hargaInput.value ? parseInt(hargaInput.value).toLocaleString('id-ID') : '0';
+                previewPrice.textContent = price;
             }
 
             namaInput.addEventListener('input', updatePreview);
+            brandInput.addEventListener('change', updatePreview);
             ccInput.addEventListener('input', updatePreview);
             transInput.addEventListener('change', updatePreview);
             hargaInput.addEventListener('input', updatePreview);
 
-            // Format price input
+            // Format input harga
             hargaInput.addEventListener('input', function() {
+                // Hapus karakter non-numerik kecuali titik desimal
                 let value = this.value.replace(/[^\d]/g, '');
                 this.value = value;
-            });
-
-            // Reset form functionality
-            document.querySelector('button[type="reset"]').addEventListener('click', function() {
-                setTimeout(updatePreview, 50); // Small delay to let form reset
             });
         });
     </script>

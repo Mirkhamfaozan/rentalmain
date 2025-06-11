@@ -23,6 +23,10 @@
   <!-- Core theme CSS (includes Bootstrap)-->
   <link href="{{ asset('frontend/css/styles.css') }}" rel="stylesheet" />
   <link rel="stylesheet" href="{{ asset('frontend/css/custom.css') }}" />
+  <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 
   <style>
     /* Minimal custom CSS - hanya untuk gradient yang tidak tersedia di Bootstrap */
@@ -51,6 +55,14 @@
       left: 0;
       background: linear-gradient(45deg, #667eea, #764ba2);
       border-radius: 2px;
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: -5px;
+      right: -10px;
+      font-size: 0.75rem;
+      padding: 2px 6px;
     }
   </style>
 </head>
@@ -101,7 +113,22 @@
         </ul>
 
         @auth
-        <div class="d-flex align-items-center">
+        <div class="d-flex align-items-center gap-3">
+          <!-- Notification Button -->
+          @php
+            $notificationCount = Auth::user()->orders()
+              ->whereHas('payment', function ($query) {
+                  $query->whereIn('status', ['pending', 'success']);
+              })->count();
+          @endphp
+          <a href="{{ route('user.notifications') }}" class="position-relative text-decoration-none text-dark" title="Notifications">
+            <i class="bi bi-bell fs-5"></i>
+            @if($notificationCount > 0)
+            <span class="badge bg-danger rounded-pill notification-badge">{{ $notificationCount }}</span>
+            @endif
+          </a>
+
+          <!-- Profile Dropdown -->
           <div class="dropdown">
             <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark"
                id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
@@ -112,7 +139,6 @@
               <span class="fw-medium">{{ Auth::user()->name }}</span>
             </a>
             <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="profileDropdown">
-              {{-- Only show Dashboard link for users who can access it (admin, superadmin, rental) --}}
               @if(Auth::user()->canAccessDashboard())
               <li>
                 <a class="dropdown-item py-2" href="/dashboard">
@@ -121,16 +147,12 @@
               </li>
               <li><hr class="dropdown-divider"></li>
               @endif
-
-              {{-- Profile link for all authenticated users --}}
               <li>
                 <a class="dropdown-item py-2" href="{{ route('profile.edit') }}">
                   <i class="bi bi-person me-2"></i>Profile
                 </a>
               </li>
               <li><hr class="dropdown-divider"></li>
-
-              {{-- Logout for all authenticated users --}}
               <li>
                 <form method="POST" action="{{ route('logout') }}">
                   @csrf
@@ -171,7 +193,7 @@
         <div class="col-md-6">
           <p class="m-0 fw-light">
             <i class="bi bi-c-circle me-1"></i>
-            Copyright &copy; AM MOTOR {{ date('Y') }}. All rights reserved.
+            Copyright © AM MOTOR {{ date('Y') }}. All rights reserved.
           </p>
         </div>
         <div class="col-md-6 text-md-end">
@@ -216,7 +238,7 @@
         });
       });
 
-      // Add Bootstrap tooltip initialization if needed
+      // Add Bootstrap tooltip initialization for notification button
       var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
       var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);

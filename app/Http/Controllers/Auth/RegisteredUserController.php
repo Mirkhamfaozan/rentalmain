@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\RentalBiodata;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -29,23 +30,53 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // Validasi dasar untuk semua user
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'role' => ['required', 'string', 'in:users,rental'], // Only allow users and rental from registration
+            'role' => ['required', 'string', 'in:users,rental'],
         ]);
 
+        // Validasi tambahan jika role rental
+        if ($request->role === 'rental') {
+            $request->validate([
+                'nama_rental' => ['required', 'string', 'max:255'],
+                'nama_pemilik' => ['required', 'string', 'max:255'],
+                'alamat' => ['required', 'string'],
+                'kota' => ['required', 'string'],
+                'provinsi' => ['required', 'string'],
+                'no_telepon' => ['required', 'string'],
+            ]);
+        }
+
+        // Membuat user
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role,
-            'email_verified_at' => null, // Pastikan email belum terverifikasi
+            'email_verified_at' => null,
         ]);
 
-        event(new Registered($user)); // Mengirim email verifikasi
-        Auth::login($user); // Login otomatis
+        // Jika role rental, buat juga data rental_biodata
+        if ($request->role === 'rental') {
+            RentalBiodata::create([
+                'user_id' => $user->id,
+                'nama_rental' => $request->nama_rental,
+                'nama_pemilik' => $request->nama_pemilik,
+                'alamat' => $request->alamat,
+                'kota' => $request->kota,
+                'provinsi' => $request->provinsi,
+                'kode_pos' => $request->kode_pos,
+                'no_telepon' => $request->no_telepon,
+                'no_wa' => $request->no_wa,
+                'email_perusahaan' => $request->email_perusahaan,
+            ]);
+        }
+
+        event(new Registered($user));
+
         return redirect()->route('verification.notice')
             ->with('status', 'Email verifikasi telah dikirim ke ' . $user->email);
     }

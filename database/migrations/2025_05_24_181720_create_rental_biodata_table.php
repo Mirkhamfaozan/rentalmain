@@ -24,11 +24,6 @@ return new class extends Migration
             $table->string('no_telepon');                   // Nomor telepon kantor
             $table->string('no_wa')->nullable();            // WhatsApp (jika berbeda)
             $table->string('email_perusahaan')->nullable(); // Email perusahaan
-            $table->string('npwp')->nullable();             // NPWP (jika ada)
-            $table->string('siup')->nullable();             // SIUP (jika ada)
-            $table->string('foto_ktp')->nullable();         // Upload KTP pemilik (URL/file path)
-            $table->string('foto_npwp')->nullable();        // Upload NPWP (URL/file path)
-
             $table->timestamps();
         });
     }

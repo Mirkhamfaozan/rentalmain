@@ -3,27 +3,26 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Product;
+use App\Models\RentalBiodata;
 
 class HomeController extends Controller
 {
-    private $productController;
-
-    public function __construct()
-    {
-        $this->productController = new ProductController();
-    }
-
     public function index()
     {
-        // Ambil data produk dari ProductController
-        $products = $this->productController->getProducts();
+        // Fetch latest available products
+        $products = Product::where('is_available', true)
+            ->orderBy('created_at', 'desc')
+            ->take(6)
+            ->get();
 
-        // Batasi hanya 3 produk untuk ditampilkan di home
-        $featuredProducts = collect($products)->take(3)->all();
+        // Fetch rental profiles
+        $rentalProfiles = RentalBiodata::forRental()
+            ->orderBy('created_at', 'desc')
+            ->take(3) // Limit to 3 rental profiles
+            ->get();
 
-        return view('frontend.homepage', [
-            'products' => $featuredProducts
-        ]);
+        return view('frontend.homepage', compact('products', 'rentalProfiles'));
     }
 
     public function contact()
@@ -31,9 +30,18 @@ class HomeController extends Controller
         return view('frontend.contact');
     }
 
-    public function detail()
+    public function detail($id)
     {
-        return view('frontend.detail');
+        $product = Product::findOrFail($id);
+
+        // Fetch recommendations (e.g., other available products, excluding the current one)
+        $recommendations = Product::where('is_available', true)
+            ->where('id', '!=', $id)
+            ->orderBy('created_at', 'desc')
+            ->take(3)
+            ->get();
+
+        return view('frontend.detail', compact('product', 'recommendations'));
     }
 
     public function carasewa()
@@ -43,11 +51,24 @@ class HomeController extends Controller
 
     public function tentang()
     {
-        return view('frontend.tentang');
+        return view('frontend.rental_tentang');
     }
 
-    public function detail4()
+    public function detail4($id)
     {
-        return view('frontend.sewa');
+        $product = Product::findOrFail($id);
+        return view('frontend.rental_sewa', compact('product'));
+    }
+
+    public function rentalProfile($id)
+    {
+        $rentalProfile = RentalBiodata::forRental()->findOrFail($id);
+        // Fetch products for the user associated with this rental profile
+        $products = Product::where('user_id', $rentalProfile->user_id)
+            ->where('is_available', true)
+            ->orderBy('created_at', 'desc')
+            ->take(6)
+            ->get();
+        return view('frontend.rental_profile', compact('rentalProfile', 'products'));
     }
 }

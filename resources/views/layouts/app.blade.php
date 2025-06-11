@@ -84,7 +84,7 @@
     @include('layouts.sidebar')
 
     <!-- Main Content -->
-    <main class="main-content mt-5">
+    <main class="main-content">
         <div class="container-fluid px-4">
             <!-- Page Header -->
             @if(!View::hasSection('no-header'))
@@ -98,10 +98,7 @@
             <footer class="mt-5 py-4 border-top">
                 <div class="row">
                     <div class="col-md-6">
-                        <p class="text-muted small mb-0">&copy; 2024 Laravel Admin. All rights reserved.</p>
-                    </div>
-                    <div class="col-md-6 text-md-end">
-                        <p class="text-muted small mb-0">Built with Bootstrap 5</p>
+                        <p class="text-muted small mb-0">&copy; 2025 AM MOTOR.</p>
                     </div>
                 </div>
             </footer>

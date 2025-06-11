@@ -204,7 +204,7 @@
             <a href="#" class="nav-link text-white rounded-3 mb-1 py-3 px-3 hover-bg-white-10">
                 <i class="fas fa-users me-3"></i>Users Management
             </a>
-            <a href="{{ route('admin.products.index') ?? '#' }}" class="nav-link text-white rounded-3 mb-1 py-3 px-3 hover-bg-white-10">
+            <a href="{{ route('dashboard.products.index') ?? '#' }}" class="nav-link text-white rounded-3 mb-1 py-3 px-3 hover-bg-white-10">
                 <i class="fas fa-box me-3"></i>Products
             </a>
             <a href="#" class="nav-link text-white rounded-3 mb-1 py-3 px-3 hover-bg-white-10">

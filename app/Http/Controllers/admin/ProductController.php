@@ -1,24 +1,40 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 
 class ProductController extends Controller
 {
-    // Tampilkan semua produk dengan filter
+    /**
+     * Display a listing of the products.
+     */
     public function index(Request $request)
     {
-        $query = Product::query();
-
-        // Filter berdasarkan pencarian nama motor
-        if ($request->filled('search')) {
-            $query->where('nama_motor', 'LIKE', '%' . $request->search . '%');
+        // Only allow admin and rental users
+        if (!Auth::user()->canAccessDashboard()) {
+            abort(403, 'Unauthorized action. You do not have permission to access this page.');
         }
 
-        // Filter berdasarkan range CC
+        // Start building the query
+        $query = Product::query();
+
+        // Rental users only see their own products
+        if (Auth::user()->isRental()) {
+            $query->where('user_id', Auth::id());
+        }
+
+        // Apply filters
+        if ($request->filled('search')) {
+            $query->where('nama_motor', 'like', '%' . $request->search . '%');
+        }
+
         if ($request->filled('cc_range')) {
             switch ($request->cc_range) {
                 case '0-150':
@@ -36,106 +52,324 @@ class ProductController extends Controller
             }
         }
 
-        // Filter berdasarkan transmisi
         if ($request->filled('transmission')) {
             $query->where('transmisi_motor', $request->transmission);
         }
 
-        // Filter berdasarkan range harga
         if ($request->filled('price_range')) {
             switch ($request->price_range) {
                 case '0-100000':
-                    $query->whereBetween('harga', [0, 20000000]);
+                    $query->whereBetween('harga_harian', [0, 100000]);
                     break;
-                case '100000-50000000':
-                    $query->whereBetween('harga', [20000000, 50000000]);
+                case '100000-200000':
+                    $query->whereBetween('harga_harian', [100000, 200000]);
                     break;
-                case '50000000+':
-                    $query->where('harga', '>', 50000000);
+                case '200000+':
+                    $query->where('harga_harian', '>', 200000);
                     break;
             }
         }
 
-        // Ambil data dengan urutan nama motor A-Z
-        $products = $query->orderBy('nama_motor', 'asc')->get();
+        // Get paginated results
+        $products = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
 
         return view('admin.products.index', compact('products'));
     }
 
-    // Tampilkan form tambah produk
+    /**
+     * Show the form for creating a new product.
+     */
     public function create()
     {
+        // Only allow admin and rental users
+        if (!Auth::user()->canAccessDashboard()) {
+            abort(403, 'Unauthorized action. You do not have permission to access this page.');
+        }
+
         return view('admin.products.create');
     }
 
-    // Simpan produk baru
+    /**
+     * Store a newly created product in storage.
+     */
     public function store(Request $request)
     {
-        $request->validate([
-            'nama_motor' => 'required|string|max:255',
-            'cc_motor' => 'required|integer|min:50|max:2000',
-            'harga' => 'required|numeric|min:10000',
-            'transmisi_motor' => 'required|string|in:Manual,Automatic,CVT',
-        ], [
-            'nama_motor.required' => 'Nama motor wajib diisi',
-            'cc_motor.required' => 'CC motor wajib diisi',
-            'cc_motor.min' => 'CC motor minimal 50cc',
-            'cc_motor.max' => 'CC motor maksimal 2000cc',
-            'harga.required' => 'Harga wajib diisi',
-            'harga.min' => 'Harga minimal Rp 100.000',
-            'transmisi_motor.required' => 'Transmisi motor wajib dipilih',
-            'transmisi_motor.in' => 'Transmisi motor harus Manual, Automatic, atau CVT',
-        ]);
+        // Only allow admin and rental users
+        if (!Auth::user()->canAccessDashboard()) {
+            abort(403, 'Unauthorized action. You do not have permission to perform this action.');
+        }
 
-        Product::create($request->all());
-        return redirect()->route('admin.products.index')->with('success', 'Motor berhasil ditambahkan');
+        // Custom validation messages
+        $messages = [
+            'required' => 'Kolom :attribute wajib diisi.',
+            'string' => 'Kolom :attribute harus berupa teks.',
+            'max' => 'Kolom :attribute tidak boleh lebih dari :max karakter.',
+            'image' => 'Kolom :attribute harus berupa gambar.',
+            'mimes' => 'Kolom :attribute harus berformat: :values.',
+            'unique' => 'Data :attribute sudah digunakan untuk produk lain.',
+            'integer' => 'Kolom :attribute harus berupa angka bulat.',
+            'numeric' => 'Kolom :attribute harus berupa angka.',
+            'min' => 'Kolom :attribute minimal :min.',
+            'tahun_produksi.min' => 'Tahun produksi tidak valid (minimal 1900).',
+            'tahun_produksi.max' => 'Tahun produksi tidak boleh lebih dari tahun depan.',
+            'cc_motor.min' => 'CC motor minimal 50cc.',
+            'harga_harian.min' => 'Harga harian tidak boleh negatif.',
+            'stok.min' => 'Stok minimal 1 unit.',
+            'gambar_utama.max' => 'Ukuran file gambar utama tidak boleh lebih dari 2MB.',
+        ];
+
+        // Attribute names
+        $attributes = [
+            'nama_motor' => 'Nama Motor',
+            'brand' => 'Merek',
+            'cc_motor' => 'CC Motor',
+            'harga_harian' => 'Harga Harian',
+            'transmisi_motor' => 'Transmisi Motor',
+            'tipe_motor' => 'Tipe Motor',
+            'tahun_produksi' => 'Tahun Produksi',
+            'warna' => 'Warna',
+            'no_mesin' => 'Nomor Mesin',
+            'no_rangka' => 'Nomor Rangka',
+            'gambar_utama' => 'Gambar Utama',
+            'deskripsi' => 'Deskripsi',
+            'stok' => 'Stok',
+            'is_available' => 'Ketersediaan',
+        ];
+
+        $validated = $request->validate([
+            'nama_motor' => 'required|string|max:100',
+            'brand' => 'required|string|max:50',
+            'cc_motor' => 'required|integer|min:50',
+            'harga_harian' => 'required|numeric|min:0',
+            'transmisi_motor' => 'required|string|max:20',
+            'tipe_motor' => 'required|string|max:50',
+            'tahun_produksi' => 'required|integer|min:1900|max:' . (date('Y') + 1),
+            'warna' => 'required|string|max:50',
+            'no_mesin' => ['required', 'string', 'max:50', 'unique:products'],
+            'no_rangka' => ['required', 'string', 'max:50', 'unique:products'],
+            'gambar_utama' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'deskripsi' => 'nullable|string',
+            'stok' => 'required|integer|min:1',
+            'is_available' => 'boolean',
+        ], $messages, $attributes);
+
+        // Handle boolean conversion for is_available
+        $validated['is_available'] = $request->has('is_available') ? true : false;
+
+        // Calculate harga_mingguan and harga_bulanan
+        $validated['harga_mingguan'] = $validated['harga_harian'] * 7;
+        $validated['harga_bulanan'] = $validated['harga_harian'] * 30;
+
+        // Handle file upload
+        try {
+            if ($request->hasFile('gambar_utama')) {
+                $validated['gambar_utama'] = $request->file('gambar_utama')->store('product_images', 'public');
+            }
+
+            // Add the user_id to the validated data
+            $validated['user_id'] = Auth::id();
+
+            // Create the product
+            Product::create($validated);
+
+            return redirect()->route('dashboard.products.index')
+                ->with('success', 'Produk berhasil ditambahkan.');
+        } catch (\Exception $e) {
+            Log::error('Product creation failed: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+
+            // Clean up uploaded file if product creation fails
+            if (isset($validated['gambar_utama']) && Storage::disk('public')->exists($validated['gambar_utama'])) {
+                Storage::disk('public')->delete($validated['gambar_utama']);
+            }
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Gagal menambahkan produk. Error: ' . $e->getMessage());
+        }
     }
 
-    // Tampilkan detail produk
+    /**
+     * Display the specified product.
+     */
     public function show(Product $product)
     {
+        // Only allow admin and rental users
+        if (!Auth::user()->canAccessDashboard()) {
+            abort(403, 'Unauthorized action. You do not have permission to view this product.');
+        }
+
+        // Rental users can only see their own products
+        if (Auth::user()->isRental() && $product->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action. This product belongs to another rental.');
+        }
+
         return view('admin.products.show', compact('product'));
     }
 
-    // Tampilkan form edit produk
+    /**
+     * Show the form for editing the specified product.
+     */
     public function edit(Product $product)
     {
+        // Only allow admin and rental users
+        if (!Auth::user()->canAccessDashboard()) {
+            abort(403, 'Unauthorized action. You do not have permission to edit products.');
+        }
+
+        // Rental users can only edit their own products
+        if (Auth::user()->isRental() && $product->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action. You can only edit your own products.');
+        }
+
         return view('admin.products.edit', compact('product'));
     }
 
-    // Update data produk
+    /**
+     * Update the specified product in storage.
+     */
     public function update(Request $request, Product $product)
     {
-        $request->validate([
-            'nama_motor' => 'required|string|max:255',
-            'cc_motor' => 'required|integer|min:50|max:2000',
-            'harga' => 'required|numeric|min:100000',
-            'transmisi_motor' => 'required|string|in:Manual,Automatic,CVT',
-        ], [
-            'nama_motor.required' => 'Nama motor wajib diisi',
-            'cc_motor.required' => 'CC motor wajib diisi',
-            'cc_motor.min' => 'CC motor minimal 50cc',
-            'cc_motor.max' => 'CC motor maksimal 2000cc',
-            'harga.required' => 'Harga wajib diisi',
-            'harga.min' => 'Harga minimal Rp 100.000',
-            'transmisi_motor.required' => 'Transmisi motor wajib dipilih',
-            'transmisi_motor.in' => 'Transmisi motor harus Manual, Automatic, atau CVT',
-        ]);
+        // Only allow admin and rental users
+        if (!Auth::user()->canAccessDashboard()) {
+            abort(403, 'Unauthorized action. You do not have permission to update products.');
+        }
 
-        $product->update($request->all());
-        return redirect()->route('admin.products.index')->with('success', 'Motor berhasil diupdate');
+        // Rental users can only update their own products
+        if (Auth::user()->isRental() && $product->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action. You can only update your own products.');
+        }
+
+        // Custom validation messages
+        $messages = [
+            'required' => 'Kolom :attribute wajib diisi.',
+            'string' => 'Kolom :attribute harus berupa teks.',
+            'max' => 'Kolom :attribute tidak boleh lebih dari :max karakter.',
+            'image' => 'Kolom :attribute harus berupa gambar.',
+            'mimes' => 'Kolom :attribute harus berformat: :values.',
+            'unique' => 'Data :attribute sudah digunakan untuk produk lain.',
+            'integer' => 'Kolom :attribute harus berupa angka bulat.',
+            'numeric' => 'Kolom :attribute harus berupa angka.',
+            'min' => 'Kolom :attribute minimal :min.',
+            'tahun_produksi.min' => 'Tahun produksi tidak valid (minimal 1900).',
+            'tahun_produksi.max' => 'Tahun produksi tidak boleh lebih dari tahun depan.',
+            'cc_motor.min' => 'CC motor minimal 50cc.',
+            'harga_harian.min' => 'Harga harian tidak boleh negatif.',
+            'stok.min' => 'Stok minimal 1 unit.',
+            'gambar_utama.max' => 'Ukuran file gambar utama tidak boleh lebih dari 2MB.',
+        ];
+
+        // Attribute names
+        $attributes = [
+            'nama_motor' => 'Nama Motor',
+            'brand' => 'Merek',
+            'cc_motor' => 'CC Motor',
+            'harga_harian' => 'Harga Harian',
+            'transmisi_motor' => 'Transmisi Motor',
+            'tipe_motor' => 'Tipe Motor',
+            'tahun_produksi' => 'Tahun Produksi',
+            'warna' => 'Warna',
+            'no_mesin' => 'Nomor Mesin',
+            'no_rangka' => 'Nomor Rangka',
+            'gambar_utama' => 'Gambar Utama',
+            'deskripsi' => 'Deskripsi',
+            'stok' => 'Stok',
+            'is_available' => 'Ketersediaan',
+        ];
+
+        $validated = $request->validate([
+            'nama_motor' => 'required|string|max:100',
+            'brand' => 'required|string|max:50',
+            'cc_motor' => 'required|integer|min:50',
+            'harga_harian' => 'required|numeric|min:0',
+            'transmisi_motor' => 'required|string|max:20',
+            'tipe_motor' => 'required|string|max:50',
+            'tahun_produksi' => 'required|integer|min:1900|max:' . (date('Y') + 1),
+            'warna' => 'required|string|max:50',
+            'no_mesin' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('products')->ignore($product->id),
+            ],
+            'no_rangka' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('products')->ignore($product->id),
+            ],
+            'gambar_utama' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'deskripsi' => 'nullable|string',
+            'stok' => 'required|integer|min:1',
+            'is_available' => 'required|boolean',
+        ], $messages, $attributes);
+
+        try {
+            // Handle boolean conversion for is_available
+            $validated['is_available'] = $request->has('is_available') ? true : false;
+
+            // Calculate harga_mingguan and harga_bulanan
+            $validated['harga_mingguan'] = $validated['harga_harian'] * 7;
+            $validated['harga_bulanan'] = $validated['harga_harian'] * 30;
+
+            // Pertahankan file lama jika tidak ada file baru
+            $validated['gambar_utama'] = $product->gambar_utama;
+
+            // Handle file upload
+            if ($request->hasFile('gambar_utama')) {
+                // Hapus file lama jika ada
+                if ($product->gambar_utama && Storage::disk('public')->exists($product->gambar_utama)) {
+                    Storage::disk('public')->delete($product->gambar_utama);
+                }
+                $validated['gambar_utama'] = $request->file('gambar_utama')->store('product_images', 'public');
+            }
+
+            // Update produk
+            $product->update($validated);
+
+            return redirect()->route('dashboard.products.index')
+                ->with('success', 'Produk berhasil diperbarui.');
+        } catch (\Exception $e) {
+            Log::error('Product update failed: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Gagal memperbarui produk. Error: ' . $e->getMessage());
+        }
     }
 
-    // Hapus produk
+    /**
+     * Remove the specified product from storage.
+     */
     public function destroy(Product $product)
     {
-        $product->delete();
-        return redirect()->route('admin.products.index')->with('success', 'Motor berhasil dihapus');
-    }
+        // Only allow admin and rental users
+        if (!Auth::user()->canAccessDashboard()) {
+            abort(403, 'Unauthorized action. You do not have permission to delete products.');
+        }
 
-    // Method tambahan untuk reset filter
-    public function resetFilters()
-    {
-        return redirect()->route('admin.products.index');
+        // Rental users can only delete their own products
+        if (Auth::user()->isRental() && $product->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action. You can only delete your own products.');
+        }
+
+        try {
+            // Delete associated file
+            if ($product->gambar_utama && Storage::disk('public')->exists($product->gambar_utama)) {
+                Storage::disk('public')->delete($product->gambar_utama);
+            }
+
+            $product->delete();
+
+            return redirect()->route('dashboard.products.index')
+                ->with('success', 'Produk berhasil dihapus.');
+        } catch (\Exception $e) {
+            Log::error('Product deletion failed: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+
+            return redirect()->back()
+                ->with('error', 'Gagal menghapus produk. Error: ' . $e->getMessage());
+        }
     }
 }

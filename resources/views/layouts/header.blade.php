@@ -1,5 +1,5 @@
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <div>
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-5 border-bottom ">
+    <div class="p-5">
         <h1 class="h2 fw-bold">@yield('page-title', 'Dashboard')</h1>
         <p class="text-muted">@yield('page-description', 'Welcome back! Here\'s what\'s happening with your business today.')</p>
     </div>

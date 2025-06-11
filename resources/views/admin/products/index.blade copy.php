@@ -8,7 +8,7 @@
             <h1 class="text-4xl font-bold text-gray-800 mb-2">Daftar Produk Motor</h1>
             <p class="text-gray-600">Kelola semua produk motor di sistem</p>
         </div>
-        <a href="{{ route('admin.products.create') }}"
+        <a href="{{ route('dashboard.products.create') }}"
             class="bg-gradient-to-r from-red-500 to-red-600 text-white py-3 px-6 rounded-lg hover:from-red-600 hover:to-red-700 transition duration-300 shadow-lg flex items-center gap-2 font-semibold">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -154,7 +154,7 @@
                                 </svg>
                                 <h3 class="text-lg font-medium text-gray-900 mb-2">Belum ada produk</h3>
                                 <p class="text-gray-500 mb-4">Mulai dengan menambahkan produk motor pertama Anda.</p>
-                                <a href="{{ route('admin.products.create') }}"
+                                <a href="{{ route('dashboard.products.create') }}"
                                     class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 transition duration-200">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
