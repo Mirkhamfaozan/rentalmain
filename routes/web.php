@@ -1,15 +1,17 @@
 <?php
 
+use App\Http\Controllers\admin\AccountController;
 use App\Http\Controllers\admin\DashboardController;
 use App\Http\Controllers\admin\OrderController;
 use App\Http\Controllers\admin\PaymentController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\admin\ProductController;
+use App\Http\Controllers\admin\ProfileController;
 use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\FrontPaymentController;
 use App\Http\Controllers\FrontProductController;
+use App\Http\Controllers\FrontProfileController;
 use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -50,25 +52,25 @@ Route::group(['prefix' => 'payment'], function () {
 Route::middleware('auth')->group(function () {
     Route::group(['prefix' => 'profile'], function () {
         // View profile
-        Route::get('/', [ProfileController::class, 'show'])->name('profile.show');
+        Route::get('/', [FrontProfileController::class, 'show'])->name('profile.show');
 
         // Edit profile
-        Route::get('/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-        Route::put('/update', [ProfileController::class, 'update'])->name('profile.update');
+        Route::get('/edit', [FrontProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/update', [FrontProfileController::class, 'update'])->name('profile.update');
 
         // Change password
-        Route::get('/change-password', [ProfileController::class, 'editPassword'])->name('profile.password.edit');
-        Route::put('/change-password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+        Route::get('/change-password', [FrontProfileController::class, 'editPassword'])->name('profile.password.edit');
+        Route::put('/change-password', [FrontProfileController::class, 'updatePassword'])->name('profile.password.update');
 
         // Delete avatar
-        Route::delete('/avatar', [ProfileController::class, 'deleteAvatar'])->name('profile.avatar.delete');
+        Route::delete('/avatar', [FrontProfileController::class, 'deleteAvatar'])->name('profile.avatar.delete');
 
         // User orders and payments
-        Route::get('/orders', [ProfileController::class, 'orders'])->name('profile.orders');
-        Route::get('/payments', [ProfileController::class, 'payments'])->name('profile.payments');
+        Route::get('/orders', [FrontProfileController::class, 'orders'])->name('profile.orders');
+        Route::get('/payments', [FrontProfileController::class, 'payments'])->name('profile.payments');
 
         // Products (for rental users only)
-        Route::get('/products', [ProfileController::class, 'products'])->name('profile.products');
+        Route::get('/products', [FrontProfileController::class, 'products'])->name('profile.products');
     });
 
     // Order routes
@@ -148,6 +150,15 @@ Route::middleware(['auth'])->group(function () {
             'update' => 'users.update',
             'destroy' => 'users.destroy',
         ]);
+
+        // Profile management routes
+        Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+        Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+        Route::get('/account', [AccountController::class, 'show'])->name('account.show');
+        Route::get('/account/edit', [AccountController::class, 'edit'])->name('account.edit');
+        Route::put('/account', [AccountController::class, 'update'])->name('account.update');
 
         // Reports and analytics
         Route::get('/reports', function () {

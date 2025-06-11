@@ -5,7 +5,7 @@
             <div class="bg-white bg-opacity-20 rounded-3 p-2 me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
                 <i class="fas fa-cube text-black"></i>
             </div>
-            <span class="text-black">Laravel Admin</span>
+            <span class="text-black">AM RENTAL</span>
         </a>
 
         <!-- Mobile Toggle Button -->
@@ -23,7 +23,7 @@
                         <i class="fas fa-search "></i>
                     </span>
                     <input type="text" class="form-control bg-white bg-opacity-20 border-0 text-white placeholder-white-50"
-                           placeholder="Search..." style="--bs-bg-opacity: 0.2;">
+                           placeholder="Cari..." style="--bs-bg-opacity: 0.2;">
                 </div>
             </div>
 
@@ -38,14 +38,14 @@
                 <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3" style="min-width: 300px;" aria-labelledby="notificationDropdown">
                     <li class="dropdown-header bg-light py-3 rounded-top-3">
                         <div class="d-flex justify-content-between align-items-center">
-                            <h6 class="mb-0 text-dark fw-semibold">Notifications</h6>
+                            <h6 class="mb-0 text-dark fw-semibold">Notifikasi</h6>
                             <span class="badge bg-primary rounded-pill">3</span>
                         </div>
                     </li>
                     <li><hr class="dropdown-divider my-0"></li>
                     <li>
                         <a class="dropdown-item text-center py-3 text-primary fw-semibold" href="#">
-                            <i class="fas fa-eye me-2"></i>View All Notifications
+                            <i class="fas fa-eye me-2"></i>Lihat Semua Notifikasi
                         </a>
                     </li>
                 </ul>
@@ -62,7 +62,7 @@
                 <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3" style="min-width: 320px;" aria-labelledby="messageDropdown">
                     <li class="dropdown-header bg-light py-3 rounded-top-3">
                         <div class="d-flex justify-content-between align-items-center">
-                            <h6 class="mb-0 text-dark fw-semibold">Messages</h6>
+                            <h6 class="mb-0 text-dark fw-semibold">Pesan</h6>
                             <span class="badge bg-success rounded-pill">2</span>
                         </div>
                     </li>
@@ -76,9 +76,9 @@
                             </div>
                             <div class="flex-grow-1">
                                 <div class="fw-semibold text-dark">John Smith</div>
-                                <div class="text-muted small">How can I help you with the new project?</div>
+                                <div class="text-muted small">Bagaimana saya bisa membantu Anda dengan proyek baru?</div>
                                 <div class="text-muted small mt-1">
-                                    <i class="fas fa-clock me-1"></i>Just now
+                                    <i class="fas fa-clock me-1"></i>Baru saja
                                 </div>
                             </div>
                         </div>
@@ -93,9 +93,9 @@
                             </div>
                             <div class="flex-grow-1">
                                 <div class="fw-semibold text-dark">Maria Davis</div>
-                                <div class="text-muted small">Thanks for the quick response!</div>
+                                <div class="text-muted small">Terima kasih atas respon cepatnya!</div>
                                 <div class="text-muted small mt-1">
-                                    <i class="fas fa-clock me-1"></i>5 min ago
+                                    <i class="fas fa-clock me-1"></i>5 menit lalu
                                 </div>
                             </div>
                         </div>
@@ -103,7 +103,7 @@
                     <li><hr class="dropdown-divider my-0"></li>
                     <li>
                         <a class="dropdown-item text-center py-3 text-primary fw-semibold" href="#">
-                            <i class="fas fa-comments me-2"></i>View All Messages
+                            <i class="fas fa-comments me-2"></i>Lihat Semua Pesan
                         </a>
                     </li>
                 </ul>
@@ -136,17 +136,17 @@
                         </div>
                     </li>
                     <li><hr class="dropdown-divider my-0"></li>
-                    <li><a class="dropdown-item py-2 rounded-2 mx-2 my-1" href="#">
-                        <i class="fas fa-user me-3 text-primary"></i>My Profile
+                    <li><a class="dropdown-item py-2 rounded-2 mx-2 my-1" href="{{ route('dashboard.profile.show') }}">
+                        <i class="fas fa-user me-3 text-primary"></i>Profil Saya
+                    </a></li>
+                    <li><a class="dropdown-item py-2 rounded-2 mx-2 my-1" href="{{ route('dashboard.account.show') }}">
+                        <i class="fas fa-cog me-3 text-success"></i>Pengaturan Akun
                     </a></li>
                     <li><a class="dropdown-item py-2 rounded-2 mx-2 my-1" href="#">
-                        <i class="fas fa-cog me-3 text-success"></i>Account Settings
+                        <i class="fas fa-bell me-3 text-warning"></i>Notifikasi
                     </a></li>
                     <li><a class="dropdown-item py-2 rounded-2 mx-2 my-1" href="#">
-                        <i class="fas fa-bell me-3 text-warning"></i>Notifications
-                    </a></li>
-                    <li><a class="dropdown-item py-2 rounded-2 mx-2 my-1" href="#">
-                        <i class="fas fa-question-circle me-3 text-info"></i>Help & Support
+                        <i class="fas fa-question-circle me-3 text-info"></i>Bantuan & Dukungan
                     </a></li>
                     <li><hr class="dropdown-divider"></li>
                     <li class="px-2">
@@ -154,12 +154,12 @@
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit" class="dropdown-item py-2 rounded-2 text-danger fw-semibold">
-                                    <i class="fas fa-sign-out-alt me-3"></i>Sign Out
+                                    <i class="fas fa-sign-out-alt me-3"></i>Keluar
                                 </button>
                             </form>
                         @else
                             <a class="dropdown-item py-2 rounded-2 text-danger fw-semibold" href="#">
-                                <i class="fas fa-sign-out-alt me-3"></i>Sign Out
+                                <i class="fas fa-sign-out-alt me-3"></i>Keluar
                             </a>
                         @endif
                     </li>
@@ -178,9 +178,9 @@
                  style="width: 40px; height: 40px;">
                 <i class="fas fa-cube text-white"></i>
             </div>
-            <h5 class="offcanvas-title text-white fw-bold mb-0" id="offcanvasSidebarLabel">Laravel Admin</h5>
+            <h5 class="offcanvas-title text-white fw-bold mb-0" id="offcanvasSidebarLabel">Admin Laravel</h5>
         </div>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Tutup"></button>
     </div>
     <div class="offcanvas-body p-0 pt-3">
         <div class="px-3 mb-4">
@@ -199,25 +199,25 @@
         <div class="nav flex-column px-3">
             <a href="{{ route('dashboard') ?? '#' }}" class="nav-link text-white rounded-3 mb-1 py-3 px-3 active"
                style="background: rgba(255,255,255,0.1);">
-                <i class="fas fa-tachometer-alt me-3"></i>Dashboard
+                <i class="fas fa-tachometer-alt me-3"></i>Dasbor
             </a>
             <a href="#" class="nav-link text-white rounded-3 mb-1 py-3 px-3 hover-bg-white-10">
-                <i class="fas fa-users me-3"></i>Users Management
+                <i class="fas fa-users me-3"></i>Manajemen Pengguna
             </a>
             <a href="{{ route('dashboard.products.index') ?? '#' }}" class="nav-link text-white rounded-3 mb-1 py-3 px-3 hover-bg-white-10">
-                <i class="fas fa-box me-3"></i>Products
+                <i class="fas fa-box me-3"></i>Produk
             </a>
             <a href="#" class="nav-link text-white rounded-3 mb-1 py-3 px-3 hover-bg-white-10">
-                <i class="fas fa-shopping-cart me-3"></i>Orders
+                <i class="fas fa-shopping-cart me-3"></i>Pesanan
             </a>
             <a href="#" class="nav-link text-white rounded-3 mb-1 py-3 px-3 hover-bg-white-10">
-                <i class="fas fa-chart-bar me-3"></i>Analytics
+                <i class="fas fa-chart-bar me-3"></i>Analitik
             </a>
             <a href="#" class="nav-link text-white rounded-3 mb-1 py-3 px-3 hover-bg-white-10">
-                <i class="fas fa-credit-card me-3"></i>Payments
+                <i class="fas fa-credit-card me-3"></i>Pembayaran
             </a>
             <a href="#" class="nav-link text-white rounded-3 mb-1 py-3 px-3 hover-bg-white-10">
-                <i class="fas fa-cog me-3"></i>Settings
+                <i class="fas fa-cog me-3"></i>Pengaturan
             </a>
         </div>
     </div>

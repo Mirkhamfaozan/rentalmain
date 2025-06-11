@@ -2,7 +2,7 @@
 <nav class="mt-5 col-md-3 col-lg-2 d-md-block bg-white sidebar collapse shadow-lg"
     style="width: 260px; border-right: 1px solid #e3e6f0;">
     <div class="position-sticky sidebar-sticky">
-        <!-- Sidebar Header -->
+        <!-- Header Sidebar -->
         <div class="sidebar-header px-3 py-4 border-bottom">
             <div class="d-flex align-items-center">
                 @php
@@ -29,26 +29,25 @@
                         @if($userRole === 'super_admin')
                             Super Admin
                         @elseif($userRole === 'admin')
-                            Admin Panel
+                            Panel Admin
                         @elseif($userRole === 'rental')
-                            Rental Manager
-
+                            Manajer Rental
                         @endif
                     </h6>
-                    <small class="text-muted">{{ ucfirst($userRole) }} System</small>
+                    <small class="text-muted">Sistem {{ ucfirst($userRole === 'rental' ? 'Rental' : ($userRole === 'admin' ? 'Admin' : $userRole)) }}</small>
                 </div>
             </div>
         </div>
 
-        <!-- Navigation Menu -->
+        <!-- Menu Navigasi -->
         <div class="px-3 py-3">
             <ul class="nav flex-column nav-pills">
-                <!-- Dashboard - Available for all roles -->
+                <!-- Dashboard - Tersedia untuk semua role -->
                 <li class="nav-item mb-1">
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
                         href="{{ route('dashboard') ?? '#' }}">
                         <i class="fas fa-tachometer-alt me-3" style="width: 16px;"></i>
-                        <span>Dashboard</span>
+                        <span>Dasbor</span>
                         <span class="badge bg-light text-dark ms-auto small">{{ \App\Models\User::count() ?? '24' }}</span>
                     </a>
                 </li>
@@ -59,70 +58,70 @@
                     $isRental = $userRole === 'rental';
                 @endphp
 
-                <!-- Users Management - Only for Admin and Super Admin -->
+                <!-- Manajemen Pengguna - Hanya untuk Admin dan Super Admin -->
                 @if($isAdmin)
                 <li class="nav-item mb-1">
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
                         href="{{ route('dashboard.users.index') ?? '#' }}">
                         <i class="fas fa-users me-3 text-primary" style="width: 16px;"></i>
-                        <span>Users Management</span>
+                        <span>Manajemen Pengguna</span>
                         <span class="badge bg-light text-dark ms-auto small">{{ \App\Models\User::count() ?? '24' }}</span>
                     </a>
                 </li>
                 @endif
 
-                <!-- Products Management - Available for Admin, Super Admin, and Rental -->
+                <!-- Manajemen Produk - Tersedia untuk Admin, Super Admin, dan Rental -->
                 @if($isAdmin || $isRental)
                 <li class="nav-item mb-1">
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
                         href="{{ route('dashboard.products.index') ?? '#' }}">
                         <i class="fas fa-box me-3 text-success" style="width: 16px;"></i>
-                        <span>{{ $isRental ? 'Rental Items' : 'Products' }}</span>
+                        <span>{{ $isRental ? 'Barang Rental' : 'Produk' }}</span>
                         <span class="badge bg-success-subtle text-success ms-auto small">156</span>
                     </a>
                 </li>
                 @endif
 {{--
-                <!-- Categories Management - Available for Admin and Super Admin -->
+                <!-- Manajemen Kategori - Tersedia untuk Admin dan Super Admin -->
                 @if($isAdmin)
                 <li class="nav-item mb-1">
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
                         href="">
                         <i class="fas fa-tags me-3 text-info" style="width: 16px;"></i>
-                        <span>Categories</span>
+                        <span>Kategori</span>
                     </a>
                 </li>
                 @endif --}}
 
-                <!-- Orders Management - Available for Admin, Super Admin, and Rental -->
+                <!-- Manajemen Pesanan - Tersedia untuk Admin, Super Admin, dan Rental -->
                 @if($isAdmin || $isRental)
                 <li class="nav-item mb-1">
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
                         href="{{ route('dashboard.orders.index') ?? '#' }}">
                         <i class="fas fa-shopping-cart me-3 text-warning" style="width: 16px;"></i>
-                        <span>{{ $isRental ? 'Rental Orders' : 'Orders' }}</span>
+                        <span>{{ $isRental ? 'Pesanan Rental' : 'Pesanan' }}</span>
                     </a>
                 </li>
                 @endif
 
-                {{-- <!-- Inventory Management - Available for Admin and Super Admin -->
+                {{-- <!-- Manajemen Inventori - Tersedia untuk Admin dan Super Admin -->
                 @if($isAdmin)
                 <li class="nav-item mb-1">
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
                         href="">
                         <i class="fas fa-warehouse me-3 text-secondary" style="width: 16px;"></i>
-                        <span>Inventory</span>
+                        <span>Inventori</span>
                     </a>
                 </li>
                 @endif --}}
 
-                <!-- Transactions - Available for Admin, Super Admin, and Rental -->
+                <!-- Transaksi - Tersedia untuk Admin, Super Admin, dan Rental -->
                 @if($isAdmin || $isRental)
                 <li class="nav-item mb-1">
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
                         href="{{ route('dashboard.payments.index') ?? '#' }}">
                         <i class="fas fa-exchange-alt me-3 text-info" style="width: 16px;"></i>
-                        <span>{{ $isRental ? 'Rental Transactions' : 'Transactions' }}</span>
+                        <span>{{ $isRental ? 'Transaksi Rental' : 'Transaksi' }}</span>
                         <span class="badge bg-info-subtle text-info ms-auto small">
                             {{ $isRental ? '5' : '42' }}
                         </span>
@@ -130,48 +129,48 @@
                 </li>
                 @endif
 
-                {{-- <!-- Reports & Analytics - Available for Admin, Super Admin, and Rental -->
+                {{-- <!-- Laporan & Analitik - Tersedia untuk Admin, Super Admin, dan Rental -->
                 @if($isAdmin || $isRental)
                 <li class="nav-item mb-1">
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
                         href="">
                         <i class="fas fa-chart-bar me-3 text-info" style="width: 16px;"></i>
-                        <span>Reports & Analytics</span>
+                        <span>Laporan & Analitik</span>
                     </a>
                 </li>
                 @endif --}}
 
-                {{-- <!-- Discounts & Coupons - Available for Admin and Super Admin -->
+                {{-- <!-- Diskon & Kupon - Tersedia untuk Admin dan Super Admin -->
                 @if($isAdmin)
                 <li class="nav-item mb-1">
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
                         href="">
                         <i class="fas fa-percent me-3 text-danger" style="width: 16px;"></i>
-                        <span>Discounts & Coupons</span>
+                        <span>Diskon & Kupon</span>
                         <span class="badge bg-danger-subtle text-danger ms-auto small">5</span>
                     </a>
                 </li>
                 @endif --}}
 {{--
-                <!-- Notifications - Available for Admin and Super Admin -->
+                <!-- Notifikasi - Tersedia untuk Admin dan Super Admin -->
                 @if($isAdmin)
                 <li class="nav-item mb-1">
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
                         href="">
                         <i class="fas fa-bell me-3 text-warning" style="width: 16px;"></i>
-                        <span>Notifications</span>
+                        <span>Notifikasi</span>
                         <span class="badge bg-warning text-dark ms-auto small">3</span>
                     </a>
                 </li>
                 @endif --}}
 
-                <!-- Rental Specific Menu Items -->
-                @if($isRental)
+                <!-- Menu Khusus Rental -->
+                {{-- @if($isRental)
                 <li class="nav-item mb-1">
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
                         href="">
                         <i class="fas fa-calendar-alt me-3 text-info" style="width: 16px;"></i>
-                        <span>Rental Calendar</span>
+                        <span>Kalender Rental</span>
                     </a>
                 </li>
 
@@ -179,18 +178,18 @@
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
                         href="">
                         <i class="fas fa-clock me-3 text-success" style="width: 16px;"></i>
-                        <span>Availability</span>
+                        <span>Ketersediaan</span>
                     </a>
                 </li>
-                @endif
+                @endif --}}
 
-                <!-- Super Admin Only Menu Items -->
+                <!-- Menu Khusus Super Admin -->
                 @if($isSuperAdmin)
                 <li class="nav-item mb-1">
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
                         href="{{ route('superadmin.system.index') ?? '#' }}">
                         <i class="fas fa-server me-3 text-danger" style="width: 16px;"></i>
-                        <span>System Management</span>
+                        <span>Manajemen Sistem</span>
                     </a>
                 </li>
 
@@ -198,7 +197,7 @@
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
                         href="{{ route('superadmin.logs.index') ?? '#' }}">
                         <i class="fas fa-file-alt me-3 text-warning" style="width: 16px;"></i>
-                        <span>System Logs</span>
+                        <span>Log Sistem</span>
                     </a>
                 </li>
 
@@ -206,7 +205,7 @@
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
                         href="{{ route('superadmin.backups.index') ?? '#' }}">
                         <i class="fas fa-database me-3 text-info" style="width: 16px;"></i>
-                        <span>Database Backups</span>
+                        <span>Backup Database</span>
                     </a>
                 </li>
 
@@ -214,87 +213,87 @@
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
                         href="{{ route('superadmin.maintenance.index') ?? '#' }}">
                         <i class="fas fa-tools me-3 text-secondary" style="width: 16px;"></i>
-                        <span>Maintenance Mode</span>
+                        <span>Mode Pemeliharaan</span>
                     </a>
                 </li>
                 @endif
             </ul>
 
-            <!-- Divider -->
+            <!-- Pembatas -->
             <hr class="my-4 text-muted">
 
-            <!-- System Menu -->
+            <!-- Menu Sistem -->
             <div class="mb-2">
                 <small class="text-muted text-uppercase fw-bold px-3"
-                    style="font-size: 11px; letter-spacing: 0.5px;">System</small>
+                    style="font-size: 11px; letter-spacing: 0.5px;">Sistem</small>
             </div>
 
             <ul class="nav flex-column nav-pills">
-                <!-- Settings - Available for all roles -->
+                <!-- Pengaturan - Tersedia untuk semua role -->
                 <li class="nav-item mb-1">
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
-                        href="">
+                        href="{{ route('dashboard.profile.show') ?? '#' }}">
                         <i class="fas fa-cog me-3 text-secondary" style="width: 16px;"></i>
-                        <span>Settings</span>
+                        <span>Pengaturan</span>
                     </a>
                 </li>
 
-                <!-- Email Templates - Available for Admin and Super Admin -->
+                <!-- Template Email - Tersedia untuk Admin dan Super Admin -->
                 @if($isAdmin)
                 <li class="nav-item mb-1">
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
                         href="">
                         <i class="fas fa-envelope me-3 text-info" style="width: 16px;"></i>
-                        <span>Email Templates</span>
+                        <span>Template Email</span>
                     </a>
                 </li>
                 @endif
 
-                <!-- Activity Logs - Available for Admin and Super Admin -->
+                <!-- Log Aktivitas - Tersedia untuk Admin dan Super Admin -->
                 @if($isAdmin)
                 <li class="nav-item mb-1">
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
                         href="">
                         <i class="fas fa-history me-3 text-warning" style="width: 16px;"></i>
-                        <span>Activity Logs</span>
+                        <span>Log Aktivitas</span>
                     </a>
                 </li>
                 @endif
 
-                <!-- Support - Available for all roles -->
+                <!-- Dukungan - Tersedia untuk semua role -->
                 <li class="nav-item mb-1">
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
                         href="">
                         <i class="fas fa-life-ring me-3 text-secondary" style="width: 16px;"></i>
-                        <span>Support</span>
+                        <span>Dukungan</span>
                     </a>
                 </li>
 
-                <!-- Role Management - Super Admin Only -->
+                <!-- Manajemen Role - Khusus Super Admin -->
                 @if($isSuperAdmin)
                 <li class="nav-item mb-1">
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
                         href="{{ route('superadmin.roles.index') ?? '#' }}">
                         <i class="fas fa-user-cog me-3 text-primary" style="width: 16px;"></i>
-                        <span>Role Management</span>
+                        <span>Manajemen Role</span>
                     </a>
                 </li>
                 @endif
 
-                <!-- Permissions - Super Admin Only -->
+                <!-- Izin Akses - Khusus Super Admin -->
                 @if($isSuperAdmin)
                 <li class="nav-item mb-1">
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
                         href="{{ route('superadmin.permissions.index') ?? '#' }}">
                         <i class="fas fa-key me-3 text-danger" style="width: 16px;"></i>
-                        <span>Permissions</span>
+                        <span>Izin Akses</span>
                     </a>
                 </li>
                 @endif
             </ul>
         </div>
 
-        <!-- User Profile Section -->
+        <!-- Bagian Profil Pengguna -->
         <div class="mt-auto border-top bg-light mx-3 rounded-3 p-3" style="margin-bottom: 20px;">
             <div class="d-flex align-items-center">
                 <div class="position-relative me-3">
@@ -307,45 +306,15 @@
                 </div>
                 <div class="flex-grow-1 min-width-0">
                     <div class="fw-semibold text-dark small mb-0" style="font-size: 13px;">
-                        {{ Auth::user()->name ?? 'Admin User' }}
+                        {{ Auth::user()->name ?? 'Pengguna Admin' }}
                     </div>
                     <div class="text-muted small text-truncate" style="font-size: 11px;">
                         {{ Auth::user()->email ?? 'admin@example.com' }}
                     </div>
                     <div class="text-muted small" style="font-size: 10px;">
                         <i class="fas fa-circle text-success me-1" style="font-size: 8px;"></i>
-                        {{ ucfirst($userRole) }}
+                        {{ $userRole === 'super_admin' ? 'Super Admin' : ($userRole === 'admin' ? 'Admin' : ($userRole === 'rental' ? 'Rental' : ucfirst($userRole))) }}
                     </div>
-                </div>
-                <div class="dropdown">
-                    <button class="btn btn-sm btn-outline-secondary border-0 dropdown-toggle-no-caret" type="button"
-                        data-bs-toggle="dropdown">
-                        <i class="fas fa-ellipsis-v"></i>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" style="min-width: 160px;">
-                        <li><a class="dropdown-item small" href="">
-                            <i class="fas fa-user me-2"></i>Profile</a></li>
-                        <li><a class="dropdown-item small" href="">
-                            <i class="fas fa-edit me-2"></i>Edit Profile</a></li>
-                        <li><a class="dropdown-item small" href="">
-                            <i class="fas fa-cog me-2"></i>Account Settings</a></li>
-                        @if($isSuperAdmin)
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item small" href="">
-                            <i class="fas fa-user-secret me-2"></i>Impersonate User</a></li>
-                        <li><a class="dropdown-item small" href="">
-                            <i class="fas fa-bug me-2"></i>Debug Panel</a></li>
-                        @endif
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <form method="POST" action="{{ route('logout') }}" class="d-inline">
-                                @csrf
-                                <button type="submit" class="dropdown-item small text-danger border-0 bg-transparent">
-                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
-                                </button>
-                            </form>
-                        </li>
-                    </ul>
                 </div>
             </div>
         </div>
@@ -354,29 +323,29 @@
 
 
 <script>
-    // Enhanced navigation functionality with role-based logic
+    // Fungsionalitas navigasi yang ditingkatkan dengan logika berbasis role
     document.addEventListener('DOMContentLoaded', function() {
         const currentPath = window.location.pathname;
         const navLinks = document.querySelectorAll('.sidebar .nav-link');
         const userRole = '{{ Auth::user()->role ?? "user" }}';
 
-        console.log('Current path:', currentPath);
-        console.log('User role:', userRole);
+        console.log('Path saat ini:', currentPath);
+        console.log('Role pengguna:', userRole);
 
-        // Add role-based class to body for additional styling
+        // Tambahkan class berbasis role ke body untuk styling tambahan
         document.body.classList.add('role-' + userRole);
 
-        // Set active link based on current path
+        // Set link aktif berdasarkan path saat ini
         navLinks.forEach(link => {
             const href = link.getAttribute('href');
-            console.log('Checking link:', href);
+            console.log('Memeriksa link:', href);
 
-            // Remove active classes first
+            // Hapus class aktif terlebih dahulu
             link.classList.remove('active');
             link.querySelector('i')?.classList.remove('text-white');
 
             if (href && href !== '#') {
-                // Check for exact match or starts with the path
+                // Periksa kecocokan exact atau dimulai dengan path
                 const isActive = currentPath === href ||
                     currentPath.startsWith(href + '/') ||
                     (href.includes('dashboard') && currentPath.includes('dashboard')) ||
@@ -389,25 +358,25 @@
                     (href.includes('payments') && currentPath.includes('payments'));
 
                 if (isActive) {
-                    // Add active class with proper styling
+                    // Tambahkan class aktif dengan styling yang tepat
                     link.classList.add('active');
                     link.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
                     link.style.color = 'white';
                     link.style.fontWeight = '500';
                     link.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
 
-                    // Make icon white too
+                    // Buat ikon putih juga
                     const icon = link.querySelector('i');
                     if (icon) {
                         icon.style.color = 'white';
                     }
 
-                    console.log('Active link set:', href);
+                    console.log('Link aktif diset:', href);
                 }
             }
         });
 
-        // Handle nav link clicks with role-based validation
+        // Handle klik link nav dengan validasi berbasis role
         navLinks.forEach(link => {
             link.addEventListener('click', function(e) {
                 const href = this.getAttribute('href');
@@ -417,37 +386,37 @@
                     return;
                 }
 
-                // Check if user has permission for this route
+                // Periksa apakah pengguna memiliki izin untuk route ini
                 const requiresAdmin = href.includes('users') || href.includes('superadmin');
                 const requiresRental = href.includes('rental');
                 const requiresTransactionAccess = href.includes('transactions');
 
                 if (requiresAdmin && !['admin', 'super_admin'].includes(userRole)) {
                     e.preventDefault();
-                    alert('You do not have permission to access this section.');
+                    alert('Anda tidak memiliki izin untuk mengakses bagian ini.');
                     return;
                 }
 
                 if (requiresRental && userRole !== 'rental' && !['admin', 'super_admin'].includes(userRole)) {
                     e.preventDefault();
-                    alert('This section is only available for rental users.');
+                    alert('Bagian ini hanya tersedia untuk pengguna rental.');
                     return;
                 }
 
                 if (requiresTransactionAccess && !['admin', 'super_admin', 'rental'].includes(userRole)) {
                     e.preventDefault();
-                    alert('You do not have permission to access transactions.');
+                    alert('Anda tidak memiliki izin untuk mengakses transaksi.');
                     return;
                 }
 
-                // Show loading state
+                // Tampilkan status loading
                 const icon = this.querySelector('i');
                 const originalIcon = icon?.className;
 
                 if (icon && !href.startsWith('javascript:')) {
                     icon.className = 'fas fa-spinner fa-spin me-3';
 
-                    // Reset after navigation (fallback)
+                    // Reset setelah navigasi (fallback)
                     setTimeout(() => {
                         if (originalIcon) {
                             icon.className = originalIcon;
@@ -456,7 +425,7 @@
                 }
             });
 
-            // Enhanced hover effects
+            // Efek hover yang ditingkatkan
             link.addEventListener('mouseenter', function() {
                 if (!this.classList.contains('active')) {
                     this.style.backgroundColor = '#f8f9ff';
@@ -475,7 +444,7 @@
             });
         });
 
-        // Auto-hide sidebar on mobile after link click
+        // Sembunyikan sidebar otomatis di mobile setelah klik link
         const sidebarCollapse = document.querySelector('.sidebar.collapse');
         if (sidebarCollapse) {
             navLinks.forEach(link => {
@@ -490,13 +459,13 @@
         }
     });
 
-    // Function to manually set active menu with role validation
+    // Fungsi untuk mengatur menu aktif secara manual dengan validasi role
     function setActiveMenu(menuName) {
         const navLinks = document.querySelectorAll('.sidebar .nav-link');
         const userRole = '{{ Auth::user()->role ?? "user" }}';
 
         navLinks.forEach(link => {
-            // Reset all links
+            // Reset semua link
             link.classList.remove('active');
             link.style.background = '';
             link.style.color = '';
@@ -509,10 +478,10 @@
             }
         });
 
-        // Find and activate the specific menu
+        // Cari dan aktifkan menu spesifik
         const targetLink = document.querySelector(`.sidebar .nav-link[href*="${menuName}"]`);
         if (targetLink) {
-            // Check if user has permission
+            // Periksa apakah pengguna memiliki izin
             const href = targetLink.getAttribute('href');
             const requiresAdmin = href.includes('users') || href.includes('superadmin');
             const requiresRental = href.includes('rental');
@@ -521,7 +490,7 @@
             if ((requiresAdmin && !['admin', 'super_admin'].includes(userRole)) ||
                 (requiresRental && userRole !== 'rental' && !['admin', 'super_admin'].includes(userRole)) ||
                 (requiresTransactionAccess && !['admin', 'super_admin', 'rental'].includes(userRole))) {
-                console.log('User does not have permission for this menu:', menuName);
+                console.log('Pengguna tidak memiliki izin untuk menu ini:', menuName);
                 return;
             }
 
@@ -538,7 +507,7 @@
         }
     }
 
-    // Handle window resize for responsive behavior
+    // Handle resize window untuk perilaku responsif
     window.addEventListener('resize', function() {
         const sidebar = document.querySelector('.sidebar');
         if (window.innerWidth >= 768) {
@@ -546,7 +515,7 @@
         }
     });
 
-    // Add smooth scrolling for sidebar
+    // Tambahkan smooth scrolling untuk sidebar
     function smoothScrollSidebar() {
         const sidebar = document.querySelector('.sidebar');
         if (sidebar) {

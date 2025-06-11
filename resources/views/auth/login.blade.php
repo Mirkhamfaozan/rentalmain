@@ -13,8 +13,8 @@
                             <div class="mb-3">
                                 <i class="bi bi-person-check text-primary" style="font-size: 3rem;"></i>
                             </div>
-                            <h2 class="card-title fw-bold text-dark mb-2">Welcome Back</h2>
-                            <p class="text-muted">Sign in to your account</p>
+                            <h2 class="card-title fw-bold text-dark mb-2">Selamat Datang Kembali</h2>
+                            <p class="text-muted">Masuk ke akun Anda</p>
                         </div>
 
                         <!-- Display session status -->
@@ -41,7 +41,7 @@
                             <!-- Email -->
                             <div class="mb-4">
                                 <label for="email" class="form-label fw-semibold text-dark">
-                                    <i class="bi bi-envelope me-2"></i>Email Address
+                                    <i class="bi bi-envelope me-2"></i> Email
                                 </label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light border-end-0">
@@ -52,7 +52,7 @@
                                            id="email"
                                            name="email"
                                            value="{{ old('email') }}"
-                                           placeholder="Enter your email"
+                                           placeholder="Masukkan email Anda"
                                            required autofocus>
                                 </div>
                                 @error('email')
@@ -63,7 +63,7 @@
                             <!-- Password -->
                             <div class="mb-4">
                                 <label for="password" class="form-label fw-semibold text-dark">
-                                    <i class="bi bi-lock me-2"></i>Password
+                                    <i class="bi bi-lock me-2"></i>Kata Sandi
                                 </label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light border-end-0">
@@ -73,7 +73,7 @@
                                            class="form-control border-start-0 @error('password') is-invalid @enderror"
                                            id="password"
                                            name="password"
-                                           placeholder="Enter your password"
+                                           placeholder="Masukkan kata sandi Anda"
                                            required>
                                     <button class="btn btn-outline-secondary border-start-0" type="button" id="togglePassword">
                                         <i class="bi bi-eye" id="toggleIcon"></i>
@@ -89,12 +89,12 @@
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
                                     <label class="form-check-label text-muted" for="remember">
-                                        Remember me
+                                        Ingat saya
                                     </label>
                                 </div>
                                 @if (Route::has('password.request'))
                                     <a href="{{ route('password.request') }}" class="text-decoration-none text-primary fw-semibold">
-                                        Forgot Password?
+                                        Lupa Kata Sandi?
                                     </a>
                                 @endif
                             </div>
@@ -102,14 +102,14 @@
                             <!-- Submit Button -->
                             <div class="d-grid mb-4">
                                 <button type="submit" class="btn btn-primary btn-lg fw-semibold" style="border-radius: 50px; background: linear-gradient(45deg, #667eea, #764ba2); border: none; transition: all 0.3s ease;">
-                                    <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                                    <i class="bi bi-box-arrow-in-right me-2"></i>Masuk
                                 </button>
                             </div>
 
                             <!-- Register -->
                             <div class="text-center">
-                                <p class="text-muted mb-0">Don't have an account?
-                                    <a href="{{ route('register') }}" class="text-decoration-none fw-semibold">Create one here</a>
+                                <p class="text-muted mb-0">Belum memiliki akun?
+                                    <a href="{{ route('register') }}" class="text-decoration-none fw-semibold">Buat akun di sini</a>
                                 </p>
                             </div>
                         </form>

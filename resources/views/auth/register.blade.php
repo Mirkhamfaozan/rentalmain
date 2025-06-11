@@ -12,8 +12,8 @@
                             <div class="mb-3">
                                 <i class="bi bi-person-plus-fill text-primary" style="font-size: 3rem;"></i>
                             </div>
-                            <h2 class="card-title fw-bold text-dark mb-2">Create Your Account</h2>
-                            <p class="text-muted">Join our rental community today</p>
+                            <h2 class="card-title fw-bold text-dark mb-2">Buat Akun Anda</h2>
+                            <p class="text-muted">Bergabunglah dengan komunitas rental kami hari ini</p>
                         </div>
 
                         <!-- Display validation errors -->
@@ -33,21 +33,21 @@
                             <!-- Role Selection -->
                             <div class="mb-4">
                                 <label class="form-label fw-semibold text-dark">
-                                    <i class="bi bi-person-badge me-2"></i>Register As
+                                    <i class="bi bi-person-badge me-2"></i>Daftar Sebagai
                                 </label>
                                 <div class="d-flex gap-4 mt-2">
                                     <div class="form-check form-check-inline">
                                         <input class="form-check-input" type="radio" name="role" id="roleUser" value="users"
                                                {{ old('role', 'users') == 'users' ? 'checked' : '' }}>
                                         <label class="form-check-label fw-medium" for="roleUser">
-                                            <i class="bi bi-person me-1"></i>Regular User
+                                            <i class="bi bi-person me-1"></i>Pengguna Biasa
                                         </label>
                                     </div>
                                     <div class="form-check form-check-inline">
                                         <input class="form-check-input" type="radio" name="role" id="roleRental" value="rental"
                                                {{ old('role') == 'rental' ? 'checked' : '' }}>
                                         <label class="form-check-label fw-medium" for="roleRental">
-                                            <i class="bi bi-shop me-1"></i>Rental Owner
+                                            <i class="bi bi-shop me-1"></i>Pemilik Rental
                                         </label>
                                     </div>
                                 </div>
@@ -59,13 +59,13 @@
                             <!-- Basic Information Section -->
                             <div class="mb-4">
                                 <h5 class="fw-semibold text-dark mb-3">
-                                    <i class="bi bi-info-circle me-2"></i>Basic Information
+                                    <i class="bi bi-info-circle me-2"></i>Informasi Dasar
                                 </h5>
 
                                 <!-- Name -->
                                 <div class="mb-3">
                                     <label for="name" class="form-label fw-semibold text-dark">
-                                        <i class="bi bi-person me-2"></i>Full Name
+                                        <i class="bi bi-person me-2"></i>Nama Lengkap
                                     </label>
                                     <div class="input-group">
                                         <span class="input-group-text bg-light border-end-0">
@@ -76,7 +76,7 @@
                                                id="name"
                                                name="name"
                                                value="{{ old('name') }}"
-                                               placeholder="Enter your full name"
+                                               placeholder="Masukkan nama lengkap Anda"
                                                required
                                                autofocus>
                                     </div>
@@ -88,7 +88,7 @@
                                 <!-- Email -->
                                 <div class="mb-3">
                                     <label for="email" class="form-label fw-semibold text-dark">
-                                        <i class="bi bi-envelope me-2"></i>Email Address
+                                        <i class="bi bi-envelope me-2"></i>Alamat Email
                                     </label>
                                     <div class="input-group">
                                         <span class="input-group-text bg-light border-end-0">
@@ -99,7 +99,7 @@
                                                id="email"
                                                name="email"
                                                value="{{ old('email') }}"
-                                               placeholder="Enter your email"
+                                               placeholder="Masukkan email Anda"
                                                required>
                                     </div>
                                     @error('email')
@@ -111,13 +111,13 @@
                             <!-- Password Section -->
                             <div class="mb-4">
                                 <h5 class="fw-semibold text-dark mb-3">
-                                    <i class="bi bi-shield-lock me-2"></i>Account Security
+                                    <i class="bi bi-shield-lock me-2"></i>Keamanan Akun
                                 </h5>
 
                                 <!-- Password -->
                                 <div class="mb-3">
                                     <label for="password" class="form-label fw-semibold text-dark">
-                                        <i class="bi bi-lock me-2"></i>Password
+                                        <i class="bi bi-lock me-2"></i>Kata Sandi
                                     </label>
                                     <div class="input-group">
                                         <span class="input-group-text bg-light border-end-0">
@@ -127,7 +127,7 @@
                                                class="form-control border-start-0 @error('password') is-invalid @enderror"
                                                id="password"
                                                name="password"
-                                               placeholder="Create a strong password"
+                                               placeholder="Buat kata sandi yang kuat"
                                                required>
                                         <button class="btn btn-outline-secondary border-start-0" type="button" id="togglePassword">
                                             <i class="bi bi-eye" id="toggleIcon"></i>
@@ -141,7 +141,7 @@
                                 <!-- Confirm Password -->
                                 <div class="mb-3">
                                     <label for="password_confirmation" class="form-label fw-semibold text-dark">
-                                        <i class="bi bi-lock-fill me-2"></i>Confirm Password
+                                        <i class="bi bi-lock-fill me-2"></i>Konfirmasi Kata Sandi
                                     </label>
                                     <div class="input-group">
                                         <span class="input-group-text bg-light border-end-0">
@@ -151,7 +151,7 @@
                                                class="form-control border-start-0 @error('password_confirmation') is-invalid @enderror"
                                                id="password_confirmation"
                                                name="password_confirmation"
-                                               placeholder="Confirm your password"
+                                               placeholder="Konfirmasi kata sandi Anda"
                                                required>
                                         <button class="btn btn-outline-secondary border-start-0" type="button" id="toggleConfirmPassword">
                                             <i class="bi bi-eye" id="toggleConfirmIcon"></i>
@@ -167,13 +167,13 @@
                             <div id="rentalFields" style="display: {{ old('role') == 'rental' ? 'block' : 'none' }};">
                                 <div class="mb-4">
                                     <h5 class="fw-semibold text-dark mb-3">
-                                        <i class="bi bi-building me-2"></i>Rental Business Information
+                                        <i class="bi bi-building me-2"></i>Informasi Bisnis Rental
                                     </h5>
 
                                     <!-- Rental Name -->
                                     <div class="mb-3">
                                         <label for="nama_rental" class="form-label fw-semibold text-dark">
-                                            <i class="bi bi-shop me-2"></i>Rental Business Name
+                                            <i class="bi bi-shop me-2"></i>Nama Bisnis Rental
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light border-end-0">
@@ -184,7 +184,7 @@
                                                    id="nama_rental"
                                                    name="nama_rental"
                                                    value="{{ old('nama_rental') }}"
-                                                   placeholder="Your rental business name">
+                                                   placeholder="Nama bisnis rental Anda">
                                         </div>
                                         @error('nama_rental')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -194,7 +194,7 @@
                                     <!-- Owner Name -->
                                     <div class="mb-3">
                                         <label for="nama_pemilik" class="form-label fw-semibold text-dark">
-                                            <i class="bi bi-person-vcard me-2"></i>Owner's Name
+                                            <i class="bi bi-person-vcard me-2"></i>Nama Pemilik
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light border-end-0">
@@ -205,7 +205,7 @@
                                                    id="nama_pemilik"
                                                    name="nama_pemilik"
                                                    value="{{ old('nama_pemilik') }}"
-                                                   placeholder="Owner's full name">
+                                                   placeholder="Nama lengkap pemilik">
                                         </div>
                                         @error('nama_pemilik')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -215,7 +215,7 @@
                                     <!-- Address -->
                                     <div class="mb-3">
                                         <label for="alamat" class="form-label fw-semibold text-dark">
-                                            <i class="bi bi-geo-alt me-2"></i>Business Address
+                                            <i class="bi bi-geo-alt me-2"></i>Alamat Bisnis
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light border-end-0">
@@ -226,7 +226,7 @@
                                                    id="alamat"
                                                    name="alamat"
                                                    value="{{ old('alamat') }}"
-                                                   placeholder="Street address">
+                                                   placeholder="Alamat jalan">
                                         </div>
                                         @error('alamat')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -237,14 +237,14 @@
                                         <!-- City -->
                                         <div class="col-md-6 mb-3">
                                             <label for="kota" class="form-label fw-semibold text-dark">
-                                                City
+                                                Kota
                                             </label>
                                             <input type="text"
                                                    class="form-control @error('kota') is-invalid @enderror"
                                                    id="kota"
                                                    name="kota"
                                                    value="{{ old('kota') }}"
-                                                   placeholder="City">
+                                                   placeholder="Kota">
                                             @error('kota')
                                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                                             @enderror
@@ -253,14 +253,14 @@
                                         <!-- Province -->
                                         <div class="col-md-6 mb-3">
                                             <label for="provinsi" class="form-label fw-semibold text-dark">
-                                                Province
+                                                Provinsi
                                             </label>
                                             <input type="text"
                                                    class="form-control @error('provinsi') is-invalid @enderror"
                                                    id="provinsi"
                                                    name="provinsi"
                                                    value="{{ old('provinsi') }}"
-                                                   placeholder="Province">
+                                                   placeholder="Provinsi">
                                             @error('provinsi')
                                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                                             @enderror
@@ -271,14 +271,14 @@
                                         <!-- Postal Code -->
                                         <div class="col-md-6 mb-3">
                                             <label for="kode_pos" class="form-label fw-semibold text-dark">
-                                                Postal Code
+                                                Kode Pos
                                             </label>
                                             <input type="text"
                                                    class="form-control @error('kode_pos') is-invalid @enderror"
                                                    id="kode_pos"
                                                    name="kode_pos"
                                                    value="{{ old('kode_pos') }}"
-                                                   placeholder="Postal code">
+                                                   placeholder="Kode pos">
                                             @error('kode_pos')
                                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                                             @enderror
@@ -287,7 +287,7 @@
                                         <!-- Phone Number -->
                                         <div class="col-md-6 mb-3">
                                             <label for="no_telepon" class="form-label fw-semibold text-dark">
-                                                <i class="bi bi-telephone me-2"></i>Phone Number
+                                                <i class="bi bi-telephone me-2"></i>Nomor Telepon
                                             </label>
                                             <div class="input-group">
                                                 <span class="input-group-text bg-light border-end-0">
@@ -298,7 +298,7 @@
                                                        id="no_telepon"
                                                        name="no_telepon"
                                                        value="{{ old('no_telepon') }}"
-                                                       placeholder="Business phone">
+                                                       placeholder="Telepon bisnis">
                                             </div>
                                             @error('no_telepon')
                                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -309,7 +309,7 @@
                                     <!-- WhatsApp Number -->
                                     <div class="mb-3">
                                         <label for="no_wa" class="form-label fw-semibold text-dark">
-                                            <i class="bi bi-whatsapp me-2"></i>WhatsApp Number (Optional)
+                                            <i class="bi bi-whatsapp me-2"></i>Nomor WhatsApp (Opsional)
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light border-end-0">
@@ -320,7 +320,7 @@
                                                    id="no_wa"
                                                    name="no_wa"
                                                    value="{{ old('no_wa') }}"
-                                                   placeholder="WhatsApp number (if different)">
+                                                   placeholder="Nomor WhatsApp (jika berbeda)">
                                         </div>
                                         @error('no_wa')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -330,7 +330,7 @@
                                     <!-- Business Email -->
                                     <div class="mb-3">
                                         <label for="email_perusahaan" class="form-label fw-semibold text-dark">
-                                            <i class="bi bi-envelope-at me-2"></i>Business Email (Optional)
+                                            <i class="bi bi-envelope-at me-2"></i>Email Bisnis (Opsional)
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light border-end-0">
@@ -341,7 +341,7 @@
                                                    id="email_perusahaan"
                                                    name="email_perusahaan"
                                                    value="{{ old('email_perusahaan') }}"
-                                                   placeholder="Business email (if different)">
+                                                   placeholder="Email bisnis (jika berbeda)">
                                         </div>
                                         @error('email_perusahaan')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -355,7 +355,7 @@
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="terms" required>
                                     <label class="form-check-label small text-muted" for="terms">
-                                        I agree to the <a href="#" class="text-decoration-none">Terms of Service</a> and <a href="#" class="text-decoration-none">Privacy Policy</a>
+                                        Saya setuju dengan <a href="#" class="text-decoration-none">Syarat dan Ketentuan</a> dan <a href="#" class="text-decoration-none">Kebijakan Privasi</a>
                                     </label>
                                 </div>
                             </div>
@@ -363,14 +363,14 @@
                             <!-- Submit Button -->
                             <div class="d-grid mb-4">
                                 <button type="submit" class="btn btn-primary btn-lg fw-semibold" style="border-radius: 50px; background: linear-gradient(45deg, #667eea, #764ba2); border: none; transition: all 0.3s ease;">
-                                    <i class="bi bi-person-plus me-2"></i>Create Account
+                                    <i class="bi bi-person-plus me-2"></i>Buat Akun
                                 </button>
                             </div>
 
                             <!-- Login Link -->
                             <div class="text-center">
-                                <p class="text-muted mb-0">Already have an account?
-                                    <a href="{{ route('login') }}" class="text-decoration-none fw-semibold">Sign in here</a>
+                                <p class="text-muted mb-0">Sudah memiliki akun?
+                                    <a href="{{ route('login') }}" class="text-decoration-none fw-semibold">Masuk di sini</a>
                                 </p>
                             </div>
                         </form>
@@ -380,79 +380,46 @@
         </div>
     </div>
 </div>
+@endsection
 
 <script>
-// Toggle password visibility
-document.getElementById('togglePassword').addEventListener('click', function() {
-    const password = document.getElementById('password');
-    const icon = document.getElementById('toggleIcon');
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle role fields
+    const roleRadios = document.querySelectorAll('input[name="role"]');
+    const rentalFields = document.getElementById('rentalFields');
 
-    if (password.type === 'password') {
-        password.type = 'text';
-        icon.classList.remove('bi-eye');
-        icon.classList.add('bi-eye-slash');
-    } else {
-        password.type = 'password';
-        icon.classList.remove('bi-eye-slash');
-        icon.classList.add('bi-eye');
-    }
-});
-
-document.getElementById('toggleConfirmPassword').addEventListener('click', function() {
-    const confirmPassword = document.getElementById('password_confirmation');
-    const icon = document.getElementById('toggleConfirmIcon');
-
-    if (confirmPassword.type === 'password') {
-        confirmPassword.type = 'text';
-        icon.classList.remove('bi-eye');
-        icon.classList.add('bi-eye-slash');
-    } else {
-        confirmPassword.type = 'password';
-        icon.classList.remove('bi-eye-slash');
-        icon.classList.add('bi-eye');
-    }
-});
-
-// Toggle rental fields based on role selection
-const roleUser = document.getElementById('roleUser');
-const roleRental = document.getElementById('roleRental');
-const rentalFields = document.getElementById('rentalFields');
-
-function toggleRentalFields() {
-    if (roleRental.checked) {
-        rentalFields.style.display = 'block';
-        // Make rental fields required
-        document.querySelectorAll('#rentalFields input').forEach(input => {
-            if (input.name !== 'no_wa' && input.name !== 'email_perusahaan') {
-                input.required = true;
+    roleRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'rental') {
+                rentalFields.style.display = 'block';
+            } else {
+                rentalFields.style.display = 'none';
             }
         });
-    } else {
-        rentalFields.style.display = 'none';
-        // Remove required from rental fields
-        document.querySelectorAll('#rentalFields input').forEach(input => {
-            input.required = false;
-        });
-    }
-}
+    });
 
-roleUser.addEventListener('change', toggleRentalFields);
-roleRental.addEventListener('change', toggleRentalFields);
+    // Toggle password visibility
+    const togglePassword = document.getElementById('togglePassword');
+    const password = document.getElementById('password');
+    const toggleIcon = document.getElementById('toggleIcon');
 
-// Add hover effects to submit button
-document.querySelector('.btn-primary').addEventListener('mouseover', function() {
-    this.style.transform = 'translateY(-2px)';
-    this.style.boxShadow = '0 8px 25px rgba(102, 126, 234, 0.4)';
-});
+    togglePassword.addEventListener('click', function() {
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
+        toggleIcon.classList.toggle('bi-eye');
+        toggleIcon.classList.toggle('bi-eye-slash');
+    });
 
-document.querySelector('.btn-primary').addEventListener('mouseout', function() {
-    this.style.transform = 'translateY(0)';
-    this.style.boxShadow = 'none';
-});
+    // Toggle confirm password visibility
+    const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+    const confirmPassword = document.getElementById('password_confirmation');
+    const toggleConfirmIcon = document.getElementById('toggleConfirmIcon');
 
-// Initialize fields based on old input (if form was submitted with errors)
-document.addEventListener('DOMContentLoaded', function() {
-    toggleRentalFields();
+    toggleConfirmPassword.addEventListener('click', function() {
+        const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+        confirmPassword.setAttribute('type', type);
+        toggleConfirmIcon.classList.toggle('bi-eye');
+        toggleConfirmIcon.classList.toggle('bi-eye-slash');
+    });
 });
 </script>
-@endsection

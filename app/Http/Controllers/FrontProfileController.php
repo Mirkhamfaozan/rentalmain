@@ -11,7 +11,7 @@ use App\Models\User;
 use App\Models\RentalBiodata;
 use App\Models\Product;
 
-class ProfileController extends Controller
+class FrontProfileController extends Controller
 {
     /**
      * Display the user's profile.
@@ -94,7 +94,7 @@ class ProfileController extends Controller
                 [
                     'nama_rental' => $rentalValidated['nama_rental'],
                     'no_wa' => $rentalValidated['no_wa'] ?? null,
-                    'alamat' => $rentalValidated['alamat'], 
+                    'alamat' => $rentalValidated['alamat'],
                 ]
             );
         }
