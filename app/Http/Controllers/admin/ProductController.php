@@ -156,9 +156,11 @@ class ProductController extends Controller
         // Handle boolean conversion for is_available
         $validated['is_available'] = $request->has('is_available') ? true : false;
 
-        // Calculate harga_mingguan and harga_bulanan
-        $validated['harga_mingguan'] = $validated['harga_harian'] * 7;
-        $validated['harga_bulanan'] = $validated['harga_harian'] * 30;
+        // Calculate harga_mingguan and harga_bulanan with 2-day discount
+        $validated['diskon_mingguan'] = 2; // 2 days discount
+        $validated['diskon_bulanan'] = 2; // 2 days discount
+        $validated['harga_mingguan'] = $validated['harga_harian'] * (7 - $validated['diskon_mingguan']); // 5 days effective
+        $validated['harga_bulanan'] = $validated['harga_harian'] * (30 - $validated['diskon_bulanan']); // 28 days effective
 
         // Handle file upload
         try {
@@ -308,9 +310,11 @@ class ProductController extends Controller
             // Handle boolean conversion for is_available
             $validated['is_available'] = $request->has('is_available') ? true : false;
 
-            // Calculate harga_mingguan and harga_bulanan
-            $validated['harga_mingguan'] = $validated['harga_harian'] * 7;
-            $validated['harga_bulanan'] = $validated['harga_harian'] * 30;
+            // Calculate harga_mingguan and harga_bulanan with 2-day discount
+            $validated['diskon_mingguan'] = 2; // 2 days discount
+            $validated['diskon_bulanan'] = 2; // 2 days discount
+            $validated['harga_mingguan'] = $validated['harga_harian'] * (7 - $validated['diskon_mingguan']); // 5 days effective
+            $validated['harga_bulanan'] = $validated['harga_harian'] * (30 - $validated['diskon_bulanan']); // 28 days effective
 
             // Pertahankan file lama jika tidak ada file baru
             $validated['gambar_utama'] = $product->gambar_utama;

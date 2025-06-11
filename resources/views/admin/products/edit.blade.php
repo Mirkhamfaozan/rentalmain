@@ -8,7 +8,7 @@
     <a href="{{ route('dashboard.products.index') }}" class="btn btn-outline-secondary">
         <i class="fas fa-arrow-left me-1"></i>Kembali ke Daftar Motor
     </a>
-@endsection
+@endsection 
 
 @section('content')
     <div class="row justify-content-center ">
@@ -42,7 +42,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('admin.products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('dashboard.products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 

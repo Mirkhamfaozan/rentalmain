@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\admin\DashboardController;
 use App\Http\Controllers\admin\OrderController;
 use App\Http\Controllers\admin\PaymentController;
 use App\Http\Controllers\HomeController;
@@ -44,8 +45,31 @@ Route::group(['prefix' => 'payment'], function () {
     Route::post('/callback', [FrontPaymentController::class, 'callback']);
 });
 
+
 // Authenticated routes
 Route::middleware('auth')->group(function () {
+    Route::group(['prefix' => 'profile'], function () {
+        // View profile
+        Route::get('/', [ProfileController::class, 'show'])->name('profile.show');
+
+        // Edit profile
+        Route::get('/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/update', [ProfileController::class, 'update'])->name('profile.update');
+
+        // Change password
+        Route::get('/change-password', [ProfileController::class, 'editPassword'])->name('profile.password.edit');
+        Route::put('/change-password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+
+        // Delete avatar
+        Route::delete('/avatar', [ProfileController::class, 'deleteAvatar'])->name('profile.avatar.delete');
+
+        // User orders and payments
+        Route::get('/orders', [ProfileController::class, 'orders'])->name('profile.orders');
+        Route::get('/payments', [ProfileController::class, 'payments'])->name('profile.payments');
+
+        // Products (for rental users only)
+        Route::get('/products', [ProfileController::class, 'products'])->name('profile.products');
+    });
 
     // Order routes
     Route::group(['prefix' => 'order'], function () {
@@ -94,9 +118,8 @@ Route::middleware('auth')->group(function () {
 */
 Route::middleware(['auth'])->group(function () {
     // Main dashboard
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/stats', [DashboardController::class, 'getStats'])->name('dashboard.stats');
 
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
         // Product management routes (using resource controller)
@@ -140,13 +163,6 @@ Route::middleware(['auth'])->group(function () {
         })->name('reports.revenue');
     });
 });
-
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
 
 
 Route::prefix('api')->middleware('auth:sanctum')->group(function () {

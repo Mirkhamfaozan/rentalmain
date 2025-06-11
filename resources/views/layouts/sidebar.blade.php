@@ -32,8 +32,7 @@
                             Admin Panel
                         @elseif($userRole === 'rental')
                             Rental Manager
-                        @else
-                            User Panel
+
                         @endif
                     </h6>
                     <small class="text-muted">{{ ucfirst($userRole) }} System</small>
@@ -292,7 +291,7 @@
                     </a>
                 </li>
                 @endif
-            </ul>   
+            </ul>
         </div>
 
         <!-- User Profile Section -->

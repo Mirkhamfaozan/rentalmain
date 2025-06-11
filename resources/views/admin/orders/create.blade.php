@@ -23,7 +23,7 @@
                     <h5 class="card-title mb-0">Formulir Pesanan</h5>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('admin.orders.store') }}" method="POST" id="orderForm">
+                    <form action="{{ route('dashboard.orders.store') }}" method="POST" id="orderForm">
                         @csrf
                         <div class="row g-3">
                             <div class="col-md-6">

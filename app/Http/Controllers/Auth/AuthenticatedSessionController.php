@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
@@ -25,10 +24,17 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
-
         $request->session()->regenerate();
 
-        return redirect()->intended(route('frontend.homepage', absolute: false));
+        $user = Auth::user();
+
+        // Redirect berdasarkan role
+        if (in_array($user->role, ['admin', 'rental'])) {
+            return redirect()->intended(route('dashboard'));
+        }
+
+        // User biasa ke homepage
+        return redirect()->intended(route('frontend.homepage'));
     }
 
     /**
@@ -39,7 +45,6 @@ class AuthenticatedSessionController extends Controller
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
         return redirect('/');

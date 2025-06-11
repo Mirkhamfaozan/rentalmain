@@ -35,6 +35,11 @@ class Product extends Model
         'stok',
         'is_available'
     ];
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
 
     // Calculate weekly price (7 days - discount)
     public function getHargaMingguanAttribute($value)

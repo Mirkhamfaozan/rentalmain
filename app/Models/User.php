@@ -39,6 +39,10 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
     public function sendEmailVerificationNotification()
     {
         $this->notify(new CustomVerifyEmail);
@@ -60,6 +64,10 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     public function isUser(): bool
+    {
+        return $this->role === 'users';
+    }
+    public function isCustomer()
     {
         return $this->role === 'users';
     }

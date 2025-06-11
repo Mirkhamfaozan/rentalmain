@@ -148,7 +148,7 @@
               <li><hr class="dropdown-divider"></li>
               @endif
               <li>
-                <a class="dropdown-item py-2" href="{{ route('profile.edit') }}">
+                <a class="dropdown-item py-2" href="{{ route('profile.show') }}">
                   <i class="bi bi-person me-2"></i>Profile
                 </a>
               </li>
