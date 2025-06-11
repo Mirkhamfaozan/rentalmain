@@ -60,15 +60,12 @@
                                         <strong>Mingguan:</strong><br>
                                         <span class="text-primary fw-bold">Rp
                                             {{ number_format($product->harga_mingguan, 0, ',', '.') }}</span>
-                                        <small
-                                            class="d-block text-muted">({{ number_format($product->harga_mingguan / 7, 0, ',', '.') }}/hari)</small>
                                     </div>
                                     <div class="col-sm-4">
                                         <strong>Bulanan:</strong><br>
                                         <span class="text-warning fw-bold">Rp
                                             {{ number_format($product->harga_bulanan, 0, ',', '.') }}</span>
-                                        <small
-                                            class="d-block text-muted">({{ number_format($product->harga_bulanan / 30, 0, ',', '.') }}/hari)</small>
+                        
                                     </div>
                                 </div>
                             </div>
