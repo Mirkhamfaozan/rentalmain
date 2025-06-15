@@ -489,9 +489,269 @@
         <i class="bi bi-arrow-up"></i>
     </button>
 
-    <!-- Required Libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ asset('assets/css/homepage.css') }}"></script>
+    <style>
+        /* Enhanced Custom Styles */
+        :root {
+            --bs-primary-rgb: 13, 110, 253;
+            --bs-warning-rgb: 255, 193, 7;
+            --bs-success-rgb: 25, 135, 84;
+            --animation-duration: 0.3s;
+        }
+
+        /* Hero Section with Parallax */
+        .hero-parallax {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-attachment: fixed;
+            z-index: -2;
+        }
+
+        /* Typed Text Animation */
+        .typed-cursor {
+            font-size: 2.5rem;
+            color: var(--bs-warning);
+            opacity: 1;
+            animation: blink 0.7s infinite;
+        }
+
+        @keyframes blink {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* Hover Effects */
+        .hover-scale {
+            transition: transform var(--animation-duration) ease, box-shadow var(--animation-duration) ease;
+        }
+
+        .hover-scale:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        }
+
+        .hover-scale-sm {
+            transition: transform var(--animation-duration) ease;
+        }
+
+        .hover-scale-sm:hover {
+            transform: scale(1.03);
+        }
+
+        .hover-tilt {
+            transition: transform var(--animation-duration) ease;
+        }
+
+        .hover-tilt:hover {
+            transform: perspective(1000px) rotateX(5deg) rotateY(5deg);
+        }
+
+        .hover-rotate {
+            transition: transform var(--animation-duration) ease;
+        }
+
+        .hover-rotate:hover {
+            transform: rotate(15deg);
+        }
+
+        .hover-zoom {
+            transition: transform calc(var(--animation-duration) * 2) ease;
+        }
+
+        .hover-zoom:hover {
+            transform: scale(1.1);
+        }
+
+        .hover-reveal {
+            transition: opacity var(--animation-duration) ease;
+        }
+
+        .card:hover .hover-reveal {
+            opacity: 1 !important;
+        }
+
+        .hover-grow {
+            transition: transform var(--animation-duration) ease, box-shadow var(--animation-duration) ease;
+        }
+
+        .hover-grow:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+        }
+
+        /* Animation Classes */
+        .floating-animation {
+            animation: floating 3s ease-in-out infinite;
+        }
+
+        .floating-animation-delay {
+            animation: floating 3s ease-in-out 1s infinite;
+        }
+
+        @keyframes floating {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(25, 135, 84, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(25, 135, 84, 0);
+            }
+        }
+
+        .star-rating i {
+            transition: transform var(--animation-duration) ease;
+        }
+
+        .star-rating:hover i {
+            transform: scale(1.2);
+            animation: starBounce 0.5s ease;
+        }
+
+        .star-rating i:nth-child(2) {
+            transition-delay: 0.1s;
+        }
+
+        .star-rating i:nth-child(3) {
+            transition-delay: 0.2s;
+        }
+
+        .star-rating i:nth-child(4) {
+            transition-delay: 0.3s;
+        }
+
+        .star-rating i:nth-child(5) {
+            transition-delay: 0.4s;
+        }
+
+        @keyframes starBounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        /* Scroll Down Animation */
+        .scroll-down {
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translateY(0);
+            }
+
+            40% {
+                transform: translateY(-20px);
+            }
+
+            60% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            display: none;
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .back-to-top.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+        }
+
+        /* Particles.js Container */
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .display-2 {
+                font-size: 2.5rem;
+            }
+
+            .display-5 {
+                font-size: 2rem;
+            }
+
+            .hero-parallax {
+                background-attachment: scroll;
+            }
+        }
+
+        /* Bootstrap Icon Enhancements */
+        .bi {
+            vertical-align: -.125em;
+        }
+
+        /* Tab Pills Custom Styling */
+        .nav-pills .nav-link {
+            transition: all var(--animation-duration) ease;
+        }
+
+        .nav-pills .nav-link:hover {
+            background-color: var(--bs-primary);
+            color: white;
+        }
+    </style>
     <script>
         // Initialize AOS (Animate On Scroll)
         document.addEventListener('DOMContentLoaded', function() {
