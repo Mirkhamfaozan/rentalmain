@@ -17,20 +17,16 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        // Only allow admin and rental users
         if (!Auth::user()->canAccessDashboard()) {
             abort(403, 'Unauthorized action. You do not have permission to access this page.');
         }
 
-        // Start building the query
         $query = Product::query();
 
-        // Rental users only see their own products
         if (Auth::user()->isRental()) {
             $query->where('user_id', Auth::id());
         }
 
-        // Apply filters
         if ($request->filled('search')) {
             $query->where('nama_motor', 'like', '%' . $request->search . '%');
         }
@@ -70,7 +66,6 @@ class ProductController extends Controller
             }
         }
 
-        // Get paginated results
         $products = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
 
         return view('admin.products.index', compact('products'));
@@ -81,7 +76,6 @@ class ProductController extends Controller
      */
     public function create()
     {
-        // Only allow admin and rental users
         if (!Auth::user()->canAccessDashboard()) {
             abort(403, 'Unauthorized action. You do not have permission to access this page.');
         }
@@ -94,12 +88,10 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        // Only allow admin and rental users
         if (!Auth::user()->canAccessDashboard()) {
             abort(403, 'Unauthorized action. You do not have permission to perform this action.');
         }
 
-        // Custom validation messages
         $messages = [
             'required' => 'Kolom :attribute wajib diisi.',
             'string' => 'Kolom :attribute harus berupa teks.',
@@ -116,9 +108,10 @@ class ProductController extends Controller
             'harga_harian.min' => 'Harga harian tidak boleh negatif.',
             'stok.min' => 'Stok minimal 1 unit.',
             'gambar_utama.max' => 'Ukuran file gambar utama tidak boleh lebih dari 2MB.',
+            'diskon_mingguan.max' => 'Diskon mingguan maksimal 6 hari.',
+            'diskon_bulanan.max' => 'Diskon bulanan maksimal 29 hari.',
         ];
 
-        // Attribute names
         $attributes = [
             'nama_motor' => 'Nama Motor',
             'brand' => 'Merek',
@@ -134,6 +127,11 @@ class ProductController extends Controller
             'deskripsi' => 'Deskripsi',
             'stok' => 'Stok',
             'is_available' => 'Ketersediaan',
+            'diskon_mingguan' => 'Diskon Mingguan',
+            'diskon_bulanan' => 'Diskon Bulanan',
+            'nomor_stnk' => 'Nomor STNK',
+            'nomor_kendaraan' => 'Plat Nomor',
+            'foto_stnk' => 'Foto STNK',
         ];
 
         $validated = $request->validate([
@@ -147,31 +145,35 @@ class ProductController extends Controller
             'warna' => 'required|string|max:50',
             'no_mesin' => ['required', 'string', 'max:50', 'unique:products'],
             'no_rangka' => ['required', 'string', 'max:50', 'unique:products'],
+            'nomor_stnk' => 'required|string|max:50',
+            'nomor_kendaraan' => 'required|string|max:20',
+            'foto_stnk' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'gambar_utama' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'deskripsi' => 'nullable|string',
             'stok' => 'required|integer|min:1',
             'is_available' => 'boolean',
+            'diskon_mingguan' => 'required|integer|min:0|max:6',
+            'diskon_bulanan' => 'required|integer|min:0|max:29',
         ], $messages, $attributes);
 
-        // Handle boolean conversion for is_available
         $validated['is_available'] = $request->has('is_available') ? true : false;
 
-        // Calculate harga_mingguan and harga_bulanan with 2-day discount
-        $validated['diskon_mingguan'] = 2; // 2 days discount
-        $validated['diskon_bulanan'] = 2; // 2 days discount
-        $validated['harga_mingguan'] = $validated['harga_harian'] * (7 - $validated['diskon_mingguan']); // 5 days effective
-        $validated['harga_bulanan'] = $validated['harga_harian'] * (30 - $validated['diskon_bulanan']); // 28 days effective
-
-        // Handle file upload
         try {
+            // Handle file uploads
             if ($request->hasFile('gambar_utama')) {
                 $validated['gambar_utama'] = $request->file('gambar_utama')->store('product_images', 'public');
             }
 
-            // Add the user_id to the validated data
+            if ($request->hasFile('foto_stnk')) {
+                $validated['foto_stnk'] = $request->file('foto_stnk')->store('stnk_images', 'public');
+            }
+
+            // Calculate weekly and monthly prices
+            $validated['harga_mingguan'] = $validated['harga_harian'] * (7 - $validated['diskon_mingguan']);
+            $validated['harga_bulanan'] = $validated['harga_harian'] * (30 - $validated['diskon_bulanan']);
+
             $validated['user_id'] = Auth::id();
 
-            // Create the product
             Product::create($validated);
 
             return redirect()->route('dashboard.products.index')
@@ -180,9 +182,12 @@ class ProductController extends Controller
             Log::error('Product creation failed: ' . $e->getMessage());
             Log::error('Stack trace: ' . $e->getTraceAsString());
 
-            // Clean up uploaded file if product creation fails
+            // Clean up uploaded files if creation fails
             if (isset($validated['gambar_utama']) && Storage::disk('public')->exists($validated['gambar_utama'])) {
                 Storage::disk('public')->delete($validated['gambar_utama']);
+            }
+            if (isset($validated['foto_stnk']) && Storage::disk('public')->exists($validated['foto_stnk'])) {
+                Storage::disk('public')->delete($validated['foto_stnk']);
             }
 
             return redirect()->back()
@@ -196,12 +201,10 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        // Only allow admin and rental users
         if (!Auth::user()->canAccessDashboard()) {
             abort(403, 'Unauthorized action. You do not have permission to view this product.');
         }
 
-        // Rental users can only see their own products
         if (Auth::user()->isRental() && $product->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action. This product belongs to another rental.');
         }
@@ -214,12 +217,10 @@ class ProductController extends Controller
      */
     public function edit(Product $product)
     {
-        // Only allow admin and rental users
         if (!Auth::user()->canAccessDashboard()) {
             abort(403, 'Unauthorized action. You do not have permission to edit products.');
         }
 
-        // Rental users can only edit their own products
         if (Auth::user()->isRental() && $product->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action. You can only edit your own products.');
         }
@@ -232,17 +233,14 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
-        // Only allow admin and rental users
         if (!Auth::user()->canAccessDashboard()) {
             abort(403, 'Unauthorized action. You do not have permission to update products.');
         }
 
-        // Rental users can only update their own products
         if (Auth::user()->isRental() && $product->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action. You can only update your own products.');
         }
 
-        // Custom validation messages
         $messages = [
             'required' => 'Kolom :attribute wajib diisi.',
             'string' => 'Kolom :attribute harus berupa teks.',
@@ -259,9 +257,10 @@ class ProductController extends Controller
             'harga_harian.min' => 'Harga harian tidak boleh negatif.',
             'stok.min' => 'Stok minimal 1 unit.',
             'gambar_utama.max' => 'Ukuran file gambar utama tidak boleh lebih dari 2MB.',
+            'diskon_mingguan.max' => 'Diskon mingguan maksimal 6 hari.',
+            'diskon_bulanan.max' => 'Diskon bulanan maksimal 29 hari.',
         ];
 
-        // Attribute names
         $attributes = [
             'nama_motor' => 'Nama Motor',
             'brand' => 'Merek',
@@ -277,6 +276,11 @@ class ProductController extends Controller
             'deskripsi' => 'Deskripsi',
             'stok' => 'Stok',
             'is_available' => 'Ketersediaan',
+            'diskon_mingguan' => 'Diskon Mingguan',
+            'diskon_bulanan' => 'Diskon Bulanan',
+            'nomor_stnk' => 'Nomor STNK',
+            'nomor_kendaraan' => 'Plat Nomor',
+            'foto_stnk' => 'Foto STNK',
         ];
 
         $validated = $request->validate([
@@ -300,35 +304,45 @@ class ProductController extends Controller
                 'max:50',
                 Rule::unique('products')->ignore($product->id),
             ],
+            'nomor_stnk' => 'required|string|max:50',
+            'nomor_kendaraan' => 'required|string|max:20',
+            'foto_stnk' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'gambar_utama' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'deskripsi' => 'nullable|string',
             'stok' => 'required|integer|min:1',
             'is_available' => 'required|boolean',
+            'diskon_mingguan' => 'required|integer|min:0|max:6',
+            'diskon_bulanan' => 'required|integer|min:0|max:29',
         ], $messages, $attributes);
 
         try {
-            // Handle boolean conversion for is_available
             $validated['is_available'] = $request->has('is_available') ? true : false;
 
-            // Calculate harga_mingguan and harga_bulanan with 2-day discount
-            $validated['diskon_mingguan'] = 2; // 2 days discount
-            $validated['diskon_bulanan'] = 2; // 2 days discount
-            $validated['harga_mingguan'] = $validated['harga_harian'] * (7 - $validated['diskon_mingguan']); // 5 days effective
-            $validated['harga_bulanan'] = $validated['harga_harian'] * (30 - $validated['diskon_bulanan']); // 28 days effective
+            // Calculate weekly and monthly prices
+            $validated['harga_mingguan'] = $validated['harga_harian'] * (7 - $validated['diskon_mingguan']);
+            $validated['harga_bulanan'] = $validated['harga_harian'] * (30 - $validated['diskon_bulanan']);
 
-            // Pertahankan file lama jika tidak ada file baru
-            $validated['gambar_utama'] = $product->gambar_utama;
-
-            // Handle file upload
+            // Handle file uploads
             if ($request->hasFile('gambar_utama')) {
-                // Hapus file lama jika ada
+                // Delete old file if exists
                 if ($product->gambar_utama && Storage::disk('public')->exists($product->gambar_utama)) {
                     Storage::disk('public')->delete($product->gambar_utama);
                 }
                 $validated['gambar_utama'] = $request->file('gambar_utama')->store('product_images', 'public');
+            } else {
+                $validated['gambar_utama'] = $product->gambar_utama;
             }
 
-            // Update produk
+            if ($request->hasFile('foto_stnk')) {
+                // Delete old file if exists
+                if ($product->foto_stnk && Storage::disk('public')->exists($product->foto_stnk)) {
+                    Storage::disk('public')->delete($product->foto_stnk);
+                }
+                $validated['foto_stnk'] = $request->file('foto_stnk')->store('stnk_images', 'public');
+            } else {
+                $validated['foto_stnk'] = $product->foto_stnk;
+            }
+
             $product->update($validated);
 
             return redirect()->route('dashboard.products.index')
@@ -348,20 +362,21 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
-        // Only allow admin and rental users
         if (!Auth::user()->canAccessDashboard()) {
             abort(403, 'Unauthorized action. You do not have permission to delete products.');
         }
 
-        // Rental users can only delete their own products
         if (Auth::user()->isRental() && $product->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action. You can only delete your own products.');
         }
 
         try {
-            // Delete associated file
+            // Delete associated files
             if ($product->gambar_utama && Storage::disk('public')->exists($product->gambar_utama)) {
                 Storage::disk('public')->delete($product->gambar_utama);
+            }
+            if ($product->foto_stnk && Storage::disk('public')->exists($product->foto_stnk)) {
+                Storage::disk('public')->delete($product->foto_stnk);
             }
 
             $product->delete();

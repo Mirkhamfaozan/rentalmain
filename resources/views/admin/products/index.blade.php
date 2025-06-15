@@ -41,7 +41,6 @@
                         <div class="flex-grow-1 ms-3">
                             <div class="fw-bold h4 mb-1">{{ $products->count() }}</div>
                             <div class="text-muted small">Total Motor</div>
-
                         </div>
                     </div>
                 </div>
@@ -265,15 +264,11 @@
                                                class="btn btn-outline-secondary" title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <form action="{{ route('dashboard.products.destroy', $product) }}"
-                                                  method="POST" class="d-inline"
-                                                  onsubmit="return confirm('Apakah Anda yakin ingin menghapus motor ini?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-outline-danger" title="Hapus">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
+                                            <button class="btn btn-outline-danger btn-delete"
+                                                    title="Hapus"
+                                                    data-url="{{ route('dashboard.products.destroy', $product) }}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -327,4 +322,49 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Konfirmasi Hapus -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Konfirmasi Hapus</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Apakah Anda yakin ingin menghapus motor ini? Data yang dihapus tidak dapat dikembalikan.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <form id="deleteForm" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger">Hapus</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const deleteModal = document.getElementById('deleteModal');
+        const deleteForm = document.getElementById('deleteForm');
+
+        // Ketika tombol hapus diklik
+        document.querySelectorAll('.btn-delete').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const url = this.getAttribute('data-url');
+                deleteForm.action = url;
+
+                // Tampilkan modal
+                const modal = new bootstrap.Modal(deleteModal);
+                modal.show();
+            });
+        });
+    });
+</script>
+@endpush
