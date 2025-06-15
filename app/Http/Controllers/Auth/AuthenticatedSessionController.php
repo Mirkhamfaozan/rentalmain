@@ -34,7 +34,7 @@ class AuthenticatedSessionController extends Controller
         }
 
         // User biasa ke homepage
-        return redirect()->intended(route('frontend.homepage'));
+        return redirect()->route('frontend.homepage');
     }
 
     /**

@@ -261,8 +261,9 @@
                                     <div class="card-footer bg-white border-0 p-4 pt-0">
                                         @if ($product->is_available)
                                             <div class="d-grid gap-2">
-                                                <a class="btn btn-primary btn-lg rounded-pill shadow-sm hover-scale"
-                                                    href="{{ route('frontend.order', $product->id) }}">
+                                                <a class="btn btn-primary btn-lg rounded-pill shadow-sm hover-scale rent-button"
+                                                    href="{{ route('frontend.order', $product->id) }}"
+                                                    data-product-id="{{ $product->id }}">
                                                     <i class="bi bi-motorcycle me-2"></i>Sewa Sekarang
                                                 </a>
                                                 <div class="btn-group" role="group">
@@ -450,276 +451,47 @@
         </div>
     </section>
 
+    <!-- Modal Verifikasi Lokasi -->
+<!-- Modal Verifikasi Lokasi -->
+<div class="modal fade" id="locationVerificationModal" tabindex="-1" aria-labelledby="locationVerificationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4">
+            <div class="modal-header border-0 bg-light">
+                <h5 class="modal-title fw-bold text-primary" id="locationVerificationModalLabel">🎉 Selamat Datang di Tegal!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-4">
+                <div class="text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-scooter text-primary" style="font-size: 3rem;"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Nikmati perjalanan Anda dengan motor kami</h4>
+                    <p class="text-muted mb-4">
+                        Kami menyambut semua tamu yang ingin menjelajahi Tegal.<br>
+                        Apakah Anda sedang berkunjung ke kota ini?
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer border-0 bg-light">
+                <button type="button" class="btn btn-lg btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">
+                    Tidak
+                </button>
+                <button type="button" id="confirmLocationBtn" class="btn btn-lg btn-primary rounded-pill px-4">
+                    <i class="bi bi-scooter me-1"></i>Ya, Saya Ingin Sewa
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
     <!-- Back to Top Button -->
     <button class="btn btn-primary btn-lg rounded-circle shadow-lg back-to-top" id="backToTop">
         <i class="bi bi-arrow-up"></i>
     </button>
 
     <!-- Required Libraries -->
-    <style>
-        /* Enhanced Custom Styles */
-        :root {
-            --bs-primary-rgb: 13, 110, 253;
-            --bs-warning-rgb: 255, 193, 7;
-            --bs-success-rgb: 25, 135, 84;
-            --animation-duration: 0.3s;
-        }
-
-        /* Hero Section with Parallax */
-        .hero-parallax {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-attachment: fixed;
-            z-index: -2;
-        }
-
-        /* Typed Text Animation */
-        .typed-cursor {
-            font-size: 2.5rem;
-            color: var(--bs-warning);
-            opacity: 1;
-            animation: blink 0.7s infinite;
-        }
-
-        @keyframes blink {
-            0% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0;
-            }
-
-            100% {
-                opacity: 1;
-            }
-        }
-
-        /* Hover Effects */
-        .hover-scale {
-            transition: transform var(--animation-duration) ease, box-shadow var(--animation-duration) ease;
-        }
-
-        .hover-scale:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-        }
-
-        .hover-scale-sm {
-            transition: transform var(--animation-duration) ease;
-        }
-
-        .hover-scale-sm:hover {
-            transform: scale(1.03);
-        }
-
-        .hover-tilt {
-            transition: transform var(--animation-duration) ease;
-        }
-
-        .hover-tilt:hover {
-            transform: perspective(1000px) rotateX(5deg) rotateY(5deg);
-        }
-
-        .hover-rotate {
-            transition: transform var(--animation-duration) ease;
-        }
-
-        .hover-rotate:hover {
-            transform: rotate(15deg);
-        }
-
-        .hover-zoom {
-            transition: transform calc(var(--animation-duration) * 2) ease;
-        }
-
-        .hover-zoom:hover {
-            transform: scale(1.1);
-        }
-
-        .hover-reveal {
-            transition: opacity var(--animation-duration) ease;
-        }
-
-        .card:hover .hover-reveal {
-            opacity: 1 !important;
-        }
-
-        .hover-grow {
-            transition: transform var(--animation-duration) ease, box-shadow var(--animation-duration) ease;
-        }
-
-        .hover-grow:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
-        }
-
-        /* Animation Classes */
-        .floating-animation {
-            animation: floating 3s ease-in-out infinite;
-        }
-
-        .floating-animation-delay {
-            animation: floating 3s ease-in-out 1s infinite;
-        }
-
-        @keyframes floating {
-            0% {
-                transform: translateY(0px);
-            }
-
-            50% {
-                transform: translateY(-10px);
-            }
-
-            100% {
-                transform: translateY(0px);
-            }
-        }
-
-        .pulse-animation {
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.4);
-            }
-
-            70% {
-                box-shadow: 0 0 0 10px rgba(25, 135, 84, 0);
-            }
-
-            100% {
-                box-shadow: 0 0 0 0 rgba(25, 135, 84, 0);
-            }
-        }
-
-        .star-rating i {
-            transition: transform var(--animation-duration) ease;
-        }
-
-        .star-rating:hover i {
-            transform: scale(1.2);
-            animation: starBounce 0.5s ease;
-        }
-
-        .star-rating i:nth-child(2) {
-            transition-delay: 0.1s;
-        }
-
-        .star-rating i:nth-child(3) {
-            transition-delay: 0.2s;
-        }
-
-        .star-rating i:nth-child(4) {
-            transition-delay: 0.3s;
-        }
-
-        .star-rating i:nth-child(5) {
-            transition-delay: 0.4s;
-        }
-
-        @keyframes starBounce {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-5px);
-            }
-        }
-
-        /* Scroll Down Animation */
-        .scroll-down {
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-
-            0%,
-            20%,
-            50%,
-            80%,
-            100% {
-                transform: translateY(0);
-            }
-
-            40% {
-                transform: translateY(-20px);
-            }
-
-            60% {
-                transform: translateY(-10px);
-            }
-        }
-
-        /* Back to Top Button */
-        .back-to-top {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            display: none;
-            z-index: 999;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .back-to-top.show {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 1;
-        }
-
-        /* Particles.js Container */
-        #particles-js {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            z-index: -1;
-        }
-
-        /* Responsive Adjustments */
-        @media (max-width: 768px) {
-            .display-2 {
-                font-size: 2.5rem;
-            }
-
-            .display-5 {
-                font-size: 2rem;
-            }
-
-            .hero-parallax {
-                background-attachment: scroll;
-            }
-        }
-
-        /* Bootstrap Icon Enhancements */
-        .bi {
-            vertical-align: -.125em;
-        }
-
-        /* Tab Pills Custom Styling */
-        .nav-pills .nav-link {
-            transition: all var(--animation-duration) ease;
-        }
-
-        .nav-pills .nav-link:hover {
-            background-color: var(--bs-primary);
-            color: white;
-        }
-    </style>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ asset('assets/css/homepage.css') }}"></script>
     <script>
         // Initialize AOS (Animate On Scroll)
         document.addEventListener('DOMContentLoaded', function() {
@@ -805,6 +577,27 @@
                         });
                     }
                 });
+            });
+
+            // Location Verification Modal
+            document.querySelectorAll('.rent-button').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const productId = this.getAttribute('data-product-id');
+                    const modal = new bootstrap.Modal(document.getElementById('locationVerificationModal'));
+
+                    // Set the confirm button to redirect to the order page
+                    document.getElementById('confirmLocationBtn').onclick = function() {
+                        window.location.href = `/order/${productId}`;
+                    };
+
+                    modal.show();
+                });
+            });
+
+            // If user clicks "No" in modal, redirect to homepage
+            document.getElementById('locationVerificationModal').addEventListener('hidden.bs.modal', function () {
+                window.location.href = "{{ route('frontend.product') }}";
             });
         });
     </script>

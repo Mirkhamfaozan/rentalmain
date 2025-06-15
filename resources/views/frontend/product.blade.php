@@ -93,8 +93,9 @@
                                     <div class="card-footer bg-white border-0 p-4 pt-0">
                                         @if ($product->is_available)
                                             <div class="d-grid gap-2">
-                                                <a class="btn btn-primary btn-lg rounded-pill shadow-sm hover-scale"
-                                                    href="{{ route('frontend.order', $product->id) }}">
+                                                <a class="btn btn-primary btn-lg rounded-pill shadow-sm hover-scale rent-button"
+                                                    href="{{ route('frontend.order', $product->id) }}"
+                                                    data-product-id="{{ $product->id }}">
                                                     <i class="bi bi-motorcycle me-2"></i>Sewa Sekarang
                                                 </a>
                                                 <div class="btn-group" role="group">
@@ -147,6 +148,38 @@
         </div>
     </section>
 
+    <!-- Location Verification Modal -->
+    <div class="modal fade" id="locationVerificationModal" tabindex="-1" aria-labelledby="locationVerificationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4">
+                <div class="modal-header border-0 bg-light">
+                    <h5 class="modal-title fw-bold text-primary" id="locationVerificationModalLabel">🎉 Selamat Datang di Tegal!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-4">
+                    <div class="text-center">
+                        <div class="mb-4">
+                            <i class="bi bi-scooter text-primary" style="font-size: 3rem;"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Nikmati perjalanan Anda dengan motor kami</h4>
+                        <p class="text-muted mb-4">
+                            Kami menyambut semua tamu yang ingin menjelajahi Tegal.<br>
+                            Apakah Anda sedang berkunjung ke kota ini?
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 bg-light">
+                    <button type="button" class="btn btn-lg btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">
+                        Tidak
+                    </button>
+                    <button type="button" id="confirmLocationBtn" class="btn btn-lg btn-primary rounded-pill px-4">
+                        <i class="bi bi-scooter me-1"></i>Ya, Saya Ingin Sewa
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Back to Top Button -->
     <button class="btn btn-primary btn-lg rounded-circle shadow-lg back-to-top" id="backToTop">
         <i class="bi bi-arrow-up"></i>
@@ -243,6 +276,26 @@
             opacity: 1;
         }
 
+        /* Modal Custom Styles */
+        #locationVerificationModal .modal-content {
+            border: 2px solid rgba(var(--bs-primary-rgb), 0.2);
+            transform: translateY(20px);
+            transition: transform 0.3s ease-out;
+        }
+
+        #locationVerificationModal.show .modal-content {
+            transform: translateY(0);
+        }
+
+        .bi-scooter {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
         /* Responsive Adjustments */
         @media (max-width: 768px) {
             .display-5 {
@@ -257,6 +310,7 @@
     </style>
 
     <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize AOS
@@ -295,6 +349,27 @@
                         });
                     }
                 });
+            });
+
+            // Location Verification Modal
+            document.querySelectorAll('.rent-button').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const productId = this.getAttribute('data-product-id');
+                    const modal = new bootstrap.Modal(document.getElementById('locationVerificationModal'));
+
+                    // Set the confirm button to redirect to the order page
+                    document.getElementById('confirmLocationBtn').onclick = function() {
+                        window.location.href = `/order/${productId}`;
+                    };
+
+                    modal.show();
+                });
+            });
+
+            // If user clicks "No" in modal, redirect to homepage
+            document.getElementById('locationVerificationModal').addEventListener('hidden.bs.modal', function() {
+                window.location.href = "{{ route('frontend.homepage') }}";
             });
         });
     </script>
