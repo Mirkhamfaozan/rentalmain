@@ -53,22 +53,6 @@
         100% { transform: scale(1); opacity: 1; }
     }
 
-    .info-label {
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: #6c757d;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 5px;
-    }
-
-    .info-value {
-        font-size: 1.1rem;
-        font-weight: 500;
-        color: #2d3748;
-        margin-bottom: 20px;
-    }
-
     .payment-amount {
         font-size: 2rem;
         font-weight: 700;
@@ -100,12 +84,6 @@
         color: white;
     }
 
-    .section-divider {
-        height: 2px;
-        background: linear-gradient(90deg, transparent, #e9ecef, transparent);
-        margin: 30px 0;
-    }
-
     .icon-wrapper {
         width: 40px;
         height: 40px;
@@ -120,6 +98,72 @@
     .order-icon { background: linear-gradient(45deg, #4ecdc4, #7fcdcd); }
     .payment-icon { background: linear-gradient(45deg, #45b7d1, #96ceb4); }
     .status-icon { background: linear-gradient(45deg, #f39c12, #f1c40f); }
+    .rental-icon { background: linear-gradient(45deg, #9b59b6, #8e44ad); }
+    .timeline-icon { background: linear-gradient(45deg, #3498db, #2980b9); }
+
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 10px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #e9ecef;
+    }
+
+    .timeline-item {
+        position: relative;
+        padding-bottom: 20px;
+    }
+
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -30px;
+        top: 5px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #3498db;
+        border: 2px solid white;
+    }
+
+    .timeline-date {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+
+    .timeline-content {
+        background: #f8f9fa;
+        padding: 10px 15px;
+        border-radius: 8px;
+        margin-top: 5px;
+    }
+
+    .detail-row {
+        display: flex;
+        margin-bottom: 10px;
+    }
+
+    .detail-label {
+        flex: 0 0 180px;
+        font-weight: 600;
+        color: #6c757d;
+    }
+
+    .detail-value {
+        flex: 1;
+    }
+
+    .badge-lg {
+        font-size: 0.9rem;
+        padding: 0.5em 0.8em;
+    }
 </style>
 @endpush
 
@@ -155,19 +199,34 @@
                             <div class="transaction-id mb-3">
                                 ID: {{ $payment->transaction_id }}
                             </div>
-                        </div>
-                        <div class="col-md-4 text-md-end">
-                            <div class="payment-amount">
-                                Rp {{ number_format($payment->gross_amount, 0, ',', '.') }}
-                            </div>
-                            <div class="mt-2">
+                            <div class="d-flex align-items-center">
                                 <span class="status-indicator
                                     @if($payment->status == 'pending') bg-warning
                                     @elseif($payment->status == 'success') bg-success
                                     @elseif($payment->status == 'failed') bg-danger
                                     @elseif($payment->status == 'expired') bg-secondary
                                     @else bg-info @endif"></span>
-                                {{ $payment->status_label }}
+                                <span class="me-3">{{ $payment->status_label }}</span>
+
+                                @if($payment->fraud_status)
+                                <span class="badge bg-{{ $payment->fraud_status == 'accept' ? 'success' : 'danger' }}">
+                                    Fraud: {{ $payment->fraud_status }}
+                                </span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <div class="payment-amount">
+                                Rp {{ number_format($payment->gross_amount, 0, ',', '.') }}
+                            </div>
+                            <div class="mt-2">
+                                <small>
+                                    @if($payment->transaction_time)
+                                        {{ \Carbon\Carbon::parse($payment->transaction_time)->format('d M Y, H:i') }} WIB
+                                    @else
+                                        {{ $payment->created_at->format('d M Y, H:i') }} WIB
+                                    @endif
+                                </small>
                             </div>
                         </div>
                     </div>
@@ -190,15 +249,36 @@
                         Informasi Pelanggan
                     </h5>
 
-                    <div class="info-label">Nama Pelanggan</div>
-                    <div class="info-value">
-                        {{ $payment->order->name ?? $payment->order->user->name ?? '-' }}
+                    <div class="detail-row">
+                        <div class="detail-label">Nama Lengkap</div>
+                        <div class="detail-value">
+                            {{ $payment->order->name ?? $payment->order->user->name ?? '-' }}
+                        </div>
                     </div>
 
-                    <div class="info-label">Email</div>
-                    <div class="info-value">
-                        {{ $payment->order->email ?? ($payment->order->user->email ?? '-') }}
+                    <div class="detail-row">
+                        <div class="detail-label">Email</div>
+                        <div class="detail-value">
+                            {{ $payment->order->email ?? ($payment->order->user->email ?? '-') }}
+                        </div>
                     </div>
+
+                    <div class="detail-row">
+                        <div class="detail-label">Nomor Telepon</div>
+                        <div class="detail-value">
+                            {{ $payment->order->phone_number ?? ($payment->order->user->phone ?? '-') }}
+                        </div>
+                    </div>
+
+                    @if($payment->order->user)
+                    <div class="detail-row">
+                        <div class="detail-label">Bergabung Sejak</div>
+                        <div class="detail-value">
+                            {{ $payment->order->user->created_at->format('d M Y') }}
+                            ({{ $payment->order->user->created_at->diffForHumans() }})
+                        </div>
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -215,15 +295,76 @@
                         Informasi Pesanan
                     </h5>
 
-                    <div class="info-label">ID Pesanan</div>
-                    <div class="info-value">
-                        #{{ $payment->order->id }} ({{ $payment->order->tipe_sewa }})
+                    <div class="detail-row">
+                        <div class="detail-label">ID Pesanan</div>
+                        <div class="detail-value">
+                            #{{ $payment->order->id }}
+                            <span class="badge bg-light text-dark ms-2">{{ $payment->order->tipe_sewa }}</span>
+                        </div>
                     </div>
 
-                    <div class="info-label">Motor</div>
-                    <div class="info-value">
-                        {{ $payment->order->product->nama_motor }}
-                        <span class="badge bg-light text-dark ms-2">{{ $payment->order->product->brand }}</span>
+                    <div class="detail-row">
+                        <div class="detail-label">Motor</div>
+                        <div class="detail-value">
+                            {{ $payment->order->product->nama_motor }}
+                            <span class="badge bg-light text-dark ms-2">{{ $payment->order->product->brand }}</span>
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Nomor Kendaraan</div>
+                        <div class="detail-value">
+                            {{ $payment->order->product->nomor_kendaraan }}
+                            <span class="badge bg-light text-dark ms-2">{{ $payment->order->product->cc_motor }} cc</span>
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Nomor Mesin</div>
+                        <div class="detail-value">
+                            {{ $payment->order->product->no_mesin }}
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Nomor Rangka</div>
+                        <div class="detail-value">
+                            {{ $payment->order->product->no_rangka }}
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Nomor Stnk</div>
+                        <div class="detail-value">
+                            {{ $payment->order->product->nomor_stnk }}
+                        </div>
+                    </div>
+
+                    <div class="detail-row">
+                        <div class="detail-label">Durasi Sewa</div>
+                        <div class="detail-value">
+                            {{ $payment->order->durasi_hari }} hari
+                            ({{ $payment->order->tanggal_mulai->format('d M Y') }} -
+                            {{ $payment->order->tanggal_selesai->format('d M Y') }})
+                        </div>
+                    </div>
+
+                    <div class="detail-row">
+                        <div class="detail-label">Total Harga</div>
+                        <div class="detail-value">
+                            Rp {{ number_format($payment->order->total_harga, 0, ',', '.') }}
+                        </div>
+                    </div>
+
+                    <div class="detail-row">
+                        <div class="detail-label">Status Pesanan</div>
+                        <div class="detail-value">
+                            <span class="badge badge-lg
+                                @if($payment->order->status == 'pending') bg-warning text-dark
+                                @elseif($payment->order->status == 'confirmed') bg-primary
+                                @elseif($payment->order->status == 'ongoing') bg-info
+                                @elseif($payment->order->status == 'completed') bg-success
+                                @elseif($payment->order->status == 'cancelled') bg-danger
+                                @else bg-secondary @endif">
+                                {{ $payment->order->status_label }}
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -243,27 +384,64 @@
                         Detail Pembayaran
                     </h5>
 
-                    <div class="info-label">Tipe Pembayaran</div>
-                    <div class="info-value">
-                        {{ $payment->payment_type ?? '-' }}
-                    </div>
-
-                    <div class="info-label">Bank</div>
-                    <div class="info-value">
-                        {{ $payment->bank ?? '-' }}
+                    <div class="detail-row">
+                        <div class="detail-label">Tipe Pembayaran</div>
+                        <div class="detail-value">
+                            {{ $payment->payment_type ?? '-' }}
+                            @if($payment->payment_type == 'bank_transfer')
+                                ({{ $payment->bank }})
+                            @endif
+                        </div>
                     </div>
 
                     @if($payment->va_number)
-                    <div class="info-label">Nomor Virtual Account</div>
-                    <div class="info-value">
-                        <code class="bg-light p-2 rounded">{{ $payment->va_number }}</code>
+                    <div class="detail-row">
+                        <div class="detail-label">Nomor Virtual Account</div>
+                        <div class="detail-value">
+                            <code>{{ $payment->va_number }}</code>
+                        </div>
+                    </div>
+                    @endif
+
+                    @if($payment->bill_key || $payment->biller_code)
+                    <div class="detail-row">
+                        <div class="detail-label">Kode Pembayaran</div>
+                        <div class="detail-value">
+                            @if($payment->bill_key) Bill Key: <code>{{ $payment->bill_key }}</code> @endif
+                            @if($payment->biller_code) Biller Code: <code>{{ $payment->biller_code }}</code> @endif
+                        </div>
+                    </div>
+                    @endif
+
+                    <div class="detail-row">
+                        <div class="detail-label">Gross Amount</div>
+                        <div class="detail-value">
+                            Rp {{ number_format($payment->gross_amount, 0, ',', '.') }}
+                        </div>
+                    </div>
+
+                    @if($payment->currency)
+                    <div class="detail-row">
+                        <div class="detail-label">Mata Uang</div>
+                        <div class="detail-value">
+                            {{ $payment->currency }}
+                        </div>
+                    </div>
+                    @endif
+
+                    @if($payment->approval_code)
+                    <div class="detail-row">
+                        <div class="detail-label">Kode Persetujuan</div>
+                        <div class="detail-value">
+                            <code>{{ $payment->approval_code }}</code>
+                        </div>
                     </div>
                     @endif
                 </div>
             </div>
         </div>
 
-        {{-- Status Information --}}
+        {{-- Status and Rental Information --}}
         <div class="col-lg-6">
             <div class="card info-card h-100">
                 <div class="card-body p-4">
@@ -272,36 +450,191 @@
                     </div>
                     <h5 class="card-title mb-4">
                         <i class="fas fa-chart-line me-2 text-warning"></i>
-                        Status Transaksi
+                        Status & Rental
                     </h5>
 
-                    <div class="info-label">Status Pembayaran</div>
-                    <div class="info-value">
-                        <span class="badge badge-lg
-                            @if($payment->status == 'pending') bg-warning text-dark
-                            @elseif($payment->status == 'success') bg-success
-                            @elseif($payment->status == 'failed') bg-danger
-                            @elseif($payment->status == 'expired') bg-secondary
-                            @else bg-info @endif">
-                            <i class="fas fa-circle me-1"></i>
-                            {{ $payment->status_label }}
-                        </span>
+                    <div class="detail-row">
+                        <div class="detail-label">Status Pembayaran</div>
+                        <div class="detail-value">
+                            <span class="badge badge-lg
+                                @if($payment->status == 'pending') bg-warning text-dark
+                                @elseif($payment->status == 'success') bg-success
+                                @elseif($payment->status == 'failed') bg-danger
+                                @elseif($payment->status == 'expired') bg-secondary
+                                @else bg-info @endif">
+                                <i class="fas fa-circle me-1"></i>
+                                {{ $payment->status_label }}
+                            </span>
+                        </div>
                     </div>
 
-                    <div class="info-label">Status Midtrans</div>
-                    <div class="info-value">
-                        {{ $payment->transaction_status_label }}
+                    <div class="detail-row">
+                        <div class="detail-label">Status Midtrans</div>
+                        <div class="detail-value">
+                            {{ $payment->transaction_status_label }}
+                        </div>
                     </div>
 
-                    <div class="info-label">Waktu Transaksi</div>
-                    <div class="info-value">
-                        @if($payment->transaction_time)
+                    @if($payment->order->product->user)
+                    <div class="detail-row">
+                        <div class="detail-label">Pemilik Motor</div>
+                        <div class="detail-value">
+                            {{ $payment->order->product->user->name }}
+                            <span class="badge bg-light text-dark ms-2">
+                                {{ $payment->order->product->user->phone }}
+                            </span>
+                        </div>
+                    </div>
+                    @endif
+
+                    <div class="detail-row">
+                        <div class="detail-label">Waktu Transaksi</div>
+                        <div class="detail-value">
+                            @if($payment->transaction_time)
+                                <i class="fas fa-clock me-1 text-muted"></i>
+                                {{ \Carbon\Carbon::parse($payment->transaction_time)->format('d F Y, H:i') }} WIB
+                            @else
+                                -
+                            @endif
+                        </div>
+                    </div>
+
+                    @if($payment->settlement_time)
+                    <div class="detail-row">
+                        <div class="detail-label">Waktu Settlement</div>
+                        <div class="detail-value">
                             <i class="fas fa-clock me-1 text-muted"></i>
-                            {{ \Carbon\Carbon::parse($payment->transaction_time)->format('d F Y, H:i') }} WIB
-                        @else
-                            -
+                            {{ \Carbon\Carbon::parse($payment->settlement_time)->format('d F Y, H:i') }} WIB
+                        </div>
+                    </div>
+                    @endif
+
+                    @if($payment->expiry_time)
+                    <div class="detail-row">
+                        <div class="detail-label">Waktu Kedaluwarsa</div>
+                        <div class="detail-value">
+                            <i class="fas fa-clock me-1 text-muted"></i>
+                            {{ \Carbon\Carbon::parse($payment->expiry_time)->format('d F Y, H:i') }} WIB
+                        </div>
+                    </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Timeline and Additional Info --}}
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="card info-card">
+                <div class="card-body p-4">
+                    <div class="icon-wrapper timeline-icon">
+                        <i class="fas fa-history text-white"></i>
+                    </div>
+                    <h5 class="card-title mb-4">
+                        <i class="fas fa-stream me-2 text-info"></i>
+                        Timeline Pembayaran
+                    </h5>
+
+                    <div class="timeline">
+                        @if($payment->transaction_time)
+                        <div class="timeline-item">
+                            <div class="timeline-date">
+                                {{ \Carbon\Carbon::parse($payment->transaction_time)->format('d M Y, H:i') }}
+                            </div>
+                            <div class="timeline-content">
+                                Transaksi dibuat dengan status:
+                                <span class="badge bg-secondary">{{ $payment->transaction_status }}</span>
+                            </div>
+                        </div>
+                        @endif
+
+                        @if($payment->status_history)
+                            @foreach(json_decode($payment->status_history, true) as $history)
+                            <div class="timeline-item">
+                                <div class="timeline-date">
+                                    {{ \Carbon\Carbon::parse($history['time'])->format('d M Y, H:i') }}
+                                </div>
+                                <div class="timeline-content">
+                                    Status berubah menjadi:
+                                    <span class="badge bg-{{ $history['status'] == 'success' ? 'success' : 'warning' }}">
+                                        {{ $history['status'] }}
+                                    </span>
+                                </div>
+                            </div>
+                            @endforeach
+                        @endif
+
+                        @if($payment->settlement_time)
+                        <div class="timeline-item">
+                            <div class="timeline-date">
+                                {{ \Carbon\Carbon::parse($payment->settlement_time)->format('d M Y, H:i') }}
+                            </div>
+                            <div class="timeline-content">
+                                Pembayaran berhasil diselesaikan
+                            </div>
+                        </div>
                         @endif
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card info-card">
+                <div class="card-body p-4">
+                    <div class="icon-wrapper rental-icon">
+                        <i class="fas fa-store text-white"></i>
+                    </div>
+                    <h5 class="card-title mb-4">
+                        <i class="fas fa-info-circle me-2 text-primary"></i>
+                        Informasi Tambahan
+                    </h5>
+
+                    <div class="detail-row">
+                        <div class="detail-label">Metode Pembayaran</div>
+                        <div class="detail-value">
+                            {{ $payment->payment_method ?? 'Bank Transfer' }}
+                        </div>
+                    </div>
+
+                    @if($payment->order->lokasi_pengambilan)
+                    <div class="detail-row">
+                        <div class="detail-label">Lokasi Pengambilan</div>
+                        <div class="detail-value">
+                            {{ $payment->order->lokasi_pengambilan }}
+                        </div>
+                    </div>
+                    @endif
+
+                    @if($payment->order->lokasi_pengembalian)
+                    <div class="detail-row">
+                        <div class="detail-label">Lokasi Pengembalian</div>
+                        <div class="detail-value">
+                            {{ $payment->order->lokasi_pengembalian }}
+                        </div>
+                    </div>
+                    @endif
+
+                    @if($payment->order->catatan)
+                    <div class="detail-row">
+                        <div class="detail-label">Catatan</div>
+                        <div class="detail-value">
+                            {{ $payment->order->catatan }}
+                        </div>
+                    </div>
+                    @endif
+
+                    @if($payment->order->foto_ktp)
+                    <div class="detail-row">
+                        <div class="detail-label">Foto KTP</div>
+                        <div class="detail-value">
+                            <a href="{{ Storage::url($payment->order->foto_ktp) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                Lihat KTP
+                            </a>
+                        </div>
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -317,15 +650,17 @@
                 </a>
 
                 <div class="d-flex gap-2">
-                    <button class="btn btn-outline-primary" onclick="window.print()">
-                        <i class="fas fa-print me-1"></i>
-                        Cetak
-                    </button>
-
                     @if($payment->status == 'pending')
                     <button class="btn btn-success" onclick="refreshPaymentStatus()">
                         <i class="fas fa-sync-alt me-1"></i>
                         Refresh Status
+                    </button>
+                    @endif
+
+                    @if(Auth::user()->isAdmin())
+                    <button class="btn btn-danger" onclick="showRefundModal()">
+                        <i class="fas fa-undo me-1"></i>
+                        Proses Refund
                     </button>
                     @endif
                 </div>
@@ -337,25 +672,26 @@
 @push('scripts')
 <script>
     function refreshPaymentStatus() {
-        // Add your payment status refresh logic here
         Swal.fire({
             title: 'Memperbarui Status...',
             text: 'Mohon tunggu sebentar',
             allowOutsideClick: false,
             didOpen: () => {
                 Swal.showLoading();
-                // Make AJAX call to refresh payment status
-                // You can implement this based on your backend API
             }
         });
+    }
+
+    function showRefundModal() {
+        const modal = new bootstrap.Modal(document.getElementById('refundModal'));
+        modal.show();
     }
 
     // Auto-refresh for pending payments
     @if($payment->status == 'pending')
     setInterval(() => {
-        // Implement auto-refresh logic for pending payments
         console.log('Checking payment status...');
-    }, 30000); // Check every 30 seconds
+    }, 30000);
     @endif
 </script>
 @endpush
