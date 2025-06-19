@@ -74,7 +74,7 @@
                                             style="height: 220px; object-fit: cover;">
                                         <!-- Availability Badge -->
                                         <div class="position-absolute top-0 end-0 m-3">
-                                            @if($product->is_available)
+                                            @if ($product->is_available)
                                                 <span class="badge bg-success rounded-pill px-3 py-2">
                                                     <i class="bi bi-check-circle me-1"></i>Tersedia
                                                 </span>
@@ -110,13 +110,15 @@
                                                 <div class="col-6">
                                                     <div class="spec-item">
                                                         <i class="bi bi-gear text-primary me-1"></i>
-                                                        <small class="text-muted">{{ $product->transmisi_motor ?? 'Manual' }}</small>
+                                                        <small
+                                                            class="text-muted">{{ $product->transmisi_motor ?? 'Manual' }}</small>
                                                     </div>
                                                 </div>
                                                 <div class="col-6">
                                                     <div class="spec-item">
                                                         <i class="bi bi-speedometer text-warning me-1"></i>
-                                                        <small class="text-muted">{{ $product->cc_motor ?? '150' }}cc</small>
+                                                        <small
+                                                            class="text-muted">{{ $product->cc_motor ?? '150' }}cc</small>
                                                     </div>
                                                 </div>
                                                 <div class="col-6">
@@ -128,15 +130,17 @@
                                                 <div class="col-6">
                                                     <div class="spec-item">
                                                         <i class="bi bi-tag text-success me-1"></i>
-                                                        <small class="text-muted">{{ $product->tipe_motor ?? 'Sport' }}</small>
+                                                        <small
+                                                            class="text-muted">{{ $product->tipe_motor ?? 'Sport' }}</small>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
 
                                         <!-- Short Description -->
-                                        @if($product->deskripsi)
-                                            <p class="text-muted small mb-3" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                        @if ($product->deskripsi)
+                                            <p class="text-muted small mb-3"
+                                                style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
                                                 {{ $product->deskripsi }}
                                             </p>
                                         @endif
@@ -148,10 +152,9 @@
                                                 class="btn btn-outline-primary rounded-pill px-4 py-2 hover-scale-sm">
                                                 <i class="bi bi-eye me-2"></i>Detail
                                             </a>
-                                            @if($product->is_available)
+                                            @if ($product->is_available)
                                                 <button class="btn btn-success rounded-pill px-4 py-2 hover-scale-sm fw-bold rent-btn"
-                                                    data-product-id="{{ $product->id }}"
-                                                    data-bs-toggle="modal"
+                                                    data-product-id="{{ $product->id }}" data-bs-toggle="modal"
                                                     data-bs-target="#locationVerificationModal">
                                                     <i class="bi bi-cart-plus me-2"></i>Sewa Sekarang
                                                 </button>
@@ -172,7 +175,8 @@
                     <div class="empty-state py-5">
                         <i class="bi bi-motorcycle display-1 text-muted mb-3"></i>
                         <h4 class="text-muted">Belum ada motor tersedia dari penyedia ini.</h4>
-                        <p class="text-muted">Silakan cek kembali nanti atau hubungi penyedia untuk informasi lebih lanjut.</p>
+                        <p class="text-muted">Silakan cek kembali nanti atau hubungi penyedia untuk informasi lebih lanjut.
+                        </p>
                     </div>
                 </div>
             @endif
@@ -180,11 +184,13 @@
     </section>
 
     <!-- Location Verification Modal -->
-    <div class="modal fade" id="locationVerificationModal" tabindex="-1" aria-labelledby="locationVerificationModalLabel" aria-hidden="true">
+    <div class="modal fade" id="locationVerificationModal" tabindex="-1"
+        aria-labelledby="locationVerificationModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content rounded-4">
                 <div class="modal-header border-0 bg-light">
-                    <h5 class="modal-title fw-bold text-primary" id="locationVerificationModalLabel">🎉 Selamat Datang di Tegal!</h5>
+                    <h5 class="modal-title fw-bold text-primary" id="locationVerificationModalLabel">🎉 Selamat Datang di
+                        Tegal!</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body py-4">
@@ -200,7 +206,8 @@
                     </div>
                 </div>
                 <div class="modal-footer border-0 bg-light">
-                    <button type="button" class="btn btn-lg btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">
+                    <button type="button" class="btn btn-lg btn-outline-secondary rounded-pill px-4"
+                        data-bs-dismiss="modal">
                         Tidak
                     </button>
                     <button type="button" id="confirmLocationBtn" class="btn btn-lg btn-primary rounded-pill px-4">
@@ -337,12 +344,19 @@
         }
 
         @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {
+
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
                 transform: translateY(0);
             }
+
             40% {
                 transform: translateY(-20px);
             }
+
             60% {
                 transform: translateY(-10px);
             }
@@ -408,7 +422,7 @@
         /* Card improvements */
         .card {
             transition: all 0.3s ease;
-            border: 1px solid rgba(0,0,0,.125);
+            border: 1px solid rgba(0, 0, 0, .125);
         }
 
         .card:hover {
@@ -436,7 +450,13 @@
 
             // Handle rent button clicks
             document.querySelectorAll('.rent-btn').forEach(button => {
-                button.addEventListener('click', function() {
+                button.addEventListener('click', function(e) {
+                    // Cek apakah tombol disabled
+                    if (this.classList.contains('disabled') || this.hasAttribute('disabled')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return false;
+                    }
                     selectedProductId = this.getAttribute('data-product-id');
                 });
             });
@@ -445,11 +465,12 @@
             document.getElementById('confirmLocationBtn').addEventListener('click', function() {
                 if (selectedProductId) {
                     // Close the modal
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('locationVerificationModal'));
+                    const modal = bootstrap.Modal.getInstance(document.getElementById(
+                        'locationVerificationModal'));
                     modal.hide();
 
                     // Redirect to order page
-                    window.location.href = `/frontend/order/${selectedProductId}`;
+                    window.location.href = `/order/${selectedProductId}`;
                 }
             });
 

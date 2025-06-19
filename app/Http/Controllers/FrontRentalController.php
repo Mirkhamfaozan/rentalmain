@@ -34,7 +34,6 @@ class FrontRentalController extends Controller
         $rentalProfile = RentalBiodata::forRental()->findOrFail($id);
         // Fetch products for the user associated with this rental profile
         $products = Product::where('user_id', $rentalProfile->user_id)
-            ->where('is_available', true)
             ->orderBy('created_at', 'desc')
             ->take(6)
             ->get();

@@ -71,7 +71,7 @@
   <!-- Navigation-->
   <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top shadow-sm">
     <div class="container px-4 px-lg-5">
-      <a class="navbar-brand fw-bold fs-4 navbar-brand-gradient text-decoration-none" href="#">
+      <a class="navbar-brand fw-bold fs-4 navbar-brand-gradient text-decoration-none" href="{{ route('frontend.homepage') }}">
         <i class="bi bi-motorcycle me-2"></i>AM MOTOR
       </a>
       <button
@@ -222,6 +222,13 @@
   <script src="{{ asset('frontend/js/scripts.js') }}"></script>
 
   <script>
+    // Initialize AOS animation
+    AOS.init({
+      duration: 800,
+      easing: 'ease-in-out',
+      once: true
+    });
+
     // Bootstrap-based interactions
     document.addEventListener('DOMContentLoaded', function() {
       // Smooth scroll for anchor links using Bootstrap's smooth scroll
@@ -238,19 +245,20 @@
         });
       });
 
-      // Add Bootstrap tooltip initialization for notification button
+      // Initialize tooltips
       var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
       var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
       });
 
-      // Add Bootstrap popover initialization if needed
+      // Initialize popovers
       var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
       var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
         return new bootstrap.Popover(popoverTriggerEl);
       });
     });
   </script>
-</body>
 
+  @stack('scripts')
+</body>
 </html>

@@ -10,16 +10,15 @@ class HomeController extends Controller
 {
     public function index()
     {
-        // Fetch latest available products
-        $products = Product::where('is_available', true)
-            ->orderBy('created_at', 'desc')
+        // Tampilkan produk terbaru (baik tersedia maupun tidak)
+        $products = Product::orderBy('created_at', 'desc')
             ->take(6)
             ->get();
 
         // Fetch rental profiles
         $rentalProfiles = RentalBiodata::forRental()
             ->orderBy('created_at', 'desc')
-            ->take(3) // Limit to 3 rental profiles
+            ->take(3)
             ->get();
 
         return view('frontend.homepage', compact('products', 'rentalProfiles'));
@@ -34,9 +33,8 @@ class HomeController extends Controller
     {
         $product = Product::findOrFail($id);
 
-        // Fetch recommendations (e.g., other available products, excluding the current one)
-        $recommendations = Product::where('is_available', true)
-            ->where('id', '!=', $id)
+        // Rekomendasi produk lain (termasuk yang tidak tersedia)
+        $recommendations = Product::where('id', '!=', $id)
             ->orderBy('created_at', 'desc')
             ->take(3)
             ->get();
@@ -63,12 +61,13 @@ class HomeController extends Controller
     public function rentalProfile($id)
     {
         $rentalProfile = RentalBiodata::forRental()->findOrFail($id);
-        // Fetch products for the user associated with this rental profile
+
+        // Tampilkan semua produk rental (baik tersedia maupun tidak)
         $products = Product::where('user_id', $rentalProfile->user_id)
-            ->where('is_available', true)
             ->orderBy('created_at', 'desc')
             ->take(6)
             ->get();
+
         return view('frontend.rental_profile', compact('rentalProfile', 'products'));
     }
 }

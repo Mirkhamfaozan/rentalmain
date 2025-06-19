@@ -69,7 +69,6 @@ class FrontPaymentController extends Controller
 
     public function store(Request $request, $orderId)
     {
-        // Enhanced validation with custom messages
         $request->validate([
             'payment_method' => 'required|in:bank_transfer,credit_card,gopay,shopeepay,dana,ovo,qris,indomaret,alfamart',
             'bank_type' => 'required_if:payment_method,bank_transfer|in:bca,bni,bri,mandiri,permata,cimb',
@@ -83,32 +82,26 @@ class FrontPaymentController extends Controller
         DB::beginTransaction();
 
         try {
-            // Check if order exists
             $order = Order::with('product')->findOrFail($orderId);
             Log::info('Processing payment for order', ['order_id' => $orderId, 'order_status' => $order->status]);
 
-            // Validate order status
             if ($order->status !== 'pending') {
                 DB::rollBack();
                 return redirect()->back()->with('error', 'Pesanan dengan status "' . $order->status . '" tidak dapat diproses untuk pembayaran.');
             }
 
-            // Check if order already has active payment
             if ($order->hasPayment() && in_array($order->payment->transaction_status, ['pending', 'settlement'])) {
                 DB::rollBack();
                 return redirect()->route('payment.show', $order->payment->id);
             }
 
-            // Validate order total
             if ($order->total_harga <= 0) {
                 DB::rollBack();
                 return redirect()->back()->with('error', 'Total pembayaran tidak valid.');
             }
 
-            // Generate unique transaction ID
             $transactionId = 'ORDER-' . $order->id . '-' . time();
 
-            // Create payment via Midtrans Core API
             $midtransResponse = $this->createMidtransPayment($order, $transactionId, $request->payment_method, $request->bank_type);
 
             if (!$midtransResponse['success']) {
@@ -116,7 +109,6 @@ class FrontPaymentController extends Controller
                 return redirect()->back()->with('error', $midtransResponse['message']);
             }
 
-            // Prepare payment data based on Midtrans response
             $paymentData = [
                 'order_id' => $order->id,
                 'transaction_id' => $transactionId,
@@ -130,7 +122,6 @@ class FrontPaymentController extends Controller
                 'updated_at' => now(),
             ];
 
-            // Add payment method specific data
             $responseData = $midtransResponse['data'];
 
             switch ($request->payment_method) {
@@ -167,7 +158,6 @@ class FrontPaymentController extends Controller
                     break;
             }
 
-            // Create payment record
             $payment = Payment::create($paymentData);
 
             if (!$payment) {
@@ -226,14 +216,12 @@ class FrontPaymentController extends Controller
     private function createMidtransPayment($order, $transactionId, $paymentMethod, $bankType = null)
     {
         try {
-            // Prepare customer details
             $customerDetails = [
                 'first_name' => $order->customer_name ?? 'Customer',
                 'email' => $order->customer_email ?? 'customer@example.com',
                 'phone' => $order->customer_phone ?? '08123456789',
             ];
 
-            // Prepare item details
             $itemDetails = [
                 [
                     'id' => $order->product->id,
@@ -243,16 +231,13 @@ class FrontPaymentController extends Controller
                 ]
             ];
 
-            // Base transaction details
             $transactionDetails = [
                 'order_id' => $transactionId,
                 'gross_amount' => $order->total_harga,
             ];
 
-            // Payment method specific configuration
             $paymentConfig = $this->getPaymentMethodConfig($paymentMethod, $bankType);
 
-            // Build complete request payload
             $payload = [
                 'payment_type' => $paymentConfig['payment_type'],
                 'transaction_details' => $transactionDetails,
@@ -260,12 +245,10 @@ class FrontPaymentController extends Controller
                 'item_details' => $itemDetails,
             ];
 
-            // Add payment method specific parameters
             if (isset($paymentConfig['payment_params'])) {
                 $payload = array_merge($payload, $paymentConfig['payment_params']);
             }
 
-            // Make API call to Midtrans
             $response = Http::withHeaders([
                 'Accept' => 'application/json',
                 'Content-Type' => 'application/json',
@@ -422,7 +405,6 @@ class FrontPaymentController extends Controller
         try {
             $payment = Payment::with('order.product')->findOrFail($paymentId);
 
-            // Check payment status from Midtrans if still pending
             if ($payment->transaction_status === 'pending') {
                 $this->checkPaymentStatus($payment);
                 $payment->refresh();
@@ -458,13 +440,11 @@ class FrontPaymentController extends Controller
         }
     }
 
-    // Webhook untuk payment gateway (Midtrans)
     public function webhook(Request $request)
     {
         try {
             Log::info('Payment webhook received', $request->all());
 
-            // Verify webhook signature
             $serverKey = $this->serverKey;
             $hashedKey = hash('sha512', $request->order_id . $request->status_code . $request->gross_amount . $serverKey);
 
@@ -507,7 +487,6 @@ class FrontPaymentController extends Controller
             $transactionStatus = $midtransData['transaction_status'];
             $fraudStatus = $midtransData['fraud_status'] ?? null;
 
-            // Update payment with webhook data
             $updateData = [
                 'transaction_status' => $transactionStatus,
                 'fraud_status' => $fraudStatus,
@@ -515,7 +494,6 @@ class FrontPaymentController extends Controller
                 'transaction_time' => now(),
             ];
 
-            // Map Midtrans status to internal status
             switch ($transactionStatus) {
                 case 'capture':
                     if ($fraudStatus == 'challenge') {
@@ -523,12 +501,16 @@ class FrontPaymentController extends Controller
                     } else if ($fraudStatus == 'accept') {
                         $updateData['status'] = 'success';
                         $payment->order->update(['status' => 'confirmed']);
+                        // Mark product as unavailable
+                        $payment->order->product->update(['is_available' => 0]);
                     }
                     break;
 
                 case 'settlement':
                     $updateData['status'] = 'success';
                     $payment->order->update(['status' => 'confirmed']);
+                    // Mark product as unavailable
+                    $payment->order->product->update(['is_available' => 0]);
                     break;
 
                 case 'expire':
@@ -544,6 +526,8 @@ class FrontPaymentController extends Controller
                 case 'refund':
                 case 'partial_refund':
                     $updateData['status'] = 'refunded';
+                    // Mark product as available again
+                    $payment->order->product->update(['is_available' => 1]);
                     break;
 
                 case 'pending':
@@ -590,7 +574,6 @@ class FrontPaymentController extends Controller
                 'transaction_time' => now(),
             ];
 
-            // Handle proof image upload and notes
             $notesArray = [];
             if ($request->hasFile('proof_image')) {
                 $imagePath = $request->file('proof_image')->store('payment_proofs', 'public');
@@ -609,6 +592,8 @@ class FrontPaymentController extends Controller
 
             $payment->update($updateData);
             $payment->order->update(['status' => 'confirmed']);
+            // Mark product as unavailable
+            $payment->order->product->update(['is_available' => 0]);
 
             Log::info('Payment confirmed successfully', [
                 'payment_id' => $paymentId,
@@ -632,14 +617,12 @@ class FrontPaymentController extends Controller
         }
     }
 
-    // Helper method to cancel payment
     public function cancel($paymentId)
     {
         try {
             $payment = Payment::findOrFail($paymentId);
 
             if ($payment->transaction_status === 'pending') {
-                // Cancel payment in Midtrans
                 $response = Http::withHeaders([
                     'Accept' => 'application/json',
                     'Authorization' => 'Basic ' . base64_encode($this->serverKey . ':'),
@@ -667,7 +650,6 @@ class FrontPaymentController extends Controller
         }
     }
 
-    // Helper method to check if payment is expired
     public function checkExpiredPayments()
     {
         try {
@@ -694,3 +676,4 @@ class FrontPaymentController extends Controller
         }
     }
 }
+    

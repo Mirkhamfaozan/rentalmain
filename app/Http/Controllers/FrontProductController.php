@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Validator;
 
 class FrontProductController extends Controller
 {
-
     public function frontendIndex()
     {
         $products = Product::where('is_available', true)->get();
@@ -94,13 +93,6 @@ class FrontProductController extends Controller
             // Auto-determine rental type based on duration
             $tipe_sewa = $this->determineRentalType($durasi_hari);
 
-            // Check stock availability
-            if (!$this->isStockAvailable($request->product_id, $request->tanggal_mulai, $request->tanggal_selesai)) {
-                return redirect()->back()
-                    ->with('error', 'Stok motor tidak mencukupi untuk tanggal tersebut. Sisa stok: ' . $this->getAvailableStock($request->product_id, $request->tanggal_mulai, $request->tanggal_selesai))
-                    ->withInput();
-            }
-
             // Handle KTP photo upload
             $ktpPath = null;
             if ($request->hasFile('foto_ktp')) {
@@ -154,49 +146,6 @@ class FrontProductController extends Controller
             Log::error('KTP upload error: ' . $e->getMessage());
             throw new \Exception('Gagal mengupload foto KTP');
         }
-    }
-
-    private function isStockAvailable($productId, $startDate, $endDate)
-    {
-        $product = Product::findOrFail($productId);
-        $totalStock = $product->stok;
-
-        // Get the number of active orders that overlap with the requested dates
-        $overlappingOrders = $this->getOverlappingOrdersCount($productId, $startDate, $endDate);
-
-        // Check if there's available stock
-        return ($totalStock - $overlappingOrders) > 0;
-    }
-
-    private function getAvailableStock($productId, $startDate, $endDate)
-    {
-        $product = Product::findOrFail($productId);
-        $totalStock = $product->stok;
-
-        // Get the number of active orders that overlap with the requested dates
-        $overlappingOrders = $this->getOverlappingOrdersCount($productId, $startDate, $endDate);
-
-        return max(0, $totalStock - $overlappingOrders);
-    }
-
-    private function getOverlappingOrdersCount($productId, $startDate, $endDate)
-    {
-        return Order::where('product_id', $productId)
-            ->whereIn('status', ['pending', 'confirmed', 'active'])
-            ->where(function ($query) use ($startDate, $endDate) {
-                $query->where(function ($q) use ($startDate, $endDate) {
-                    // Case 1: Order starts within our date range
-                    $q->whereBetween('tanggal_mulai', [$startDate, $endDate]);
-                })->orWhere(function ($q) use ($startDate, $endDate) {
-                    // Case 2: Order ends within our date range
-                    $q->whereBetween('tanggal_selesai', [$startDate, $endDate]);
-                })->orWhere(function ($q) use ($startDate, $endDate) {
-                    // Case 3: Order spans our entire date range
-                    $q->where('tanggal_mulai', '<=', $startDate)
-                      ->where('tanggal_selesai', '>=', $endDate);
-                });
-            })
-            ->count();
     }
 
     private function determineRentalType($durasi_hari)
@@ -258,18 +207,11 @@ class FrontProductController extends Controller
             return response()->json(['error' => 'Invalid input'], 400);
         }
 
-        $availableStock = $this->getAvailableStock(
-            $request->product_id,
-            $request->tanggal_mulai,
-            $request->tanggal_selesai
-        );
-
         $product = Product::findOrFail($request->product_id);
 
+        // Since there's no stock column, we'll just check if the product is available
         return response()->json([
-            'available_stock' => $availableStock,
-            'total_stock' => $product->stok,
-            'is_available' => $availableStock > 0
+            'is_available' => $product->is_available
         ]);
     }
 }
