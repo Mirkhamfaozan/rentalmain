@@ -11,6 +11,7 @@ use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\FrontPaymentController;
 use App\Http\Controllers\FrontProductController;
 use App\Http\Controllers\FrontProfileController;
+use App\Http\Controllers\FrontRentalController;
 use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
@@ -22,7 +23,8 @@ use Illuminate\Support\Facades\Route;
 
 // Homepage and general pages
 Route::get('/', [HomeController::class, 'index'])->name('frontend.homepage');
-Route::get('/rental-profile/{id}', [HomeController::class, 'rentalProfile'])->name('rental.profiles');
+Route::get('/rental', [FrontRentalController::class, 'rentalList'])->name('frontend.rental');
+Route::get('/rental-profile/{id}', [FrontRentalController::class, 'rentalProfile'])->name('rental.profiles');
 Route::get('/tentang', [HomeController::class, 'tentang'])->name('frontend.tentang');
 Route::get('/contact', [HomeController::class, 'contact'])->name('frontend.contact');
 Route::get('/carasewa', [HomeController::class, 'carasewa'])->name('frontend.carasewa');
@@ -36,6 +38,7 @@ Route::post('/notifications/{id}/mark-as-read', [NotificationController::class, 
 // Product frontend routes
 Route::get('/product', [FrontProductController::class, 'frontendIndex'])->name('frontend.product');
 Route::get('/detail/{id}', [HomeController::class, 'detail'])->name('frontend.detail');
+
 
 // Guest routes (accessible without authentication)
 Route::group(['prefix' => 'payment'], function () {
@@ -126,6 +129,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
         // Product management routes (using resource controller)
         Route::resource('products', ProductController::class);
+        Route::put('/products/bulk-update', [ProductController::class, 'bulkUpdate'])->name('products.bulk-update');
 
         // Additional product routes
         Route::get('/products/{product}/toggle-availability', [ProductController::class, 'toggleAvailability'])->name('products.toggle-availability');

@@ -388,7 +388,7 @@
 
             <!-- View All Button with Animation -->
             <div class="text-center mt-5" data-aos="fade-up" data-aos-delay="100">
-                <a href=""
+                <a href="{{ route('frontend.rental') }}"
                     class="btn btn-outline-primary btn-lg px-5 py-3 rounded-pill hover-scale">
                     <i class="bi bi-grid-3x3-gap me-2"></i>Lihat Semua Rental
                 </a>
@@ -451,7 +451,6 @@
         </div>
     </section>
 
-    <!-- Modal Verifikasi Lokasi -->
 <!-- Modal Verifikasi Lokasi -->
 <div class="modal fade" id="locationVerificationModal" tabindex="-1" aria-labelledby="locationVerificationModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -857,7 +856,7 @@
 
             // If user clicks "No" in modal, redirect to homepage
             document.getElementById('locationVerificationModal').addEventListener('hidden.bs.modal', function () {
-                window.location.href = "{{ route('frontend.product') }}";
+                window.location.href = "{{ route('frontend.rental') }}";
             });
         });
     </script>

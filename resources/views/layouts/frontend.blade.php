@@ -93,9 +93,9 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link fw-medium position-relative {{ Request::routeIs('frontend.product') ? 'text-primary fw-semibold nav-link-active' : '' }}"
-               href="{{ route('frontend.product') }}">
-              <i class="bi bi-grid me-1"></i>Product
+            <a class="nav-link fw-medium position-relative {{ Request::routeIs('frontend.rental') ? 'text-primary fw-semibold nav-link-active' : '' }}"
+               href="{{ route('frontend.rental') }}">
+              <i class="bi bi-grid me-1"></i>Rental
             </a>
           </li>
           <li class="nav-item">

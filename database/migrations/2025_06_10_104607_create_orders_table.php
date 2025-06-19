@@ -14,6 +14,7 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->string('phone_number')->nullable();
             $table->string('email')->nullable();
+            $table->string('foto_ktp')->nullable(); 
             $table->foreignId('product_id')->constrained()->onDelete('restrict');
             $table->date('tanggal_mulai');
             $table->date('tanggal_selesai');

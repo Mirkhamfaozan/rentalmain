@@ -8,7 +8,7 @@
     <a href="{{ route('dashboard.products.index') }}" class="btn btn-outline-secondary">
         <i class="fas fa-arrow-left me-1"></i>Kembali ke Daftar Motor
     </a>
-@endsection 
+@endsection
 
 @section('content')
     <div class="row justify-content-center ">
@@ -317,7 +317,7 @@
                         <div class="row mb-4 mt-5">
                             <div class="col-12">
                                 <h6 class="text-primary fw-bold mb-3">
-                                    <i class="fas fa-money-bill-wave me-1"></i>Harga & Stok
+                                    <i class="fas fa-money-bill-wave me-1"></i>Harga
                                 </h6>
                             </div>
                         </div>
@@ -390,24 +390,6 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                                 <div class="form-text">Hari gratis untuk sewa bulanan (0-29 hari)</div>
-                            </div>
-
-                            <!-- Stok -->
-                            <div class="col-md-6">
-                                <label for="stok" class="form-label fw-semibold">
-                                    <i class="fas fa-boxes me-1 text-secondary"></i>Jumlah Stok
-                                    <span class="text-danger">*</span>
-                                </label>
-                                <input type="number"
-                                       class="form-control @error('stok') is-invalid @enderror"
-                                       id="stok"
-                                       name="stok"
-                                       value="{{ old('stok', $product->stok) }}"
-                                       min="1"
-                                       required>
-                                @error('stok')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
                             </div>
 
                             <!-- Ketersediaan -->
@@ -570,17 +552,6 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="d-flex">
-                                <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0"
-                                     style="width: 24px; height: 24px; font-size: 12px;">
-                                    <i class="fas fa-check"></i>
-                                </div>
-                                <div class="small">
-                                    <strong>Stok:</strong> Perbarui stok sesuai ketersediaan unit
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -620,7 +591,6 @@
 
             // Format input harga
             hargaInput.addEventListener('input', function() {
-                // Hapus karakter non-numerik kecuali titik desimal
                 let value = this.value.replace(/[^\d]/g, '');
                 this.value = value;
             });

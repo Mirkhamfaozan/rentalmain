@@ -158,7 +158,7 @@
                                 </div>
                             </div>
                             <div class="col-md-2">
-                                <label class="form-label small fw-semibold"> </label>
+                                <label class="form-label small fw-semibold"> </label>
                                 <div class="d-grid">
                                     <button type="submit" class="btn btn-outline-secondary" id="filterButton">
                                         <i class="fas fa-filter me-1"></i>Filter
@@ -204,11 +204,10 @@
                                     </th>
                                     <th class="border-0 fw-semibold" scope="col">Pesanan</th>
                                     <th class="border-0 fw-semibold" scope="col">Pelanggan</th>
+                                    <th class="border-0 fw-semibold" scope="col">KTP</th>
                                     <th class="border-0 fw-semibold" scope="col">Motor</th>
                                     <th class="border-0 fw-semibold" scope="col">Tanggal Mulai</th>
                                     <th class="border-0 fw-semibold" scope="col">Tanggal Selesai</th>
-                                    <th class="border-0 fw-semibold" scope="col">Lokasi Pengambilan</th>
-                                    <th class="border-0 fw-semibold" scope="col">Lokasi Pengembalian</th>
                                     <th class="border-0 fw-semibold" scope="col">Total Harga</th>
                                     <th class="border-0 fw-semibold" scope="col">Status</th>
                                     <th class="border-0 fw-semibold" scope="col">Aksi</th>
@@ -228,7 +227,27 @@
                                         <td>
                                             <div class="fw-semibold">{{ $order->name }}</div>
                                             <div class="text-muted small">
-                                                {{ $order->email ?? ($order->Hugh1->user->email ?? '-') }}</div>
+                                                {{ $order->email ?? ($order->user->email ?? '-') }}</div>
+                                        </td>
+                                        <td>
+                                            @if($order->foto_ktp)
+                                                <div class="position-relative">
+                                                    <img src="{{ asset('storage/' . str_replace('public/', '', $order->foto_ktp)) }}"
+                                                         class="ktp-thumbnail"
+                                                         alt="Foto KTP"
+                                                         style="cursor: pointer;"
+                                                         data-bs-toggle="modal"
+                                                         data-bs-target="#ktpModal"
+                                                         data-ktp-image="{{ asset('storage/' . str_replace('public/', '', $order->foto_ktp)) }}"
+                                                         data-customer-name="{{ $order->name }}">
+                                                    <div class="position-absolute top-0 end-0 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center ktp-overlay"
+                                                         style="width: 20px; height: 20px; font-size: 10px; transform: translate(25%, -25%);">
+                                                        <i class="fas fa-search-plus"></i>
+                                                    </div>
+                                                </div>
+                                            @else
+                                                <span class="text-muted small">Tidak ada</span>
+                                            @endif
                                         </td>
                                         <td>
                                             <div class="d-flex align-items-center">
@@ -251,8 +270,6 @@
                                         </td>
                                         <td>{{ \Carbon\Carbon::parse($order->tanggal_mulai)->format('d/m/Y') }}</td>
                                         <td>{{ \Carbon\Carbon::parse($order->tanggal_selesai)->format('d/m/Y') }}</td>
-                                        <td>{{ $order->lokasi_pengambilan ?? '-' }}</td>
-                                        <td>{{ $order->lokasi_pengembalian ?? '-' }}</td>
                                         <td class="fw-bold">Rp {{ number_format($order->total_harga, 0, ',', '.') }}</td>
                                         <td>
                                             <span
@@ -347,6 +364,32 @@
             </div>
         </div>
 
+        <!-- KTP Preview Modal -->
+        <div class="modal fade" id="ktpModal" tabindex="-1" aria-labelledby="ktpModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="ktpModalLabel">Foto KTP</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <div class="d-flex justify-content-center">
+                            <div class="spinner-border" role="status" id="ktpImageLoader">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                        <img id="ktpPreviewImage" class="img-fluid" alt="Foto KTP" style="max-height: 70vh; display: none;">
+                        <p id="ktpNoImage" class="text-muted" style="display: none;">Tidak ada foto KTP</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i> Tutup
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Delete Confirmation Modal -->
         <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
             <div class="modal-dialog">
@@ -370,9 +413,72 @@
             </div>
         </div>
 
+        @push('styles')
+        <!-- jQuery CDN (jika belum ada di layout utama) -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <!-- Moment.js untuk date range picker -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+        <!-- DateRangePicker -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/3.0.5/daterangepicker.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/3.0.5/daterangepicker.min.css">
+
+        <style>
+            .ktp-thumbnail {
+                width: 60px;
+                height: 40px;
+                object-fit: cover;
+                border-radius: 4px;
+                border: 1px solid #dee2e6;
+                transition: all 0.3s ease;
+            }
+
+            .ktp-thumbnail:hover {
+                transform: scale(1.05);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            }
+
+            .ktp-overlay {
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+
+            .ktp-thumbnail:hover + .ktp-overlay,
+            .position-relative:hover .ktp-overlay {
+                opacity: 1;
+            }
+
+            .ktp-preview {
+                max-width: 100%;
+                height: auto;
+                max-height: 300px;
+                border: 1px solid #dee2e6;
+                border-radius: 4px;
+            }
+
+            #ktpModal .modal-body {
+                min-height: 200px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        </style>
+        @endpush
+
         @push('scripts')
             <script>
-                $(document).ready(function() {
+                // Pastikan jQuery sudah dimuat
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Jika jQuery tersedia, gunakan jQuery
+                    if (typeof $ !== 'undefined') {
+                        initializeWithJQuery();
+                    } else {
+                        // Jika jQuery tidak tersedia, gunakan Vanilla JavaScript
+                        initializeWithVanillaJS();
+                    }
+                });
+
+                function initializeWithJQuery() {
+                    $(document).ready(function() {
                     // Initialize tooltips
                     $('[data-bs-toggle="tooltip"]').tooltip();
 
@@ -441,6 +547,55 @@
                         // Add grid view implementation here if needed
                     });
 
+                    // Handle KTP image preview modal
+                    $('#ktpModal').on('show.bs.modal', function (event) {
+                        const button = $(event.relatedTarget);
+                        const ktpImageSrc = button.data('ktp-image');
+                        const customerName = button.data('customer-name');
+
+                        const modal = $(this);
+                        const modalTitle = modal.find('#ktpModalLabel');
+                        const imageLoader = modal.find('#ktpImageLoader');
+                        const previewImage = modal.find('#ktpPreviewImage');
+                        const noImageText = modal.find('#ktpNoImage');
+
+                        // Update modal title
+                        modalTitle.text(`Foto KTP - ${customerName}`);
+
+                        // Reset modal state
+                        imageLoader.show();
+                        previewImage.hide();
+                        noImageText.hide();
+
+                        if (ktpImageSrc) {
+                            // Create new image object to preload
+                            const img = new Image();
+
+                            img.onload = function() {
+                                imageLoader.hide();
+                                previewImage.attr('src', ktpImageSrc).show();
+                            };
+
+                            img.onerror = function() {
+                                imageLoader.hide();
+                                noImageText.show();
+                            };
+
+                            img.src = ktpImageSrc;
+                        } else {
+                            imageLoader.hide();
+                            noImageText.show();
+                        }
+                    });
+
+                    // Reset modal when closed
+                    $('#ktpModal').on('hidden.bs.modal', function () {
+                        const modal = $(this);
+                        modal.find('#ktpPreviewImage').attr('src', '').hide();
+                        modal.find('#ktpImageLoader').show();
+                        modal.find('#ktpNoImage').hide();
+                    });
+
                     // Handle delete button click
                     $('button[data-bs-target="#deleteModal"]').on('click', function() {
                         const orderId = $(this).data('order-id');
@@ -453,7 +608,155 @@
                     $('#confirmDelete').on('click', function() {
                         $('#deleteForm').submit();
                     });
-                });
+                    });
+                }
+
+                function initializeWithVanillaJS() {
+                    // Initialize tooltips (Bootstrap 5)
+                    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                        return new bootstrap.Tooltip(tooltipTriggerEl);
+                    });
+
+                    // Handle form submission with loading state
+                    const filterForm = document.getElementById('filterForm');
+                    const filterButton = document.getElementById('filterButton');
+
+                    if (filterForm && filterButton) {
+                        filterForm.addEventListener('submit', function() {
+                            const spinner = filterButton.querySelector('.spinner-border');
+                            if (spinner) {
+                                spinner.classList.remove('d-none');
+                            }
+                            filterButton.disabled = true;
+                        });
+                    }
+
+                    // Handle select all checkbox
+                    const selectAllCheckbox = document.getElementById('selectAll');
+                    const orderCheckboxes = document.querySelectorAll('.order-checkbox');
+                    const bulkEditBtn = document.getElementById('bulkEdit');
+
+                    if (selectAllCheckbox && orderCheckboxes.length > 0) {
+                        selectAllCheckbox.addEventListener('change', function() {
+                            orderCheckboxes.forEach(checkbox => {
+                                checkbox.checked = this.checked;
+                            });
+                            toggleBulkActions();
+                        });
+
+                        orderCheckboxes.forEach(checkbox => {
+                            checkbox.addEventListener('change', toggleBulkActions);
+                        });
+                    }
+
+                    function toggleBulkActions() {
+                        const checkedCount = document.querySelectorAll('.order-checkbox:checked').length;
+                        if (bulkEditBtn) {
+                            bulkEditBtn.disabled = checkedCount === 0;
+                        }
+                    }
+
+                    // Handle view toggle (list/grid)
+                    const viewButtons = document.querySelectorAll('[data-view]');
+                    viewButtons.forEach(button => {
+                        button.addEventListener('click', function() {
+                            viewButtons.forEach(btn => btn.classList.remove('active'));
+                            this.classList.add('active');
+                        });
+                    });
+
+                    // Handle KTP image preview modal
+                    const ktpModal = document.getElementById('ktpModal');
+                    const ktpThumbnails = document.querySelectorAll('.ktp-thumbnail[data-bs-toggle="modal"]');
+
+                    if (ktpModal && ktpThumbnails.length > 0) {
+                        ktpModal.addEventListener('show.bs.modal', function (event) {
+                            const button = event.relatedTarget;
+                            const ktpImageSrc = button.getAttribute('data-ktp-image');
+                            const customerName = button.getAttribute('data-customer-name');
+
+                            const modalTitle = ktpModal.querySelector('#ktpModalLabel');
+                            const imageLoader = ktpModal.querySelector('#ktpImageLoader');
+                            const previewImage = ktpModal.querySelector('#ktpPreviewImage');
+                            const noImageText = ktpModal.querySelector('#ktpNoImage');
+
+                            // Update modal title
+                            if (modalTitle) {
+                                modalTitle.textContent = `Foto KTP - ${customerName}`;
+                            }
+
+                            // Reset modal state
+                            if (imageLoader) imageLoader.style.display = 'block';
+                            if (previewImage) previewImage.style.display = 'none';
+                            if (noImageText) noImageText.style.display = 'none';
+
+                            if (ktpImageSrc) {
+                                // Create new image object to preload
+                                const img = new Image();
+
+                                img.onload = function() {
+                                    if (imageLoader) imageLoader.style.display = 'none';
+                                    if (previewImage) {
+                                        previewImage.src = ktpImageSrc;
+                                        previewImage.style.display = 'block';
+                                    }
+                                };
+
+                                img.onerror = function() {
+                                    if (imageLoader) imageLoader.style.display = 'none';
+                                    if (noImageText) noImageText.style.display = 'block';
+                                };
+
+                                img.src = ktpImageSrc;
+                            } else {
+                                if (imageLoader) imageLoader.style.display = 'none';
+                                if (noImageText) noImageText.style.display = 'block';
+                            }
+                        });
+
+                        // Reset modal when closed
+                        ktpModal.addEventListener('hidden.bs.modal', function () {
+                            const previewImage = ktpModal.querySelector('#ktpPreviewImage');
+                            const imageLoader = ktpModal.querySelector('#ktpImageLoader');
+                            const noImageText = ktpModal.querySelector('#ktpNoImage');
+
+                            if (previewImage) {
+                                previewImage.src = '';
+                                previewImage.style.display = 'none';
+                            }
+                            if (imageLoader) imageLoader.style.display = 'block';
+                            if (noImageText) noImageText.style.display = 'none';
+                        });
+                    }
+
+                    // Handle delete button click
+                    const deleteButtons = document.querySelectorAll('button[data-bs-target="#deleteModal"]');
+                    const deleteForm = document.getElementById('deleteForm');
+                    const deleteModalMessage = document.getElementById('deleteModalMessage');
+
+                    deleteButtons.forEach(button => {
+                        button.addEventListener('click', function() {
+                            const orderId = this.getAttribute('data-order-id');
+                            const orderNumber = this.getAttribute('data-order-number');
+
+                            if (deleteModalMessage) {
+                                deleteModalMessage.textContent = `Apakah Anda yakin ingin menghapus Pesanan #${orderNumber}?`;
+                            }
+                            if (deleteForm) {
+                                deleteForm.action = `{{ url('dashboard/orders') }}/${orderId}`;
+                            }
+                        });
+                    });
+
+                    // Handle confirm delete in modal
+                    const confirmDeleteBtn = document.getElementById('confirmDelete');
+                    if (confirmDeleteBtn && deleteForm) {
+                        confirmDeleteBtn.addEventListener('click', function() {
+                            deleteForm.submit();
+                        });
+                    }
+                }
             </script>
         @endpush
     @endsection

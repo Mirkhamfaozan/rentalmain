@@ -130,10 +130,6 @@
                                                         <small class="text-muted d-block">Tahun</small>
                                                         <strong>{{ $product->tahun_produksi }}</strong>
                                                     </div>
-                                                    <div>
-                                                        <small class="text-muted d-block">Stok</small>
-                                                        <strong>{{ $product->stok }} unit</strong>
-                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

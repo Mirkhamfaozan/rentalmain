@@ -13,6 +13,7 @@ class Order extends Model
     protected $fillable = [
         'user_id',
         'name',
+        'foto_ktp',
         'phone_number',
         'email',
         'product_id',
@@ -85,5 +86,5 @@ class Order extends Model
     {
         return $this->payment && $this->payment->status === 'paid';
     }
-    
+
 }

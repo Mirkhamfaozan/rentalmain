@@ -307,11 +307,11 @@
                             </div>
                         </div>
 
-                        <!-- Bagian Harga & Stok -->
+                        <!-- Bagian Harga & Ketersediaan -->
                         <div class="row mb-4 mt-5">
                             <div class="col-12">
                                 <h6 class="text-primary fw-bold mb-3">
-                                    <i class="fas fa-money-bill-wave me-1"></i>Harga & Stok
+                                    <i class="fas fa-money-bill-wave me-1"></i>Harga & Ketersediaan
                                 </h6>
                             </div>
                         </div>
@@ -384,24 +384,6 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                                 <div class="form-text">Hari gratis untuk sewa bulanan (0-29 hari)</div>
-                            </div>
-
-                            <!-- Stok -->
-                            <div class="col-md-6">
-                                <label for="stok" class="form-label fw-semibold">
-                                    <i class="fas fa-boxes me-1 text-secondary"></i>Jumlah Stok
-                                    <span class="text-danger">*</span>
-                                </label>
-                                <input type="number"
-                                       class="form-control @error('stok') is-invalid @enderror"
-                                       id="stok"
-                                       name="stok"
-                                       value="{{ old('stok', 1) }}"
-                                       min="1"
-                                       required>
-                                @error('stok')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
                             </div>
 
                             <!-- Ketersediaan -->

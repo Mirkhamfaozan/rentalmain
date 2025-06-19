@@ -7,10 +7,12 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class FrontProductController extends Controller
 {
+
     public function frontendIndex()
     {
         $products = Product::where('is_available', true)->get();
@@ -23,21 +25,24 @@ class FrontProductController extends Controller
         if (!$product->is_available) {
             return redirect()->route('frontend.product')->with('error', 'Motor tidak tersedia untuk disewa.');
         }
-        return view('frontend.order', compact('product'));
+
+        $user = Auth::user();
+        return view('frontend.order', compact('product', 'user'));
     }
 
     public function submitOrder(Request $request)
     {
+        $user = Auth::user();
+
         $validator = Validator::make($request->all(), [
             'product_id' => 'required|exists:products,id',
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
             'phone_number' => 'required|string|max:20',
             'tanggal_mulai' => 'required|date|after_or_equal:today',
             'tanggal_selesai' => 'required|date|after:tanggal_mulai',
             'catatan' => 'nullable|string|max:1000',
             'lokasi_pengambilan' => 'required|string|max:255',
             'lokasi_pengembalian' => 'required|string|max:255',
+            'foto_ktp' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // 2MB max
         ], [
             'product_id.required' => 'Produk harus dipilih.',
             'product_id.exists' => 'Produk tidak ditemukan.',
@@ -59,6 +64,10 @@ class FrontProductController extends Controller
             'lokasi_pengambilan.max' => 'Lokasi pengambilan maksimal 255 karakter.',
             'lokasi_pengembalian.required' => 'Lokasi pengembalian harus diisi.',
             'lokasi_pengembalian.max' => 'Lokasi pengembalian maksimal 255 karakter.',
+            'foto_ktp.required' => 'Foto KTP harus diupload.',
+            'foto_ktp.image' => 'File harus berupa gambar.',
+            'foto_ktp.mimes' => 'Format foto KTP harus jpeg, png, jpg, atau gif.',
+            'foto_ktp.max' => 'Ukuran foto KTP maksimal 2MB.',
         ]);
 
         if ($validator->fails()) {
@@ -72,6 +81,10 @@ class FrontProductController extends Controller
             if (!$product->is_available) {
                 return redirect()->back()->with('error', 'Motor tidak tersedia untuk disewa.')->withInput();
             }
+
+            // Use user data if fields are empty
+            $name = empty($request->name) ? $user->name : $request->name;
+            $email = empty($request->email) ? $user->email : $request->email;
 
             // Calculate duration
             $startDate = new \DateTime($request->tanggal_mulai);
@@ -88,12 +101,19 @@ class FrontProductController extends Controller
                     ->withInput();
             }
 
+            // Handle KTP photo upload
+            $ktpPath = null;
+            if ($request->hasFile('foto_ktp')) {
+                $ktpPath = $this->uploadKtpPhoto($request->file('foto_ktp'), $user->id);
+            }
+
             // Create the order
             $order = Order::create([
-                'user_id' => Auth::id(),
-                'name' => $request->name,
-                'email' => $request->email,
+                'user_id' => $user->id,
+                'name' => $name,
+                'email' => $email,
                 'phone_number' => $request->phone_number,
+                'foto_ktp' => $ktpPath,
                 'product_id' => $request->product_id,
                 'tanggal_mulai' => $request->tanggal_mulai,
                 'tanggal_selesai' => $request->tanggal_selesai,
@@ -114,6 +134,25 @@ class FrontProductController extends Controller
             return redirect()->back()
                 ->with('error', 'Terjadi kesalahan saat memproses pesanan. Silakan coba lagi.')
                 ->withInput();
+        }
+    }
+
+    /**
+     * Upload KTP photo and return the file path
+     */
+    private function uploadKtpPhoto($file, $userId)
+    {
+        try {
+            // Create a unique filename
+            $filename = 'ktp_' . $userId . '_' . time() . '.' . $file->getClientOriginalExtension();
+
+            // Store the file in storage/app/public/ktp directory
+            $path = $file->storeAs('ktp', $filename, 'public');
+
+            return $path;
+        } catch (\Exception $e) {
+            Log::error('KTP upload error: ' . $e->getMessage());
+            throw new \Exception('Gagal mengupload foto KTP');
         }
     }
 
@@ -195,6 +234,11 @@ class FrontProductController extends Controller
         // Only allow cancellation for pending orders that haven't been paid
         if ($order->status !== 'pending' || $order->isPaid()) {
             return redirect()->back()->with('error', 'Pesanan tidak dapat dibatalkan.');
+        }
+
+        // Delete KTP photo if exists
+        if ($order->foto_ktp && Storage::disk('public')->exists($order->foto_ktp)) {
+            Storage::disk('public')->delete($order->foto_ktp);
         }
 
         $order->update(['status' => 'cancelled']);

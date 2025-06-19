@@ -84,44 +84,27 @@
                                 </div>
                             @endif
 
-                            <form action="{{ route('frontend.order.submit') }}" method="POST" id="orderForm">
+                            <form action="{{ route('frontend.order.submit') }}" method="POST" id="orderForm" enctype="multipart/form-data">
                                 @csrf
                                 <input type="hidden" name="product_id" value="{{ $product->id }}">
 
-                                <!-- Floating Label Inputs -->
-                                <div class="mb-3 form-floating">
-                                    <input type="text" class="form-control @error('name') is-invalid @enderror"
-                                        name="name" id="name" value="{{ old('name') }}" placeholder="Nama Penyewa" required>
-                                    <label for="name">Nama Penyewa <span class="text-danger">*</span></label>
-                                    @error('name')
-                                        <div class="invalid-feedback">{{ $error }}</div>
-                                    @enderror
-                                </div>
-
-                                <div class="mb-3 form-floating">
-                                    <input type="email" class="form-control @error('email') is-invalid @enderror"
-                                        name="email" id="email" value="{{ old('email') }}" placeholder="Email" required>
-                                    <label for="email">Email <span class="text-danger">*</span></label>
-                                    @error('email')
-                                        <span class="invalid-feedback">{{ $error }}</span>
-                                    @enderror
-                                </div>
-
+                                <!-- Phone Number Input -->
                                 <div class="mb-3 form-floating">
                                     <input type="text" class="form-control @error('phone_number') is-invalid @enderror"
-                                        name="phone_number" id="phone_number" value="{{ old('phone_number') }}" placeholder="Nomor WhatsApp" required>
+                                        name="phone_number" id="phone_number" value="{{ old('phone_number', $user->phone_number ?? '') }}" placeholder="Nomor WhatsApp" required>
                                     <label for="phone_number">Nomor WhatsApp <span class="text-danger">*</span></label>
                                     @error('phone_number')
-                                        <div class="invalid-feedback">{{ $error }}</div>
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
 
+                                <!-- Date Inputs -->
                                 <div class="mb-3 form-floating">
                                     <input type="date" class="form-control @error('tanggal_mulai') is-invalid @enderror"
                                         name="tanggal_mulai" id="tanggal_mulai" value="{{ old('tanggal_mulai') }}" min="{{ date('Y-m-d') }}" required>
                                     <label for="tanggal_mulai">Tanggal Mulai Sewa <span class="text-danger">*</span></label>
                                     @error('tanggal_mulai')
-                                        <div class="invalid-feedback">{{ $error }}</div>
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
 
@@ -130,34 +113,74 @@
                                         name="tanggal_selesai" id="tanggal_selesai" value="{{ old('tanggal_selesai') }}" required>
                                     <label for="tanggal_selesai">Tanggal Selesai Sewa <span class="text-danger">*</span></label>
                                     @error('tanggal_selesai')
-                                        <div class="invalid-feedback">{{ $error }}</div>
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
 
+                                <!-- Notes -->
                                 <div class="mb-3 form-floating">
                                     <textarea class="form-control @error('catatan') is-invalid @enderror" name="catatan" id="catatan" rows="4" placeholder="Catatan Tambahan">{{ old('catatan') }}</textarea>
                                     <label for="catatan">Catatan Tambahan</label>
                                     @error('catatan')
-                                        <div class="invalid-feedback">{{ $error }}</div>
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
 
+                                <!-- Location Inputs -->
                                 <div class="mb-3 form-floating">
                                     <input type="text" class="form-control @error('lokasi_pengambilan') is-invalid @enderror"
-                                        name="lokasi_pengambilan" id="lokasi_pengambilan" value="{{ old('lokasi_pengambilan') }}" placeholder="Lokasi Pengambilan">
-                                    <label for="lokasi_pengambilan">Lokasi Pengambilan</label>
+                                        name="lokasi_pengambilan" id="lokasi_pengambilan" value="{{ old('lokasi_pengambilan') }}" placeholder="Lokasi Pengambilan" required>
+                                    <label for="lokasi_pengambilan">Lokasi Pengambilan <span class="text-danger">*</span></label>
                                     @error('lokasi_pengambilan')
-                                        <div class="invalid-feedback">{{ $error }}</div>
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
 
                                 <div class="mb-3 form-floating">
                                     <input type="text" class="form-control @error('lokasi_pengembalian') is-invalid @enderror"
-                                        name="lokasi_pengembalian" id="lokasi_pengembalian" value="{{ old('lokasi_pengembalian') }}" placeholder="Lokasi Pengembalian">
-                                    <label for="lokasi_pengembalian">Lokasi Pengembalian</label>
+                                        name="lokasi_pengembalian" id="lokasi_pengembalian" value="{{ old('lokasi_pengembalian') }}" placeholder="Lokasi Pengembalian" required>
+                                    <label for="lokasi_pengembalian">Lokasi Pengembalian <span class="text-danger">*</span></label>
                                     @error('lokasi_pengembalian')
-                                        <div class="invalid-feedback">{{ $error }}</div>
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
+                                </div>
+
+                                <!-- KTP Photo Upload -->
+                                <div class="mb-4">
+                                    <div class="card bg-light rounded-3 shadow-sm">
+                                        <div class="card-body p-4">
+                                            <h6 class="fw-semibold mb-3"><i class="bi bi-card-image me-2"></i>Upload Foto KTP</h6>
+                                            <div class="alert alert-warning rounded-3 py-2 mb-3">
+                                                <small><i class="bi bi-exclamation-triangle me-2"></i>Foto KTP harus jelas dan terbaca</small>
+                                            </div>
+
+                                            <!-- Current KTP Preview (if exists) -->
+                                            @if(Auth::check() && Auth::user()->ktp_photo)
+                                            <div class="mb-3 text-center" id="currentKtpContainer">
+                                                <img src="{{ Storage::url(Auth::user()->ktp_photo) }}" class="img-thumbnail mb-2" style="max-height: 150px;">
+                                                <p class="text-muted small">Foto KTP yang tersimpan</p>
+                                            </div>
+                                            @endif
+
+                                            <!-- KTP Upload Field -->
+                                            <div class="form-floating">
+                                                <input type="file" class="form-control @error('foto_ktp') is-invalid @enderror"
+                                                    name="foto_ktp" id="foto_ktp" accept="image/*" capture="environment" required>
+                                                @error('foto_ktp')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                                <div class="form-text">Format: JPEG, PNG, JPG (maks. 2MB)</div>
+                                            </div>
+
+                                            <!-- KTP Preview -->
+                                            <div class="mt-3 text-center" id="ktpPreviewContainer" style="display: none;">
+                                                <img id="ktpPreview" class="img-thumbnail" style="max-height: 150px;">
+                                                <button type="button" class="btn btn-sm btn-outline-danger mt-2" id="removeKtpBtn">
+                                                    <i class="bi bi-trash"></i> Hapus Foto
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!-- Price Summary -->
@@ -226,11 +249,11 @@
                                     </h6>
                                     <div class="mb-2">
                                         <small class="text-muted">Nama:</small><br>
-                                        <span class="fw-semibold" id="confirmName">-</span>
+                                        <span class="fw-semibold" id="confirmName">{{ $user->name ?? 'User' }}</span>
                                     </div>
                                     <div class="mb-2">
                                         <small class="text-muted">Email:</small><br>
-                                        <span class="fw-semibold" id="confirmEmail">-</span>
+                                        <span class="fw-semibold" id="confirmEmail">{{ $user->email ?? 'user@example.com' }}</span>
                                     </div>
                                     <div class="mb-2">
                                         <small class="text-muted">WhatsApp:</small><br>
@@ -262,8 +285,8 @@
                         </div>
                     </div>
 
-                    <!-- Locations (if provided) -->
-                    <div class="row g-4 mt-2" id="locationsSection" style="display: none;">
+                    <!-- Locations -->
+                    <div class="row g-4 mt-2">
                         <div class="col-12">
                             <div class="card bg-light border-0 rounded-3">
                                 <div class="card-body p-3">
@@ -293,6 +316,20 @@
                                     <i class="bi bi-chat-text me-2"></i>Catatan Tambahan
                                 </h6>
                                 <p class="mb-0 text-muted" id="confirmNotes">-</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KTP Verification -->
+                    <div class="mt-3">
+                        <div class="card bg-light border-0 rounded-3">
+                            <div class="card-body p-3">
+                                <h6 class="fw-bold text-secondary mb-2">
+                                    <i class="bi bi-card-image me-2"></i>Verifikasi KTP
+                                </h6>
+                                <p class="mb-0 text-success" id="confirmKtpStatus">
+                                    <i class="bi bi-check-circle-fill me-2"></i>Foto KTP telah diupload
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -346,6 +383,11 @@
             const orderForm = document.getElementById('orderForm');
             const confirmOrderBtn = document.getElementById('confirmOrderBtn');
             const orderConfirmationModal = new bootstrap.Modal(document.getElementById('orderConfirmationModal'));
+            const ktpInput = document.getElementById('foto_ktp');
+            const ktpPreview = document.getElementById('ktpPreview');
+            const ktpPreviewContainer = document.getElementById('ktpPreviewContainer');
+            const removeKtpBtn = document.getElementById('removeKtpBtn');
+            const currentKtpContainer = document.getElementById('currentKtpContainer');
 
             // Pricing data
             const pricing = {
@@ -365,6 +407,45 @@
                 });
             }, 5000);
 
+            // KTP Photo Preview
+            ktpInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const file = this.files[0];
+
+                    // Validate file size (max 2MB)
+                    if (file.size > 2 * 1024 * 1024) {
+                        alert('Ukuran file maksimal 2MB');
+                        this.value = '';
+                        return;
+                    }
+
+                    const reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        ktpPreview.src = e.target.result;
+                        ktpPreviewContainer.style.display = 'block';
+
+                        // Hide current KTP if exists
+                        if (currentKtpContainer) {
+                            currentKtpContainer.style.display = 'none';
+                        }
+                    }
+
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Remove KTP Photo
+            removeKtpBtn.addEventListener('click', function() {
+                ktpInput.value = '';
+                ktpPreviewContainer.style.display = 'none';
+
+                // Show current KTP if exists
+                if (currentKtpContainer) {
+                    currentKtpContainer.style.display = 'block';
+                }
+            });
+
             // Submit button click handler - show confirmation modal
             submitBtn.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -376,7 +457,7 @@
                 }
 
                 // Check if required fields are filled
-                const requiredFields = ['name', 'email', 'phone_number', 'tanggal_mulai', 'tanggal_selesai'];
+                const requiredFields = ['phone_number', 'tanggal_mulai', 'tanggal_selesai', 'lokasi_pengambilan', 'lokasi_pengembalian'];
                 let allValid = true;
 
                 requiredFields.forEach(field => {
@@ -389,8 +470,16 @@
                     }
                 });
 
+                // Check KTP photo
+                if (!ktpInput.files || ktpInput.files.length === 0) {
+                    allValid = false;
+                    ktpInput.classList.add('is-invalid');
+                    alert('Mohon upload foto KTP terlebih dahulu!');
+                } else {
+                    ktpInput.classList.remove('is-invalid');
+                }
+
                 if (!allValid) {
-                    alert('Mohon lengkapi semua field yang wajib diisi!');
                     return;
                 }
 
@@ -420,9 +509,7 @@
 
             // Function to populate confirmation modal
             function populateConfirmationModal() {
-                // Personal data
-                document.getElementById('confirmName').textContent = document.getElementById('name').value;
-                document.getElementById('confirmEmail').textContent = document.getElementById('email').value;
+                // Phone number
                 document.getElementById('confirmPhone').textContent = document.getElementById('phone_number').value;
 
                 // Rental details
@@ -441,17 +528,9 @@
                     `${durasiHari.textContent} hari (${tipeSewaTerpilih.textContent})`;
                 document.getElementById('confirmTotal').textContent = totalHarga.textContent;
 
-                // Locations (optional)
-                const pickupLocation = document.getElementById('lokasi_pengambilan').value;
-                const returnLocation = document.getElementById('lokasi_pengembalian').value;
-
-                if (pickupLocation || returnLocation) {
-                    document.getElementById('confirmPickup').textContent = pickupLocation || 'Tidak disebutkan';
-                    document.getElementById('confirmReturn').textContent = returnLocation || 'Tidak disebutkan';
-                    document.getElementById('locationsSection').style.display = 'block';
-                } else {
-                    document.getElementById('locationsSection').style.display = 'none';
-                }
+                // Locations
+                document.getElementById('confirmPickup').textContent = document.getElementById('lokasi_pengambilan').value;
+                document.getElementById('confirmReturn').textContent = document.getElementById('lokasi_pengembalian').value;
 
                 // Notes (optional)
                 const notes = document.getElementById('catatan').value;

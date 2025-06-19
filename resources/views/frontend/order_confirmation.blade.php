@@ -44,7 +44,7 @@
                         </ul>
 
                         <div class="mt-4">
-                            <a href="{{ route('frontend.product') }}" class="btn btn-primary">Kembali ke Daftar Produk</a>
+                            <a href="{{ route('frontend.rental') }}" class="btn btn-primary">Kembali ke Daftar Produk</a>
                         </div>
                     </div>
                 </div>

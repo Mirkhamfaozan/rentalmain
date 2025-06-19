@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class OrderController extends Controller
@@ -90,6 +91,9 @@ class OrderController extends Controller
             'exists' => 'Kolom :attribute tidak valid.',
             'required_without' => 'Kolom :attribute wajib diisi jika tidak ada akun pengguna.',
             'email' => 'Kolom :attribute harus berupa alamat email yang valid.',
+            'image' => 'Kolom :attribute harus berupa file gambar.',
+            'mimes' => 'Kolom :attribute harus berupa file dengan tipe: :values.',
+            'max' => 'Kolom :attribute tidak boleh lebih besar dari :max KB.',
         ];
 
         $attributes = [
@@ -97,6 +101,7 @@ class OrderController extends Controller
             'name' => 'Nama',
             'phone_number' => 'Nomor HP',
             'email' => 'Email',
+            'foto_ktp' => 'Foto KTP',
             'product_id' => 'Produk',
             'tanggal_mulai' => 'Tanggal Mulai',
             'tanggal_selesai' => 'Tanggal Selesai',
@@ -114,6 +119,7 @@ class OrderController extends Controller
             'name' => 'required_without:user_id|string|max:255',
             'phone_number' => 'required_without:user_id|string|max:20',
             'email' => 'required_without:user_id|email|max:255',
+            'foto_ktp' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'product_id' => [
                 'required',
                 'exists:products,id',
@@ -136,6 +142,12 @@ class OrderController extends Controller
         ], $messages, $attributes);
 
         try {
+            // Handle KTP photo upload
+            if ($request->hasFile('foto_ktp')) {
+                $path = $request->file('foto_ktp')->store('public/ktp');
+                $validated['foto_ktp'] = str_replace('public/', '', $path);
+            }
+
             $order = Order::create($validated);
 
             return redirect()->route('dashboard.orders.index')
@@ -205,6 +217,9 @@ class OrderController extends Controller
             'exists' => 'Kolom :attribute tidak valid.',
             'required_without' => 'Kolom :attribute wajib diisi jika tidak ada akun pengguna.',
             'email' => 'Kolom :attribute harus berupa alamat email yang valid.',
+            'image' => 'Kolom :attribute harus berupa file gambar.',
+            'mimes' => 'Kolom :attribute harus berupa file dengan tipe: :values.',
+            'max' => 'Kolom :attribute tidak boleh lebih besar dari :max KB.',
         ];
 
         $attributes = [
@@ -212,6 +227,7 @@ class OrderController extends Controller
             'name' => 'Nama',
             'phone_number' => 'Nomor HP',
             'email' => 'Email',
+            'foto_ktp' => 'Foto KTP',
             'product_id' => 'Produk',
             'tanggal_mulai' => 'Tanggal Mulai',
             'tanggal_selesai' => 'Tanggal Selesai',
@@ -229,6 +245,7 @@ class OrderController extends Controller
             'name' => 'required_without:user_id|string|max:255',
             'phone_number' => 'required_without:user_id|string|max:20',
             'email' => 'required_without:user_id|email|max:255',
+            'foto_ktp' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'product_id' => [
                 'required',
                 'exists:products,id',
@@ -251,6 +268,20 @@ class OrderController extends Controller
         ], $messages, $attributes);
 
         try {
+            // Handle KTP photo upload
+            if ($request->hasFile('foto_ktp')) {
+                // Delete old photo if exists
+                if ($order->foto_ktp) {
+                    Storage::delete('public/' . $order->foto_ktp);
+                }
+
+                $path = $request->file('foto_ktp')->store('public/ktp');
+                $validated['foto_ktp'] = str_replace('public/', '', $path);
+            } else {
+                // Keep the existing photo if no new photo is uploaded
+                $validated['foto_ktp'] = $order->foto_ktp;
+            }
+
             $order->update($validated);
 
             return redirect()->route('dashboard.orders.index')
@@ -276,6 +307,11 @@ class OrderController extends Controller
         }
 
         try {
+            // Delete KTP photo if exists
+            if ($order->foto_ktp) {
+                Storage::delete('public/' . $order->foto_ktp);
+            }
+
             $order->delete();
 
             return redirect()->route('dashboard.orders.index')

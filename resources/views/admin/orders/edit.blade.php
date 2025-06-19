@@ -23,7 +23,7 @@
                     <h5 class="card-title mb-0">Edit Pesanan #{{ $order->id }}</h5>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('dashboard.orders.update', $order) }}" method="POST">
+                    <form action="{{ route('dashboard.orders.update', $order) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
                         <div class="row g-3">
@@ -75,6 +75,36 @@
                                 @enderror
                             </div>
 
+                            <div class="col-12">
+                                <label for="foto_ktp" class="form-label fw-semibold">Foto KTP</label>
+
+                                @if($order->foto_ktp)
+                                    <div class="mb-3">
+                                        <p>Foto KTP Saat Ini:</p>
+                                        <img src="{{ asset('storage/' . $order->foto_ktp) }}"
+                                             alt="Foto KTP"
+                                             class="img-thumbnail"
+                                             style="max-width: 300px; max-height: 200px;">
+                                        <div class="form-check mt-2">
+                                            <input class="form-check-input" type="checkbox" name="hapus_foto_ktp" id="hapus_foto_ktp">
+                                            <label class="form-check-label" for="hapus_foto_ktp">
+                                                Hapus foto saat ini
+                                            </label>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                <input type="file" name="foto_ktp" id="foto_ktp"
+                                       class="form-control @error('foto_ktp') is-invalid @enderror"
+                                       accept="image/jpeg,image/png,image/jpg">
+                                <div class="form-text">
+                                    Unggah foto KTP (format: JPEG, PNG, JPG, maksimal 2MB)
+                                </div>
+                                @error('foto_ktp')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
                             <div class="col-md-6">
                                 <label for="product_id" class="form-label fw-semibold">Motor</label>
                                 <select name="product_id" id="product_id" class="form-select @error('product_id') is-invalid @enderror">
@@ -116,7 +146,6 @@
                                            class="form-control @error('tanggal_selesai') is-invalid @enderror"
                                            value="{{ old('tanggal_selesai', \Carbon\Carbon::parse($order->tanggal_selesai)->format('Y-m-d')) }}"
                                            placeholder="Pilih tanggal selesai">
-                                       </div>
                                     @error('tanggal_selesai')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -270,6 +299,25 @@
 
             // Toggle fields when user_id changes
             $('#user_id').on('change', toggleFields);
+
+            // Preview image before upload
+            $('#foto_ktp').on('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        // Create preview if not exists
+                        if ($('#foto_ktp_preview').length === 0) {
+                            $('<div class="mb-3"><p>Preview Foto Baru:</p>' +
+                              '<img id="foto_ktp_preview" src="" alt="Preview Foto KTP" ' +
+                              'class="img-thumbnail" style="max-width: 300px; max-height: 200px;"></div>')
+                              .insertBefore('#foto_ktp');
+                        }
+                        $('#foto_ktp_preview').attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
         });
     </script>
     @endpush

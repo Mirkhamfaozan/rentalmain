@@ -32,14 +32,18 @@ class Product extends Model
         'no_rangka',
         'gambar_utama',
         'deskripsi',
-        'stok',
         'is_available'
     ];
+
     public function orders()
     {
         return $this->hasMany(Order::class);
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     // Calculate weekly price (7 days - discount)
     public function getHargaMingguanAttribute($value)
@@ -139,20 +143,5 @@ class Product extends Model
     public function getStnkPhotoUrlAttribute()
     {
         return $this->foto_stnk ? Storage::url($this->foto_stnk) : null;
-    }
-
-    public function getStnkThumbUrlAttribute()
-    {
-        return $this->foto_stnk_thumb ? Storage::url($this->foto_stnk_thumb) : null;
-    }
-
-    public function isStnkValid()
-    {
-        return $this->stnk_valid && $this->masa_berlaku_stnk > now();
-    }
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
     }
 }
