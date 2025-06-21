@@ -338,7 +338,7 @@
                             <!-- Rental Image (Placeholder or logo if available) -->
                             <div class="ratio ratio-4x3 position-relative overflow-hidden">
                                 <img class="card-img-top object-fit-cover w-100 h-100 hover-zoom"
-                                    src="{{ $profile->logo ? Storage::url($profile->logo) : '/images/rental-placeholder.jpg' }}"
+                                    src="{{ Storage::url($profile->foto_tempat)}}"
                                     alt="{{ $profile->nama_rental }}">
 
                                 <!-- Image Overlay -->

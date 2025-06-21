@@ -3,6 +3,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\RentalBiodata;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -28,8 +29,22 @@ class AuthenticatedSessionController extends Controller
 
         $user = Auth::user();
 
-        // Redirect berdasarkan role
-        if (in_array($user->role, ['admin', 'rental'])) {
+        // Admin selalu ke dashboard
+        if ($user->isAdmin()) {
+            return redirect()->intended(route('dashboard'));
+        }
+
+        // Rental user - cek status verifikasi
+        if ($user->isRental()) {
+            $rentalBiodata = RentalBiodata::where('user_id', $user->id)->first();
+
+            // Jika belum ada biodata atau belum terverifikasi, arahkan ke homepage
+            if (!$rentalBiodata || !$rentalBiodata->isVerified()) {
+                return redirect()->route('frontend.homepage')
+                    ->with('warning', 'Anda perlu melengkapi dan memverifikasi biodata rental terlebih dahulu.');
+            }
+
+            // Jika sudah terverifikasi, arahkan ke dashboard
             return redirect()->intended(route('dashboard'));
         }
 

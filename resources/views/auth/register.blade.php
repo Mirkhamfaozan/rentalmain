@@ -13,7 +13,7 @@
                                 <i class="bi bi-person-plus-fill text-primary" style="font-size: 3rem;"></i>
                             </div>
                             <h2 class="card-title fw-bold text-dark mb-2">Buat Akun Anda</h2>
-                            <p class="text-muted">Bergabunglah dengan komunitas rental kami hari ini</p>
+                            <p class="text-muted">Bergabunglah dengan komunitas kami hari ini</p>
                         </div>
 
                         <!-- Display validation errors -->
@@ -27,7 +27,7 @@
                             </div>
                         @endif
 
-                        <form method="POST" action="{{ route('register') }}">
+                        <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data">
                             @csrf
 
                             <!-- Role Selection -->
@@ -184,7 +184,8 @@
                                                    id="nama_rental"
                                                    name="nama_rental"
                                                    value="{{ old('nama_rental') }}"
-                                                   placeholder="Nama bisnis rental Anda">
+                                                   placeholder="Nama bisnis rental Anda"
+                                                   {{ old('role') == 'rental' ? 'required' : '' }}>
                                         </div>
                                         @error('nama_rental')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -205,7 +206,8 @@
                                                    id="nama_pemilik"
                                                    name="nama_pemilik"
                                                    value="{{ old('nama_pemilik') }}"
-                                                   placeholder="Nama lengkap pemilik">
+                                                   placeholder="Nama lengkap pemilik"
+                                                   {{ old('role') == 'rental' ? 'required' : '' }}>
                                         </div>
                                         @error('nama_pemilik')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -221,12 +223,12 @@
                                             <span class="input-group-text bg-light border-end-0">
                                                 <i class="bi bi-geo-alt text-muted"></i>
                                             </span>
-                                            <input type="text"
-                                                   class="form-control border-start-0 @error('alamat') is-invalid @enderror"
-                                                   id="alamat"
-                                                   name="alamat"
-                                                   value="{{ old('alamat') }}"
-                                                   placeholder="Alamat jalan">
+                                            <textarea class="form-control border-start-0 @error('alamat') is-invalid @enderror"
+                                                      id="alamat"
+                                                      name="alamat"
+                                                      rows="3"
+                                                      placeholder="Alamat lengkap bisnis rental"
+                                                      {{ old('role') == 'rental' ? 'required' : '' }}>{{ old('alamat') }}</textarea>
                                         </div>
                                         @error('alamat')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -237,14 +239,15 @@
                                         <!-- City -->
                                         <div class="col-md-6 mb-3">
                                             <label for="kota" class="form-label fw-semibold text-dark">
-                                                Kota
+                                                <i class="bi bi-geo me-1"></i>Kota
                                             </label>
                                             <input type="text"
                                                    class="form-control @error('kota') is-invalid @enderror"
                                                    id="kota"
                                                    name="kota"
                                                    value="{{ old('kota') }}"
-                                                   placeholder="Kota">
+                                                   placeholder="Kota"
+                                                   {{ old('role') == 'rental' ? 'required' : '' }}>
                                             @error('kota')
                                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                                             @enderror
@@ -253,14 +256,15 @@
                                         <!-- Province -->
                                         <div class="col-md-6 mb-3">
                                             <label for="provinsi" class="form-label fw-semibold text-dark">
-                                                Provinsi
+                                                <i class="bi bi-map me-1"></i>Provinsi
                                             </label>
                                             <input type="text"
                                                    class="form-control @error('provinsi') is-invalid @enderror"
                                                    id="provinsi"
                                                    name="provinsi"
                                                    value="{{ old('provinsi') }}"
-                                                   placeholder="Provinsi">
+                                                   placeholder="Provinsi"
+                                                   {{ old('role') == 'rental' ? 'required' : '' }}>
                                             @error('provinsi')
                                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                                             @enderror
@@ -271,7 +275,7 @@
                                         <!-- Postal Code -->
                                         <div class="col-md-6 mb-3">
                                             <label for="kode_pos" class="form-label fw-semibold text-dark">
-                                                Kode Pos
+                                                <i class="bi bi-mailbox me-1"></i>Kode Pos
                                             </label>
                                             <input type="text"
                                                    class="form-control @error('kode_pos') is-invalid @enderror"
@@ -298,7 +302,8 @@
                                                        id="no_telepon"
                                                        name="no_telepon"
                                                        value="{{ old('no_telepon') }}"
-                                                       placeholder="Telepon bisnis">
+                                                       placeholder="Telepon bisnis"
+                                                       {{ old('role') == 'rental' ? 'required' : '' }}>
                                             </div>
                                             @error('no_telepon')
                                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -309,7 +314,7 @@
                                     <!-- WhatsApp Number -->
                                     <div class="mb-3">
                                         <label for="no_wa" class="form-label fw-semibold text-dark">
-                                            <i class="bi bi-whatsapp me-2"></i>Nomor WhatsApp (Opsional)
+                                            <i class="bi bi-whatsapp me-2"></i>Nomor WhatsApp
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light border-end-0">
@@ -320,7 +325,8 @@
                                                    id="no_wa"
                                                    name="no_wa"
                                                    value="{{ old('no_wa') }}"
-                                                   placeholder="Nomor WhatsApp (jika berbeda)">
+                                                   placeholder="Nomor WhatsApp"
+                                                   {{ old('role') == 'rental' ? 'required' : '' }}>
                                         </div>
                                         @error('no_wa')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -330,7 +336,7 @@
                                     <!-- Business Email -->
                                     <div class="mb-3">
                                         <label for="email_perusahaan" class="form-label fw-semibold text-dark">
-                                            <i class="bi bi-envelope-at me-2"></i>Email Bisnis (Opsional)
+                                            <i class="bi bi-envelope-at me-2"></i>Email Bisnis
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light border-end-0">
@@ -341,11 +347,100 @@
                                                    id="email_perusahaan"
                                                    name="email_perusahaan"
                                                    value="{{ old('email_perusahaan') }}"
-                                                   placeholder="Email bisnis (jika berbeda)">
+                                                   placeholder="Email bisnis">
                                         </div>
                                         @error('email_perusahaan')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
                                         @enderror
+                                    </div>
+                                </div>
+
+                                <!-- Document Upload Section -->
+                                <div class="mb-4">
+                                    <h5 class="fw-semibold text-dark mb-3">
+                                        <i class="bi bi-file-earmark-image me-2"></i>Dokumen Verifikasi
+                                    </h5>
+                                    <div class="alert alert-info">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        <small>Dokumen ini diperlukan untuk verifikasi rental Anda.</small>
+                                    </div>
+
+                                    <!-- KTP Photo -->
+                                    <div class="mb-3">
+                                        <label for="foto_ktp" class="form-label fw-semibold text-dark">
+                                            <i class="bi bi-card-image me-2"></i>Foto KTP Pemilik
+                                        </label>
+                                        <div class="input-group">
+                                            <input type="file"
+                                                   class="form-control @error('foto_ktp') is-invalid @enderror"
+                                                   id="foto_ktp"
+                                                   name="foto_ktp"
+                                                   accept="image/jpeg,image/png,image/jpg"
+                                                   {{ old('role') == 'rental' ? 'required' : '' }}>
+                                            <label class="input-group-text" for="foto_ktp">
+                                                <i class="bi bi-upload text-muted"></i>
+                                            </label>
+                                        </div>
+                                        <div class="form-text">Format: JPG, PNG. Maksimal 2MB.</div>
+                                        @error('foto_ktp')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                        <!-- Preview -->
+                                        <div id="ktpPreview" class="mt-2" style="display: none;">
+                                            <img id="ktpImage" src="" alt="Preview KTP" class="img-thumbnail" style="max-width: 200px; max-height: 150px;">
+                                        </div>
+                                    </div>
+
+                                    <!-- Business License Photo -->
+                                    <div class="mb-3">
+                                        <label for="foto_surat_izin_usaha" class="form-label fw-semibold text-dark">
+                                            <i class="bi bi-file-earmark-text me-2"></i>Foto Surat Izin Usaha
+                                        </label>
+                                        <div class="input-group">
+                                            <input type="file"
+                                                   class="form-control @error('foto_surat_izin_usaha') is-invalid @enderror"
+                                                   id="foto_surat_izin_usaha"
+                                                   name="foto_surat_izin_usaha"
+                                                   accept="image/jpeg,image/png,image/jpg"
+                                                   {{ old('role') == 'rental' ? 'required' : '' }}>
+                                            <label class="input-group-text" for="foto_surat_izin_usaha">
+                                                <i class="bi bi-upload text-muted"></i>
+                                            </label>
+                                        </div>
+                                        <div class="form-text">Format: JPG, PNG. Maksimal 2MB.</div>
+                                        @error('foto_surat_izin_usaha')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                        <!-- Preview -->
+                                        <div id="licensePreview" class="mt-2" style="display: none;">
+                                            <img id="licenseImage" src="" alt="Preview Surat Izin" class="img-thumbnail" style="max-width: 200px; max-height: 150px;">
+                                        </div>
+                                    </div>
+
+                                    <!-- Business Place Photo -->
+                                    <div class="mb-3">
+                                        <label for="foto_tempat" class="form-label fw-semibold text-dark">
+                                            <i class="bi bi-image me-2"></i>Foto Tempat Usaha
+                                        </label>
+                                        <div class="input-group">
+                                            <input type="file"
+                                                   class="form-control @error('foto_tempat') is-invalid @enderror"
+                                                   id="foto_tempat"
+                                                   name="foto_tempat"
+                                                   accept="image/jpeg,image/png,image/jpg"
+                                                   {{ old('role') == 'rental' ? 'required' : '' }}>
+                                            <label class="input-group-text" for="foto_tempat">
+                                                <i class="bi bi-upload text-muted"></i>
+                                            </label>
+                                        </div>
+                                        <div class="form-text">Format: JPG, PNG. Maksimal 2MB.</div>
+                                        @error('foto_tempat')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                        <!-- Preview -->
+                                        <div id="placePreview" class="mt-2" style="display: none;">
+                                            <img id="placeImage" src="" alt="Preview Tempat Usaha" class="img-thumbnail" style="max-width: 200px; max-height: 150px;">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -382,6 +477,35 @@
 </div>
 @endsection
 
+@push('styles')
+<style>
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.input-group-text {
+    border-color: #dee2e6;
+}
+
+.img-thumbnail {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+#rentalFields {
+    transition: all 0.3s ease;
+}
+</style>
+@endpush
+
+@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Toggle role fields
@@ -390,36 +514,88 @@ document.addEventListener('DOMContentLoaded', function() {
 
     roleRadios.forEach(radio => {
         radio.addEventListener('change', function() {
-            if (this.value === 'rental') {
-                rentalFields.style.display = 'block';
-            } else {
-                rentalFields.style.display = 'none';
-            }
+            rentalFields.style.display = this.value === 'rental' ? 'block' : 'none';
+
+            // Toggle required attributes
+            const rentalInputs = rentalFields.querySelectorAll('input, textarea, select');
+            rentalInputs.forEach(input => {
+                input.required = this.value === 'rental';
+            });
         });
     });
 
     // Toggle password visibility
-    const togglePassword = document.getElementById('togglePassword');
-    const password = document.getElementById('password');
-    const toggleIcon = document.getElementById('toggleIcon');
+    function setupPasswordToggle(buttonId, inputId, iconId) {
+        const button = document.getElementById(buttonId);
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
 
-    togglePassword.addEventListener('click', function() {
-        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-        password.setAttribute('type', type);
-        toggleIcon.classList.toggle('bi-eye');
-        toggleIcon.classList.toggle('bi-eye-slash');
-    });
+        button.addEventListener('click', function() {
+            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+            input.setAttribute('type', type);
+            icon.classList.toggle('bi-eye');
+            icon.classList.toggle('bi-eye-slash');
+        });
+    }
 
-    // Toggle confirm password visibility
-    const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
-    const confirmPassword = document.getElementById('password_confirmation');
-    const toggleConfirmIcon = document.getElementById('toggleConfirmIcon');
+    setupPasswordToggle('togglePassword', 'password', 'toggleIcon');
+    setupPasswordToggle('toggleConfirmPassword', 'password_confirmation', 'toggleConfirmIcon');
 
-    toggleConfirmPassword.addEventListener('click', function() {
-        const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
-        confirmPassword.setAttribute('type', type);
-        toggleConfirmIcon.classList.toggle('bi-eye');
-        toggleConfirmIcon.classList.toggle('bi-eye-slash');
-    });
+    // File preview functionality
+    function setupFilePreview(inputId, previewId, imageId) {
+        const input = document.getElementById(inputId);
+        const preview = document.getElementById(previewId);
+        const image = document.getElementById(imageId);
+
+        input.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Validate file type
+                const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+                if (!validTypes.includes(file.type)) {
+                    alert('Format file harus JPG, JPEG, atau PNG');
+                    input.value = '';
+                    preview.style.display = 'none';
+                    return;
+                }
+
+                // Validate file size (2MB)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('Ukuran file maksimal 2MB');
+                    input.value = '';
+                    preview.style.display = 'none';
+                    return;
+                }
+
+                // Show preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    image.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+    }
+
+    // Setup file previews
+    setupFilePreview('foto_ktp', 'ktpPreview', 'ktpImage');
+    setupFilePreview('foto_surat_izin_usaha', 'licensePreview', 'licenseImage');
+    setupFilePreview('foto_tempat', 'placePreview', 'placeImage');
+
+    // Form submission loading state
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function() {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Memproses...';
+            }
+        });
+    }
 });
 </script>
+@endpush

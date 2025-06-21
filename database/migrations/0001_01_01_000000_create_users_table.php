@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -10,31 +11,31 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('rental_biodata', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            // $table->boolean('is_admin')->default(false); // HAPUS INI
-            $table->string('role')->default('users'); // TAMBAHKAN INI
-            $table->rememberToken();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->string('nama_rental');                  // Nama perusahaan / usaha
+            $table->string('nama_pemilik');                 // Nama pemilik rental
+            $table->string('alamat');                       // Alamat lengkap
+            $table->string('kota');                         // Kota/kabupaten
+            $table->string('provinsi');                     // Provinsi
+            $table->string('kode_pos')->nullable();         // Kode pos
+            $table->string('no_telepon');                   // Nomor telepon kantor
+            $table->string('no_wa')->nullable();            // WhatsApp (jika berbeda)
+            $table->string('email_perusahaan')->nullable(); // Email perusahaan
+
+            // Kolom untuk dokumen pendukung
+            $table->string('foto_ktp')->nullable();         // Path foto KTP pemilik
+            $table->string('foto_surat_izin_usaha')->nullable(); // Path foto surat izin usaha
+
+            // Status verifikasi
+            $table->enum('status_verifikasi', ['belum_verifikasi', 'terverifikasi', 'ditolak'])
+                  ->default('belum_verifikasi');            // Status verifikasi rental
+            $table->text('catatan_verifikasi')->nullable(); // Catatan dari admin saat verifikasi
+            $table->timestamp('tanggal_verifikasi')->nullable(); // Tanggal verifikasi
+            $table->foreignId('verified_by')->nullable()->constrained('users'); // Admin yang verifikasi
+
             $table->timestamps();
-        });
-
-        Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
-            $table->string('token');
-            $table->timestamp('created_at')->nullable();
-        });
-
-        Schema::create('sessions', function (Blueprint $table) {
-            $table->string('id')->primary();
-            $table->foreignId('user_id')->nullable()->index();
-            $table->string('ip_address', 45)->nullable();
-            $table->text('user_agent')->nullable();
-            $table->longText('payload');
-            $table->integer('last_activity')->index();
         });
     }
 
@@ -43,8 +44,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
-        Schema::dropIfExists('sessions');
+        Schema::dropIfExists('rental_biodata');
     }
 };

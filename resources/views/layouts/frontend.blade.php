@@ -64,6 +64,31 @@
       font-size: 0.75rem;
       padding: 2px 6px;
     }
+
+    .verification-status {
+      font-size: 0.8rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      margin-left: 8px;
+    }
+
+    .verification-pending {
+      background-color: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
+    }
+
+    .verification-verified {
+      background-color: #d1edff;
+      color: #0c5460;
+      border: 1px solid #b3d9ff;
+    }
+
+    .verification-rejected {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
   </style>
 </head>
 
@@ -140,12 +165,47 @@
             </a>
             <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="profileDropdown">
               @if(Auth::user()->canAccessDashboard())
-              <li>
-                <a class="dropdown-item py-2" href="/dashboard">
-                  <i class="bi bi-speedometer2 me-2"></i>Dashboard
-                </a>
-              </li>
-              <li><hr class="dropdown-divider"></li>
+                @if(Auth::user()->isRental())
+                  @php
+                    $rentalBiodata = Auth::user()->rentalBiodata;
+                  @endphp
+                  @if($rentalBiodata && $rentalBiodata->isPending())
+                    <li>
+                      <a class="dropdown-item py-2 text-warning" href="#" onclick="return false;">
+                        <i class="bi bi-clock me-2"></i>Sedang Diverifikasi
+                        <small class="d-block text-muted">Menunggu persetujuan admin</small>
+                      </a>
+                    </li>
+                  @elseif($rentalBiodata && $rentalBiodata->isRejected())
+                    <li>
+                      <a class="dropdown-item py-2" href="/dashboard">
+                        <i class="bi bi-exclamation-triangle me-2 text-danger"></i>Dashboard
+                        <small class="d-block text-danger">Verifikasi ditolak - perlu perbaikan</small>
+                      </a>
+                    </li>
+                  @elseif($rentalBiodata && $rentalBiodata->isVerified())
+                    <li>
+                      <a class="dropdown-item py-2" href="/dashboard">
+                        <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                        <small class="d-block text-success">Akun terverifikasi</small>
+                      </a>
+                    </li>
+                  @else
+                    <li>
+                      <a class="dropdown-item py-2" href="/dashboard">
+                        <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                        <small class="d-block text-warning">Lengkapi biodata rental</small>
+                      </a>
+                    </li>
+                  @endif
+                @else
+                  <li>
+                    <a class="dropdown-item py-2" href="/dashboard">
+                      <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                    </a>
+                  </li>
+                @endif
+                <li><hr class="dropdown-divider"></li>
               @endif
               <li>
                 <a class="dropdown-item py-2" href="{{ route('profile.show') }}">

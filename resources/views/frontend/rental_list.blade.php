@@ -35,8 +35,8 @@
                                     <!-- Rental Image -->
                                     <div class="ratio ratio-4x3 position-relative overflow-hidden">
                                         <img class="card-img-top object-fit-cover w-100 h-100 hover-zoom"
-                                            src="{{ $rental->gambar_rental ? Storage::url($rental->gambar_rental) : '/images/rental-placeholder.jpg' }}"
-                                            alt="{{ $rental->nama_rental }}">
+                                            src="{{ Storage::url($rental->foto_tempat)}}"
+                                            alt="{{ $rental->foto_tempat }}">
 
                                         <!-- Image Overlay -->
                                         <div

@@ -20,6 +20,10 @@ class DashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
+        if ($user->isRental() && !$user->isRentalVerified()) {
+            return redirect()->route('frontend.homepage')
+                ->with('error', 'Your rental account must be verified before accessing the dashboard.');
+        }
 
         // Data untuk admin
         if ($user->isAdmin()) {
@@ -47,7 +51,7 @@ class DashboardController extends Controller
         $totalOrders = Order::count();
         $totalRevenue = Payment::where('status', 'success')->sum('gross_amount');
         $totalUsers = User::count();
-        $activeRentals = Order::where('status', 'ongoing')->count();
+        $activeRentals = Order::where('status', 'ongoing')->count(); // Changed to count for consistency
         $pendingPayments = Payment::where('status', 'pending')->count();
 
         // Monthly Revenue Chart Data
@@ -114,7 +118,7 @@ class DashboardController extends Controller
             });
 
         // Most Active Rental Owners
-        $activeRentals = User::where('role', 'rental')
+        $activeRentalOwners = User::where('role', 'rental')
             ->withCount(['products', 'products as active_orders' => function ($query) {
                 $query->whereHas('orders', function ($q) {
                     $q->whereIn('status', ['confirmed', 'ongoing']);
@@ -142,7 +146,7 @@ class DashboardController extends Controller
             'tables' => [
                 'recent_orders' => $recentOrders,
                 'top_products' => $topProducts,
-                'active_rentals' => $activeRentals,
+                'active_rentals' => $activeRentalOwners,
             ]
         ];
     }
@@ -187,6 +191,14 @@ class DashboardController extends Controller
             ->mapWithKeys(function ($item) {
                 return [Carbon::create()->month($item->month)->format('M') => $item->total];
             });
+
+        // Fill missing months with 0
+        $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        foreach ($months as $month) {
+            if (!$monthlyRevenue->has($month)) {
+                $monthlyRevenue[$month] = 0;
+            }
+        }
 
         // Product Performance
         $productPerformance = Product::where('user_id', $userId)
@@ -295,6 +307,14 @@ class DashboardController extends Controller
             ->mapWithKeys(function ($item) {
                 return [Carbon::create()->month($item->month)->format('M') => $item->total];
             });
+
+        // Fill missing months with 0
+        $months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        foreach ($months as $month) {
+            if (!$monthlySpending->has($month)) {
+                $monthlySpending[$month] = 0;
+            }
+        }
 
         // Favorite Products (most rented)
         $favoriteProducts = Product::whereHas('orders', function ($query) use ($userId) {

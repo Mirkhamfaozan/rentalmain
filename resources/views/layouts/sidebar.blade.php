@@ -1,4 +1,3 @@
-{{-- //layouts/sidebar.blade.php --}}
 <nav class="mt-5 col-md-3 col-lg-2 d-md-block bg-white sidebar collapse shadow-lg"
     style="width: 260px; border-right: 1px solid #e3e6f0;">
     <div class="position-sticky sidebar-sticky">
@@ -81,17 +80,18 @@
                     </a>
                 </li>
                 @endif
-{{--
-                <!-- Manajemen Kategori - Tersedia untuk Admin dan Super Admin -->
-                @if($isAdmin)
+
+                <!-- Manajemen Biodata Rental - Tersedia untuk Admin, Super Admin, dan Rental -->
+                @if($isAdmin || $isRental)
                 <li class="nav-item mb-1">
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
-                        href="">
-                        <i class="fas fa-tags me-3 text-info" style="width: 16px;"></i>
-                        <span>Kategori</span>
+                        href="{{ route('dashboard.rental_biodata.index') ?? '#' }}">
+                        <i class="fas fa-address-card me-3 text-purple" style="width: 16px;"></i>
+                        <span>{{ $isRental ? 'Biodata Rental Saya' : 'Biodata Rental' }}</span>
+                        <span class="badge bg-purple-subtle text-purple ms-auto small">{{ \App\Models\RentalBiodata::count() ?? '0' }}</span>
                     </a>
                 </li>
-                @endif --}}
+                @endif
 
                 <!-- Manajemen Pesanan - Tersedia untuk Admin, Super Admin, dan Rental -->
                 @if($isAdmin || $isRental)
@@ -103,17 +103,6 @@
                     </a>
                 </li>
                 @endif
-
-                {{-- <!-- Manajemen Inventori - Tersedia untuk Admin dan Super Admin -->
-                @if($isAdmin)
-                <li class="nav-item mb-1">
-                    <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
-                        href="">
-                        <i class="fas fa-warehouse me-3 text-secondary" style="width: 16px;"></i>
-                        <span>Inventori</span>
-                    </a>
-                </li>
-                @endif --}}
 
                 <!-- Transaksi - Tersedia untuk Admin, Super Admin, dan Rental -->
                 @if($isAdmin || $isRental)
@@ -128,60 +117,6 @@
                     </a>
                 </li>
                 @endif
-
-                {{-- <!-- Laporan & Analitik - Tersedia untuk Admin, Super Admin, dan Rental -->
-                @if($isAdmin || $isRental)
-                <li class="nav-item mb-1">
-                    <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
-                        href="">
-                        <i class="fas fa-chart-bar me-3 text-info" style="width: 16px;"></i>
-                        <span>Laporan & Analitik</span>
-                    </a>
-                </li>
-                @endif --}}
-
-                {{-- <!-- Diskon & Kupon - Tersedia untuk Admin dan Super Admin -->
-                @if($isAdmin)
-                <li class="nav-item mb-1">
-                    <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
-                        href="">
-                        <i class="fas fa-percent me-3 text-danger" style="width: 16px;"></i>
-                        <span>Diskon & Kupon</span>
-                        <span class="badge bg-danger-subtle text-danger ms-auto small">5</span>
-                    </a>
-                </li>
-                @endif --}}
-{{--
-                <!-- Notifikasi - Tersedia untuk Admin dan Super Admin -->
-                @if($isAdmin)
-                <li class="nav-item mb-1">
-                    <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
-                        href="">
-                        <i class="fas fa-bell me-3 text-warning" style="width: 16px;"></i>
-                        <span>Notifikasi</span>
-                        <span class="badge bg-warning text-dark ms-auto small">3</span>
-                    </a>
-                </li>
-                @endif --}}
-
-                <!-- Menu Khusus Rental -->
-                {{-- @if($isRental)
-                <li class="nav-item mb-1">
-                    <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
-                        href="">
-                        <i class="fas fa-calendar-alt me-3 text-info" style="width: 16px;"></i>
-                        <span>Kalender Rental</span>
-                    </a>
-                </li>
-
-                <li class="nav-item mb-1">
-                    <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
-                        href="">
-                        <i class="fas fa-clock me-3 text-success" style="width: 16px;"></i>
-                        <span>Ketersediaan</span>
-                    </a>
-                </li>
-                @endif --}}
 
                 <!-- Menu Khusus Super Admin -->
                 @if($isSuperAdmin)
@@ -321,6 +256,15 @@
     </div>
 </nav>
 
+<style>
+/* Tambahkan warna kustom untuk menu Biodata Rental */
+.text-purple {
+    color: #6f42c1 !important;
+}
+.bg-purple-subtle {
+    background-color: #e2d9f3 !important;
+}
+</style>
 
 <script>
     // Fungsionalitas navigasi yang ditingkatkan dengan logika berbasis role
@@ -353,7 +297,7 @@
                     (href.includes('users') && currentPath.includes('users')) ||
                     (href.includes('products') && currentPath.includes('products')) ||
                     (href.includes('transactions') && currentPath.includes('transactions')) ||
-                    (href.includes('rental') && currentPath.includes('rental')) ||
+                    (href.includes('rental_biodata') && currentPath.includes('rental_biodata')) ||
                     (href.includes('analytics') && currentPath.includes('analytics')) ||
                     (href.includes('payments') && currentPath.includes('payments'));
 
@@ -388,8 +332,8 @@
 
                 // Periksa apakah pengguna memiliki izin untuk route ini
                 const requiresAdmin = href.includes('users') || href.includes('superadmin');
-                const requiresRental = href.includes('rental');
-                const requiresTransactionAccess = href.includes('transactions');
+                const requiresRental = href.includes('rental_biodata') || href.includes('rental');
+                const requiresTransactionAccess = href.includes('transactions') || href.includes('payments');
 
                 if (requiresAdmin && !['admin', 'super_admin'].includes(userRole)) {
                     e.preventDefault();
@@ -472,6 +416,7 @@
             link.style.fontWeight = '';
             link.style.boxShadow = '';
 
+ Noxa
             const icon = link.querySelector('i');
             if (icon) {
                 icon.style.color = '';
@@ -484,8 +429,8 @@
             // Periksa apakah pengguna memiliki izin
             const href = targetLink.getAttribute('href');
             const requiresAdmin = href.includes('users') || href.includes('superadmin');
-            const requiresRental = href.includes('rental');
-            const requiresTransactionAccess = href.includes('transactions');
+            const requiresRental = href.includes('rental_biodata') || href.includes "rental';
+            const requiresTransactionAccess = href.includes('transactions') || href.includes('payments');
 
             if ((requiresAdmin && !['admin', 'super_admin'].includes(userRole)) ||
                 (requiresRental && userRole !== 'rental' && !['admin', 'super_admin'].includes(userRole)) ||

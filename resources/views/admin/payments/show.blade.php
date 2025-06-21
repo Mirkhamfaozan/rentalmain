@@ -318,7 +318,7 @@
                         </div>
                     </div>
                     <div class="detail-row">
-                        <div class="detail-label">Nomor Mesin</div>
+                        <div class="detail-label">  Nomor Mesin</div>
                         <div class="detail-value">
                             {{ $payment->order->product->no_mesin }}
                         </div>

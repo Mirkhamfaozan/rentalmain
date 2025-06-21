@@ -7,6 +7,7 @@ use App\Http\Controllers\admin\PaymentController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\admin\ProductController;
 use App\Http\Controllers\admin\ProfileController;
+use App\Http\Controllers\admin\RentalBiodataController;
 use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\FrontPaymentController;
 use App\Http\Controllers\FrontProductController;
@@ -154,6 +155,20 @@ Route::middleware(['auth'])->group(function () {
             'update' => 'users.update',
             'destroy' => 'users.destroy',
         ]);
+        Route::resource('rental_biodata', RentalBiodataController::class)->names([
+            'index' => 'rental_biodata.index',
+            'create' => 'rental_biodata.create',
+            'store' => 'rental_biodata.store',
+            'show' => 'rental_biodata.show',
+            'edit' => 'rental_biodata.edit',
+            'update' => 'rental_biodata.update',
+            'destroy' => 'rental_biodata.destroy',
+        ]);
+
+        // Additional rental biodata routes for verification
+        Route::post('rental_biodata/{biodata}/verify', [RentalBiodataController::class, 'verify'])->name('rental_biodata.verify');
+        Route::post('rental_biodata/{biodata}/reject', [RentalBiodataController::class, 'reject'])->name('rental_biodata.reject');
+        Route::post('rental_biodata/{biodata}/reset-verification', [RentalBiodataController::class, 'resetVerification'])->name('rental_biodata.reset-verification');
 
         // Profile management routes
         Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');

@@ -20,7 +20,9 @@ class OrderController extends Controller
             abort(403, 'Unauthorized action. You do not have permission to access this page.');
         }
 
-        $query = Order::with(['user', 'product'])->orderBy('created_at', 'desc');
+        $query = Order::with(['user', 'product'])
+            ->whereHas('product') // Ensure only orders with valid products are included
+            ->orderBy('created_at', 'desc');
 
         if (Auth::user()->isRental()) {
             $query->whereHas('product', function ($q) {
@@ -168,8 +170,12 @@ class OrderController extends Controller
             abort(403, 'Unauthorized action. You do not have permission to view this order.');
         }
 
-        if (Auth::user()->isRental() && $order->product->user_id !== Auth::id()) {
+        if (Auth::user()->isRental() && $order->product && $order->product->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action. This order belongs to another rental.');
+        }
+
+        if (!$order->product) {
+            Log::warning("Order ID {$order->id} has no associated product.");
         }
 
         return view('admin.orders.show', compact('order'));
@@ -181,7 +187,7 @@ class OrderController extends Controller
             abort(403, 'Unauthorized action. You do not have permission to edit orders.');
         }
 
-        if (Auth::user()->isRental() && $order->product->user_id !== Auth::id()) {
+        if (Auth::user()->isRental() && $order->product && $order->product->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action. You can only edit orders for your own products.');
         }
 
@@ -202,7 +208,7 @@ class OrderController extends Controller
             abort(403, 'Unauthorized action. You do not have permission to update orders.');
         }
 
-        if (Auth::user()->isRental() && $order->product->user_id !== Auth::id()) {
+        if (Auth::user()->isRental() && $order->product && $order->product->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action. You can only update orders for your own products.');
         }
 
@@ -282,6 +288,12 @@ class OrderController extends Controller
                 $validated['foto_ktp'] = $order->foto_ktp;
             }
 
+            // Handle photo deletion if checkbox is checked
+            if ($request->has('hapus_foto_ktp') && $order->foto_ktp) {
+                Storage::delete('public/' . $order->foto_ktp);
+                $validated['foto_ktp'] = null;
+            }
+
             $order->update($validated);
 
             return redirect()->route('dashboard.orders.index')
@@ -302,7 +314,7 @@ class OrderController extends Controller
             abort(403, 'Unauthorized action. You do not have permission to delete orders.');
         }
 
-        if (Auth::user()->isRental() && $order->product->user_id !== Auth::id()) {
+        if ( Auth::user()->isRental() && $order->product && $order->product->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action. You can only delete orders for your own products.');
         }
 

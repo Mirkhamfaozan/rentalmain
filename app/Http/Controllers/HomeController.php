@@ -15,8 +15,9 @@ class HomeController extends Controller
             ->take(6)
             ->get();
 
-        // Fetch rental profiles
+        // Fetch rental profiles yang sudah terverifikasi
         $rentalProfiles = RentalBiodata::forRental()
+            ->verified()
             ->orderBy('created_at', 'desc')
             ->take(3)
             ->get();
@@ -60,14 +61,21 @@ class HomeController extends Controller
 
     public function rentalProfile($id)
     {
-        $rentalProfile = RentalBiodata::forRental()->findOrFail($id);
+        try {
+            // Ambil rental profile yang sudah terverifikasi
+            $rentalProfile = RentalBiodata::forRental()
+                ->verified()
+                ->findOrFail($id);
 
-        // Tampilkan semua produk rental (baik tersedia maupun tidak)
-        $products = Product::where('user_id', $rentalProfile->user_id)
-            ->orderBy('created_at', 'desc')
-            ->take(6)
-            ->get();
+            // Tampilkan semua produk rental (baik tersedia maupun tidak)
+            $products = Product::where('user_id', $rentalProfile->user_id)
+                ->orderBy('created_at', 'desc')
+                ->take(6)
+                ->get();
 
-        return view('frontend.rental_profile', compact('rentalProfile', 'products'));
+            return view('frontend.rental_profile', compact('rentalProfile', 'products'));
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return redirect()->route('home')->with('error', 'Profil rental belum diverifikasi atau tidak ditemukan.');
+        }
     }
 }

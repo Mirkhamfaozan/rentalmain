@@ -25,7 +25,7 @@
                 <!-- Profile Image -->
                 <div class="col-lg-4" data-aos="fade-right" data-aos-delay="100">
                     <div class="card shadow-lg rounded-4 overflow-hidden">
-                        <img src="{{ $rentalProfile->profile_image ? Storage::url($rentalProfile->profile_image) : '/images/placeholder.jpg' }}"
+                        <img src="{{Storage::url($rentalProfile->foto_tempat)}}"
                             class="d-block w-100 rounded-top hover-zoom" alt="{{ $rentalProfile->business_name }}"
                             style="object-fit: cover; height: 300px;">
                     </div>
@@ -69,7 +69,7 @@
                                 <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden hover-grow">
                                     <!-- Motor Image -->
                                     <div class="position-relative">
-                                        <img src="{{ $product->gambar_utama ? Storage::url($product->gambar_utama) : '/images/placeholder.jpg' }}"
+                                        <img src="{{ Storage::url($product->foto_tempat)}}"
                                             class="card-img-top hover-zoom" alt="{{ $product->nama_motor }}"
                                             style="height: 220px; object-fit: cover;">
                                         <!-- Availability Badge -->
