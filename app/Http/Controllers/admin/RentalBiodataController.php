@@ -205,33 +205,50 @@ class RentalBiodataController extends Controller
             return $this->handleException($e, 'memperbarui');
         }
     }
+public function destroy($id)
+{
+    $this->authorizeAdmin();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(RentalBiodata $biodata): RedirectResponse
-    {
-        $this->authorizeAdmin();
-
-        try {
-            DB::transaction(function () use ($biodata) {
-                // Delete associated files
-                $this->deleteFiles($biodata);
-
-                $biodata->delete();
-
-                Log::info('Rental biodata deleted successfully', [
-                    'biodata_id' => $biodata->id,
-                    'admin_id' => Auth::id()
-                ]);
-            });
-
-            return redirect()->route('dashboard.rental_biodata.index')
-                ->with('success', 'Biodata rental berhasil dihapus.');
-        } catch (\Exception $e) {
-            return $this->handleException($e, 'menghapus');
-        }
+    // Handle bulk delete
+    if ($id === 'bulk') {
+        return $this->bulkDestroy(request());
     }
+
+    // Handle single delete
+    try {
+        $biodata = RentalBiodata::findOrFail($id);
+        DB::transaction(function () use ($biodata) {
+            $this->deleteFiles($biodata);
+            $biodata->delete();
+        });
+
+        return redirect()->back()->with('success', 'Biodata berhasil dihapus.');
+    } catch (\Exception $e) {
+        return $this->handleException($e, 'menghapus');
+    }
+}
+
+private function bulkDestroy(Request $request)
+{
+    $validated = $request->validate([
+        'selectedBiodatas' => 'required|array',
+        'selectedBiodatas.*' => 'exists:rental_biodata,id'
+    ]);
+
+    try {
+        DB::transaction(function () use ($validated) {
+            $biodatas = RentalBiodata::whereIn('id', $validated['selectedBiodatas'])->get();
+            foreach ($biodatas as $biodata) {
+                $this->deleteFiles($biodata);
+                $biodata->delete();
+            }
+        });
+
+        return redirect()->back()->with('success', 'Biodata terpilih berhasil dihapus.');
+    } catch (\Exception $e) {
+        return $this->handleException($e, 'menghapus');
+    }
+}
 
     /**
      * Verify the rental biodata.
