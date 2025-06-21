@@ -64,6 +64,19 @@
                                         <input type="email" name="email" id="email" class="form-control rounded-3"
                                                value="{{ old('email', $user->email) }}" required>
                                     </div>
+                                    <!-- Avatar -->
+                                    <div class="col-12">
+                                        <label for="avatar" class="form-label fw-semibold text-muted">Foto Profil</label>
+                                        <input type="file" name="avatar" id="avatar" class="form-control rounded-3">
+                                        @if($user->avatar)
+                                            <div class="mt-2">
+                                                <img src="{{ asset('storage/'.$user->avatar) }}" alt="Avatar" class="rounded-circle" width="100" height="100">
+                                                <a href="{{ route('profile.delete-avatar') }}" class="btn btn-sm btn-outline-danger ms-2" onclick="return confirm('Yakin ingin menghapus foto profil?')">
+                                                    <i class="bi bi-trash"></i> Hapus
+                                                </a>
+                                            </div>
+                                        @endif
+                                    </div>
                                 </div>
 
                                 <!-- Rental Information (if applicable) -->
@@ -75,21 +88,92 @@
                                     <div class="row g-4">
                                         <!-- Business Name -->
                                         <div class="col-md-6">
-                                            <label for="nama_rental" class="form-label fw-semibold text-muted">Nama Bisnis</label>
+                                            <label for="nama_rental" class="form-label fw-semibold text-muted">Nama Bisnis Rental</label>
                                             <input type="text" name="nama_rental" id="nama_rental" class="form-control rounded-3"
                                                    value="{{ old('nama_rental', $rentalBiodata->nama_rental ?? '') }}" required>
                                         </div>
-                                        <!-- Business Address -->
+                                        <!-- Owner Name -->
                                         <div class="col-md-6">
-                                            <label for="alamat" class="form-label fw-semibold text-muted">Alamat Bisnis</label>
-                                            <input type="text" name="alamat" id="alamat" class="form-control rounded-3"
-                                                   value="{{ old('alamat', $rentalBiodata->alamat ?? '') }}" required>
+                                            <label for="nama_pemilik" class="form-label fw-semibold text-muted">Nama Pemilik</label>
+                                            <input type="text" name="nama_pemilik" id="nama_pemilik" class="form-control rounded-3"
+                                                   value="{{ old('nama_pemilik', $rentalBiodata->nama_pemilik ?? '') }}" required>
+                                        </div>
+                                        <!-- Business Address -->
+                                        <div class="col-12">
+                                            <label for="alamat" class="form-label fw-semibold text-muted">Alamat Lengkap</label>
+                                            <textarea name="alamat" id="alamat" class="form-control rounded-3" rows="3" required>{{ old('alamat', $rentalBiodata->alamat ?? '') }}</textarea>
+                                        </div>
+                                        <!-- City -->
+                                        <div class="col-md-4">
+                                            <label for="kota" class="form-label fw-semibold text-muted">Kota</label>
+                                            <input type="text" name="kota" id="kota" class="form-control rounded-3"
+                                                   value="{{ old('kota', $rentalBiodata->kota ?? '') }}" required>
+                                        </div>
+                                        <!-- Province -->
+                                        <div class="col-md-4">
+                                            <label for="provinsi" class="form-label fw-semibold text-muted">Provinsi</label>
+                                            <input type="text" name="provinsi" id="provinsi" class="form-control rounded-3"
+                                                   value="{{ old('provinsi', $rentalBiodata->provinsi ?? '') }}" required>
+                                        </div>
+                                        <!-- Postal Code -->
+                                        <div class="col-md-4">
+                                            <label for="kode_pos" class="form-label fw-semibold text-muted">Kode Pos</label>
+                                            <input type="text" name="kode_pos" id="kode_pos" class="form-control rounded-3"
+                                                   value="{{ old('kode_pos', $rentalBiodata->kode_pos ?? '') }}">
+                                        </div>
+                                        <!-- Phone -->
+                                        <div class="col-md-6">
+                                            <label for="no_telepon" class="form-label fw-semibold text-muted">Nomor Telepon</label>
+                                            <input type="text" name="no_telepon" id="no_telepon" class="form-control rounded-3"
+                                                   value="{{ old('no_telepon', $rentalBiodata->no_telepon ?? '') }}" required>
                                         </div>
                                         <!-- WhatsApp -->
                                         <div class="col-md-6">
-                                            <label for="whatsapp" class="form-label fw-semibold text-muted">WhatsApp</label>
+                                            <label for="no_wa" class="form-label fw-semibold text-muted">WhatsApp</label>
                                             <input type="text" name="no_wa" id="no_wa" class="form-control rounded-3"
-                                                   value="{{ old('no_wa', $rentalBiodata->no_wa ?? '') }}">
+                                                   value="{{ old('no_wa', $rentalBiodata->no_wa ?? '') }}" required>
+                                        </div>
+                                        <!-- Company Email -->
+                                        <div class="col-md-6">
+                                            <label for="email_perusahaan" class="form-label fw-semibold text-muted">Email Perusahaan</label>
+                                            <input type="email" name="email_perusahaan" id="email_perusahaan" class="form-control rounded-3"
+                                                   value="{{ old('email_perusahaan', $rentalBiodata->email_perusahaan ?? '') }}">
+                                        </div>
+                                        <!-- KTP Photo -->
+                                        <div class="col-md-6">
+                                            <label for="foto_ktp" class="form-label fw-semibold text-muted">Foto KTP</label>
+                                            <input type="file" name="foto_ktp" id="foto_ktp" class="form-control rounded-3">
+                                            @if($rentalBiodata && $rentalBiodata->foto_ktp)
+                                                <div class="mt-2">
+                                                    <a href="{{ $rentalBiodata->getKtpPhotoUrl() }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-eye"></i> Lihat KTP
+                                                    </a>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <!-- Business License -->
+                                        <div class="col-md-6">
+                                            <label for="foto_surat_izin_usaha" class="form-label fw-semibold text-muted">Surat Izin Usaha</label>
+                                            <input type="file" name="foto_surat_izin_usaha" id="foto_surat_izin_usaha" class="form-control rounded-3">
+                                            @if($rentalBiodata && $rentalBiodata->foto_surat_izin_usaha)
+                                                <div class="mt-2">
+                                                    <a href="{{ $rentalBiodata->getBusinessLicenseUrl() }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-eye"></i> Lihat Izin Usaha
+                                                    </a>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <!-- Business Place Photo -->
+                                        <div class="col-md-6">
+                                            <label for="foto_tempat" class="form-label fw-semibold text-muted">Foto Tempat Usaha</label>
+                                            <input type="file" name="foto_tempat" id="foto_tempat" class="form-control rounded-3">
+                                            @if($rentalBiodata && $rentalBiodata->foto_tempat)
+                                                <div class="mt-2">
+                                                    <a href="{{ $rentalBiodata->getBusinessPlaceUrl() }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-eye"></i> Lihat Tempat Usaha
+                                                    </a>
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
                                 @endif

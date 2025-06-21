@@ -32,6 +32,23 @@ class FrontProfileController extends Controller
 
         return view('frontend.profile.show', compact('user', 'rentalBiodata', 'userProducts'));
     }
+    public function verificationNote()
+    {
+        $user = Auth::user();
+
+        if ($user->role !== 'rental') {
+            abort(403);
+        }
+
+        $rentalBiodata = RentalBiodata::where('user_id', $user->id)->firstOrFail();
+
+        if (!$rentalBiodata->isRejected()) {
+            return redirect()->route('profile.show');
+        }
+
+        return view('frontend.profile.verification-note', compact('rentalBiodata', 'user'));
+    }
+
 
     /**
      * Show the form for editing the profile.
@@ -60,15 +77,24 @@ class FrontProfileController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
         ]);
 
         // Additional validation for rental users
         if ($user->role === 'rental') {
             $rentalValidated = $request->validate([
                 'nama_rental' => ['required', 'string', 'max:255'],
+                'nama_pemilik' => ['required', 'string', 'max:255'],
                 'alamat' => ['required', 'string', 'max:500'],
-                'no_wa' => ['nullable', 'string', 'max:20'],
-
+                'kota' => ['required', 'string', 'max:100'],
+                'provinsi' => ['required', 'string', 'max:100'],
+                'kode_pos' => ['nullable', 'string', 'max:10'],
+                'no_telepon' => ['required', 'string', 'max:20'],
+                'no_wa' => ['required', 'string', 'max:20'],
+                'email_perusahaan' => ['nullable', 'email', 'max:255'],
+                'foto_ktp' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
+                'foto_surat_izin_usaha' => ['nullable', 'file', 'mimes:jpeg,png,jpg,pdf', 'max:2048'],
+                'foto_tempat' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
             ]);
         }
 
@@ -89,13 +115,60 @@ class FrontProfileController extends Controller
 
         // Update rental biodata if user is rental
         if ($user->role === 'rental') {
+            $rentalData = [
+                'nama_rental' => $rentalValidated['nama_rental'],
+                'nama_pemilik' => $rentalValidated['nama_pemilik'],
+                'alamat' => $rentalValidated['alamat'],
+                'kota' => $rentalValidated['kota'],
+                'provinsi' => $rentalValidated['provinsi'],
+                'kode_pos' => $rentalValidated['kode_pos'] ?? null,
+                'no_telepon' => $rentalValidated['no_telepon'],
+                'no_wa' => $rentalValidated['no_wa'],
+                'email_perusahaan' => $rentalValidated['email_perusahaan'] ?? null,
+            ];
+
+            // Handle file uploads
+            $fileFields = [
+                'foto_ktp' => 'ktp',
+                'foto_surat_izin_usaha' => 'izin_usaha',
+                'foto_tempat' => 'tempat_usaha'
+            ];
+
+            foreach ($fileFields as $field => $folder) {
+                if ($request->hasFile($field)) {
+                    // Delete old file if exists
+                    $oldFile = $rentalBiodata->{$field} ?? null;
+                    if ($oldFile && Storage::disk('public')->exists($oldFile)) {
+                        Storage::disk('public')->delete($oldFile);
+                    }
+
+                    // Store new file
+                    $path = $request->file($field)->store($folder, 'public');
+                    $rentalData[$field] = $path;
+                }
+            }
+
+            // Get existing rental biodata if it exists
+            $rentalBiodata = RentalBiodata::where('user_id', $user->id)->first();
+
+            // Handle verification status
+            if ($rentalBiodata) {
+                // If status was rejected, change to pending verification when updating
+                if ($rentalBiodata->status_verifikasi === RentalBiodata::STATUS_DITOLAK) {
+                    $rentalData['status_verifikasi'] = RentalBiodata::STATUS_BELUM_VERIFIKASI;
+                    $rentalData['catatan_verifikasi'] = null;
+                    $rentalData['tanggal_verifikasi'] = null;
+                    $rentalData['verified_by'] = null;
+                }
+                // If status was already verified, keep it verified
+                elseif ($rentalBiodata->status_verifikasi === RentalBiodata::STATUS_TERVERIFIKASI) {
+                    $rentalData['status_verifikasi'] = RentalBiodata::STATUS_TERVERIFIKASI;
+                }
+            }
+
             RentalBiodata::updateOrCreate(
                 ['user_id' => $user->id],
-                [
-                    'nama_rental' => $rentalValidated['nama_rental'],
-                    'no_wa' => $rentalValidated['no_wa'] ?? null,
-                    'alamat' => $rentalValidated['alamat'],
-                ]
+                $rentalData
             );
         }
 
@@ -137,11 +210,11 @@ class FrontProfileController extends Controller
         // Get orders based on user role
         if ($user->role === 'rental') {
             // For rental users, show orders for their products
-            $orders = \App\Models\Order::whereHas('product', function($query) use ($user) {
+            $orders = \App\Models\Order::whereHas('product', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             })->with(['product', 'user', 'payment'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
         } else {
             // For regular users, show their own orders
             $orders = \App\Models\Order::where('user_id', $user->id)
@@ -162,18 +235,18 @@ class FrontProfileController extends Controller
 
         if ($user->role === 'rental') {
             // For rental users, show payments for orders of their products
-            $payments = \App\Models\Payment::whereHas('order.product', function($query) use ($user) {
+            $payments = \App\Models\Payment::whereHas('order.product', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             })->with(['order.product', 'order.user'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
         } else {
             // For regular users, show their own payments
-            $payments = \App\Models\Payment::whereHas('order', function($query) use ($user) {
+            $payments = \App\Models\Payment::whereHas('order', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             })->with(['order.product'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
         }
 
         return view('frontend.profile.payments', compact('payments'));

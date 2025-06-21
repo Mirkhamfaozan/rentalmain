@@ -98,13 +98,12 @@
                                                             <i class="fas fa-check"></i>
                                                         </button>
                                                     </form>
-                                                    <form action="{{ route('dashboard.rental_biodata.reject', $biodata->id) }}" method="POST" class="d-inline">
+                                                    <a href="{{ route('dashboard.rental_biodata.reject', $biodata->id) }}"  class="d-inline">
                                                         @csrf
-                                                        <button type="submit" class="btn btn-outline-warning rounded-circle" title="Tolak"
-                                                                onclick="return confirm('Apakah Anda yakin ingin menolak biodata ini?')">
+                                                        <button type="submit" class="btn btn-outline-warning rounded-circle" title="Tolak">
                                                             <i class="fas fa-times"></i>
                                                         </button>
-                                                    </form>
+                                                    </a>
                                                 @endif
                                                 @if ($biodata->canDelete(auth()->user()))
                                                     <form action="{{ route('dashboard.rental_biodata.destroy', $biodata->id) }}" method="POST" class="d-inline">
@@ -309,14 +308,10 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        if (!confirm(`Apakah Anda yakin ingin ${action === 'verify' ? 'memverifikasi' : action === 'reject' ? 'menolak' : 'menghapus'} biodata yang dipilih?`)) {
-            return;
-        }
 
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = action === 'verify' ? '{{ route("dashboard.rental_biodata.verify", "") }}' :
-                      action === 'reject' ? '{{ route("dashboard.rental_biodata.reject", "") }}' :
                       '{{ route("dashboard.rental_biodata.destroy", "") }}';
         form.innerHTML = '@csrf' + (action === 'delete' ? '@method("DELETE")' : '');
 

@@ -56,6 +56,8 @@ Route::group(['prefix' => 'payment'], function () {
 Route::middleware('auth')->group(function () {
     Route::group(['prefix' => 'profile'], function () {
         // View profile
+            Route::get('/verification-note', [FrontProfileController::class, 'verificationNote'])->name('profile.verification-note');
+
         Route::get('/', [FrontProfileController::class, 'show'])->name('profile.show');
 
         // Edit profile
@@ -165,6 +167,7 @@ Route::middleware(['auth'])->group(function () {
             'destroy' => 'rental_biodata.destroy',
         ]);
 
+        Route::get('/rental_biodata/{biodata}/reject', [RentalBiodataController::class, 'showRejectForm'])->name('rental_biodata.reject');
         // Additional rental biodata routes for verification
         Route::post('rental_biodata/{biodata}/verify', [RentalBiodataController::class, 'verify'])->name('rental_biodata.verify');
         Route::post('rental_biodata/{biodata}/reject', [RentalBiodataController::class, 'reject'])->name('rental_biodata.reject');

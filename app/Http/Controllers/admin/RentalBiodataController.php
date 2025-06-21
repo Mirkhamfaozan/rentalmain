@@ -31,9 +31,9 @@ class RentalBiodataController extends Controller
         $this->applyFilters($query, $request);
 
         $biodatas = $query->with(['user:id,name,email', 'verifiedBy:id,name'])
-                         ->orderBy('created_at', 'desc')
-                         ->paginate(15)
-                         ->withQueryString();
+            ->orderBy('created_at', 'desc')
+            ->paginate(15)
+            ->withQueryString();
 
         return view('admin.rental_biodata.index', [
             'biodatas' => $biodatas,
@@ -52,11 +52,11 @@ class RentalBiodataController extends Controller
             $searchTerm = '%' . $request->search . '%';
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('nama_rental', 'like', $searchTerm)
-                  ->orWhere('nama_pemilik', 'like', $searchTerm)
-                  ->orWhere('email_perusahaan', 'like', $searchTerm)
-                  ->orWhere('no_telepon', 'like', $searchTerm)
-                  ->orWhere('kota', 'like', $searchTerm)
-                  ->orWhere('provinsi', 'like', $searchTerm);
+                    ->orWhere('nama_pemilik', 'like', $searchTerm)
+                    ->orWhere('email_perusahaan', 'like', $searchTerm)
+                    ->orWhere('no_telepon', 'like', $searchTerm)
+                    ->orWhere('kota', 'like', $searchTerm)
+                    ->orWhere('provinsi', 'like', $searchTerm);
             });
         }
 
@@ -86,25 +86,25 @@ class RentalBiodataController extends Controller
         ];
     }
 
-public function show($id)
-{
-    if (Auth::user()->role !== 'admin') {
-        abort(403, 'Unauthorized action. You do not have permission to access this page.');
+    public function show($id)
+    {
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized action. You do not have permission to access this page.');
+        }
+
+        $biodata = RentalBiodata::forRental()->findOrFail($id);
+
+        return view('admin.rental_biodata.show', compact('biodata'));
     }
-
-    $biodata = RentalBiodata::forRental()->findOrFail($id);
-
-    return view('admin.rental_biodata.show', compact('biodata'));
-}
 
     public function create(): View
     {
         $this->authorizeAdmin();
 
         $users = User::where('role', 'rental')
-                    ->whereDoesntHave('rentalBiodata')
-                    ->orderBy('name')
-                    ->get(['id', 'name', 'email']);
+            ->whereDoesntHave('rentalBiodata')
+            ->orderBy('name')
+            ->get(['id', 'name', 'email']);
 
         return view('admin.rental_biodata.create', compact('users'));
     }
@@ -140,7 +140,7 @@ public function show($id)
             });
 
             return redirect()->route('dashboard.rental_biodata.index')
-                           ->with('success', 'Biodata rental berhasil dibuat.');
+                ->with('success', 'Biodata rental berhasil dibuat.');
         } catch (\Exception $e) {
             return $this->handleException($e, 'membuat');
         }
@@ -156,12 +156,12 @@ public function show($id)
         $biodata->load('user:id,name,email');
 
         $users = User::where('role', 'rental')
-                    ->where(function($query) use ($biodata) {
-                        $query->whereDoesntHave('rentalBiodata')
-                              ->orWhere('id', $biodata->user_id);
-                    })
-                    ->orderBy('name')
-                    ->get(['id', 'name', 'email']);
+            ->where(function ($query) use ($biodata) {
+                $query->whereDoesntHave('rentalBiodata')
+                    ->orWhere('id', $biodata->user_id);
+            })
+            ->orderBy('name')
+            ->get(['id', 'name', 'email']);
 
         return view('admin.rental_biodata.edit', [
             'biodata' => $biodata,
@@ -200,7 +200,7 @@ public function show($id)
             });
 
             return redirect()->route('dashboard.rental_biodata.index')
-                           ->with('success', 'Biodata rental berhasil diperbarui.');
+                ->with('success', 'Biodata rental berhasil diperbarui.');
         } catch (\Exception $e) {
             return $this->handleException($e, 'memperbarui');
         }
@@ -227,7 +227,7 @@ public function show($id)
             });
 
             return redirect()->route('dashboard.rental_biodata.index')
-                           ->with('success', 'Biodata rental berhasil dihapus.');
+                ->with('success', 'Biodata rental berhasil dihapus.');
         } catch (\Exception $e) {
             return $this->handleException($e, 'menghapus');
         }
@@ -263,16 +263,27 @@ public function show($id)
             });
 
             return redirect()->route('dashboard.rental_biodata.show', $biodata)
-                           ->with('success', 'Biodata rental berhasil diverifikasi.');
+                ->with('success', 'Biodata rental berhasil diverifikasi.');
         } catch (\Exception $e) {
             return $this->handleException($e, 'memverifikasi');
         }
     }
 
+    public function showRejectForm(RentalBiodata $biodata)
+    {
+        $this->authorizeAdmin();
+
+        if (!$biodata->canVerify(Auth::user())) {
+            abort(403, 'Biodata tidak dapat ditolak saat ini.');
+        }
+
+        return view('admin.rental_biodata.reject', compact('biodata'));
+    }
+
     /**
-     * Reject the rental biodata.
+     * Reject the rental biodata
      */
-    public function reject(Request $request, RentalBiodata $biodata): RedirectResponse
+    public function reject(Request $request, RentalBiodata $biodata)
     {
         $this->authorizeAdmin();
 
@@ -283,8 +294,8 @@ public function show($id)
         $validated = $request->validate([
             'catatan_verifikasi' => 'required|string|max:1000',
         ], [
-            'catatan_verifikasi.required' => 'Catatan penolakan wajib diisi.',
-            'catatan_verifikasi.max' => 'Catatan penolakan maksimal 1000 karakter.'
+            'catatan_verifikasi.required' => 'Alasan penolakan wajib diisi',
+            'catatan_verifikasi.max' => 'Alasan penolakan maksimal 1000 karakter'
         ]);
 
         try {
@@ -303,9 +314,11 @@ public function show($id)
             });
 
             return redirect()->route('dashboard.rental_biodata.show', $biodata)
-                           ->with('success', 'Biodata rental berhasil ditolak.');
+                ->with('success', 'Biodata rental berhasil ditolak.');
         } catch (\Exception $e) {
-            return $this->handleException($e, 'menolak');
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Gagal menolak biodata: ' . $e->getMessage());
         }
     }
 
@@ -327,7 +340,7 @@ public function show($id)
             });
 
             return redirect()->route('dashboard.rental_biodata.show', $biodata)
-                           ->with('success', 'Status verifikasi biodata rental berhasil direset.');
+                ->with('success', 'Status verifikasi biodata rental berhasil direset.');
         } catch (\Exception $e) {
             return $this->handleException($e, 'mereset verifikasi');
         }
@@ -363,7 +376,7 @@ public function show($id)
      */
     private function getDocumentFileInfo(RentalBiodata $biodata, string $type): array
     {
-        return match($type) {
+        return match ($type) {
             'ktp' => [
                 'path' => $biodata->foto_ktp,
                 'name' => "KTP_{$biodata->nama_pemilik}_{$biodata->id}"
@@ -399,8 +412,8 @@ public function show($id)
 
             DB::transaction(function () use ($validated, &$processed, &$failed) {
                 $biodatas = RentalBiodata::whereIn('id', $validated['biodata_ids'])
-                                       ->where('status_verifikasi', RentalBiodata::STATUS_BELUM_VERIFIKASI)
-                                       ->get();
+                    ->where('status_verifikasi', RentalBiodata::STATUS_BELUM_VERIFIKASI)
+                    ->get();
 
                 foreach ($biodatas as $biodata) {
                     if ($biodata->verify(Auth::user(), $validated['catatan_verifikasi'] ?? null)) {
@@ -601,7 +614,7 @@ public function show($id)
         }
 
         return redirect()->back()
-                       ->withInput()
-                       ->with('error', $message);
+            ->withInput()
+            ->with('error', $message);
     }
 }

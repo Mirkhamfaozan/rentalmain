@@ -31,19 +31,18 @@
                         <div class="card-body text-center p-4">
                             <!-- Avatar -->
                             <div class="position-relative mb-4">
-                                @if($user->avatar)
-                                    <img src="{{ Storage::url($user->avatar) }}"
-                                         class="rounded-circle shadow-lg"
-                                         alt="Avatar"
-                                         style="width: 150px; height: 150px; object-fit: cover;">
+                                @if ($user->avatar)
+                                    <img src="{{ Storage::url($user->avatar) }}" class="rounded-circle shadow-lg"
+                                        alt="Avatar" style="width: 150px; height: 150px; object-fit: cover;">
                                 @else
                                     <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center shadow-lg mx-auto"
-                                         style="width: 150px; height: 150px;">
+                                        style="width: 150px; height: 150px;">
                                         <i class="bi bi-person-fill text-white" style="font-size: 4rem;"></i>
                                     </div>
                                 @endif
-                                <span class="position-absolute bottom-0 end-0 translate-middle badge rounded-pill
-                                    @if($user->role === 'admin') bg-danger
+                                <span
+                                    class="position-absolute bottom-0 end-0 translate-middle badge rounded-pill
+                                    @if ($user->role === 'admin') bg-danger
                                     @elseif($user->role === 'rental') bg-warning
                                     @else bg-success @endif">
                                     {{ ucfirst($user->role) }}
@@ -53,7 +52,7 @@
                             <h4 class="fw-bold text-primary mb-2">{{ $user->name }}</h4>
                             <p class="text-muted mb-3">{{ $user->email }}</p>
 
-                            @if($user->phone)
+                            @if ($user->phone)
                                 <p class="text-muted mb-3">
                                     <i class="bi bi-telephone-fill me-2"></i>{{ $user->phone }}
                                 </p>
@@ -71,25 +70,80 @@
                         </div>
                     </div>
 
-                    @if($user->role === 'rental' && $rentalBiodata)
+                    @if ($user->role === 'rental' && $rentalBiodata)
                         <!-- Rental Info Card -->
                         <div class="card shadow-sm border-0 rounded-4 mt-4" data-aos="fade-right" data-aos-delay="200">
                             <div class="card-body p-4">
                                 <h5 class="fw-bold text-primary mb-3">
                                     <i class="bi bi-shop me-2"></i>Info Rental
                                 </h5>
+
+                                <!-- Verification Status Alert -->
+                                @if ($rentalBiodata->isRejected())
+                                    <div class="alert alert-danger border-0 rounded-3 shadow-sm mb-4">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-exclamation-triangle-fill me-3 fs-4"></i>
+                                            <div>
+                                                <h6 class="alert-heading mb-1">Verifikasi Ditolak</h6>
+                                                <p class="mb-0">Data rental Anda tidak memenuhi persyaratan verifikasi.
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <a href="{{ route('profile.verification-note') }}"
+                                                class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-info-circle me-1"></i> Lihat Detail Penolakan
+                                            </a>
+                                        </div>
+                                    </div>
+                                @elseif($rentalBiodata->isPending())
+                                    <div class="alert alert-warning border-0 rounded-3 shadow-sm mb-4">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-hourglass-split me-3 fs-4"></i>
+                                            <div>
+                                                <h6 class="alert-heading mb-1">Menunggu Verifikasi</h6>
+                                                <p class="mb-0">Data rental Anda sedang dalam proses verifikasi oleh
+                                                    admin.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                <div class="mb-3">
+                                    <strong>Status Verifikasi:</strong>
+                                    <span class="badge bg-{{ $rentalBiodata->getStatusBadgeClass() }} ms-2">
+                                        {{ $rentalBiodata->getStatusLabel() }}
+                                    </span>
+                                </div>
+
                                 <div class="mb-3">
                                     <strong>Nama Bisnis:</strong>
                                     <p class="text-muted mb-0">{{ $rentalBiodata->nama_rental }}</p>
                                 </div>
+
                                 <div class="mb-3">
                                     <strong>Alamat Bisnis:</strong>
                                     <p class="text-muted mb-0">{{ $rentalBiodata->alamat }}</p>
                                 </div>
-                                @if($rentalBiodata->no_wa)
+
+                                @if ($rentalBiodata->no_wa)
                                     <div class="mb-3">
                                         <strong>WhatsApp:</strong>
                                         <p class="text-muted mb-0">{{ $rentalBiodata->no_wa }}</p>
+                                    </div>
+                                @endif
+
+                                @if ($rentalBiodata->isVerified())
+                                    <div class="alert alert-success border-0 rounded-3 shadow-sm mt-4">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-check-circle-fill me-3 fs-4"></i>
+                                            <div>
+                                                <h6 class="alert-heading mb-1">Terverifikasi</h6>
+                                                <p class="mb-0">Data rental Anda telah diverifikasi pada
+                                                    {{ $rentalBiodata->tanggal_verifikasi->format('d F Y') }}
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
                                 @endif
                             </div>
@@ -105,20 +159,20 @@
                             <nav>
                                 <div class="nav nav-pills nav-fill" id="nav-tab" role="tablist">
                                     <button class="nav-link active rounded-pill" id="nav-info-tab" data-bs-toggle="tab"
-                                            data-bs-target="#nav-info" type="button" role="tab">
+                                        data-bs-target="#nav-info" type="button" role="tab">
                                         <i class="bi bi-person-lines-fill me-2"></i>Info Personal
                                     </button>
                                     <button class="nav-link rounded-pill" id="nav-orders-tab" data-bs-toggle="tab"
-                                            data-bs-target="#nav-orders" type="button" role="tab">
+                                        data-bs-target="#nav-orders" type="button" role="tab">
                                         <i class="bi bi-bag-check me-2"></i>Pesanan
                                     </button>
                                     <button class="nav-link rounded-pill" id="nav-payments-tab" data-bs-toggle="tab"
-                                            data-bs-target="#nav-payments" type="button" role="tab">
+                                        data-bs-target="#nav-payments" type="button" role="tab">
                                         <i class="bi bi-credit-card me-2"></i>Pembayaran
                                     </button>
-                                    @if($user->role === 'rental')
+                                    @if ($user->role === 'rental')
                                         <button class="nav-link rounded-pill" id="nav-products-tab" data-bs-toggle="tab"
-                                                data-bs-target="#nav-products" type="button" role="tab">
+                                            data-bs-target="#nav-products" type="button" role="tab">
                                             <i class="bi bi-grid me-2"></i>Produk
                                         </button>
                                     @endif
@@ -173,7 +227,8 @@
                                     </div>
                                     <div class="text-center text-muted py-5">
                                         <i class="bi bi-bag-x display-1 text-muted mb-3"></i>
-                                        <p>Belum ada pesanan. <a href="{{ route('frontend.product') }}" class="text-primary">Mulai berbelanja</a></p>
+                                        <p>Belum ada pesanan. <a href="{{ route('frontend.product') }}"
+                                                class="text-primary">Mulai berbelanja</a></p>
                                     </div>
                                 </div>
                             </div>
@@ -198,7 +253,7 @@
                         </div>
 
                         <!-- Products Tab (Rental Only) -->
-                        @if($user->role === 'rental')
+                        @if ($user->role === 'rental')
                             <div class="tab-pane fade" id="nav-products" role="tabpanel">
                                 <div class="card shadow-sm border-0 rounded-4">
                                     <div class="card-body p-4">
@@ -208,19 +263,21 @@
                                             </h5>
                                         </div>
 
-                                        @if($userProducts->count() > 0)
+                                        @if ($userProducts->count() > 0)
                                             <div class="row g-3">
-                                                @foreach($userProducts->take(3) as $product)
+                                                @foreach ($userProducts->take(3) as $product)
                                                     <div class="col-md-4">
                                                         <div class="card border-0 shadow-sm rounded-3 hover-scale">
                                                             <img src="{{ $product->gambar_utama ? Storage::url($product->gambar_utama) : '/images/placeholder.jpg' }}"
-                                                                 class="card-img-top"
-                                                                 style="height: 150px; object-fit: cover;"
-                                                                 alt="{{ $product->nama_motor }}">
+                                                                class="card-img-top"
+                                                                style="height: 150px; object-fit: cover;"
+                                                                alt="{{ $product->nama_motor }}">
                                                             <div class="card-body p-3">
-                                                                <h6 class="fw-bold text-truncate mb-2">{{ $product->nama_motor }}</h6>
+                                                                <h6 class="fw-bold text-truncate mb-2">
+                                                                    {{ $product->nama_motor }}</h6>
                                                                 <p class="text-success fw-bold mb-0">
-                                                                    Rp {{ number_format($product->harga_harian, 0, ',', '.') }}/hari
+                                                                    Rp
+                                                                    {{ number_format($product->harga_harian, 0, ',', '.') }}/hari
                                                                 </p>
                                                             </div>
                                                         </div>
@@ -325,6 +382,7 @@
                 opacity: 0;
                 transform: translateY(10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
