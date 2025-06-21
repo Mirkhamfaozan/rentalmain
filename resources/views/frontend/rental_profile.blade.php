@@ -69,7 +69,7 @@
                                 <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden hover-grow">
                                     <!-- Motor Image -->
                                     <div class="position-relative">
-                                        <img src="{{ Storage::url($product->foto_tempat)}}"
+                                        <img src="{{ $product->gambar_utama ? Storage::url($product->gambar_utama) : '/images/placeholder.jpg' }}"
                                             class="card-img-top hover-zoom" alt="{{ $product->nama_motor }}"
                                             style="height: 220px; object-fit: cover;">
                                         <!-- Availability Badge -->
