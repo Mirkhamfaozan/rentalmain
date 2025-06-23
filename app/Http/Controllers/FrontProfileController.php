@@ -21,6 +21,8 @@ class FrontProfileController extends Controller
         $user = Auth::user();
         $rentalBiodata = null;
         $userProducts = collect();
+        $orders = collect();
+        $payments = collect();
 
         // If user is rental, get their biodata and products
         if ($user->role === 'rental') {
@@ -28,9 +30,36 @@ class FrontProfileController extends Controller
             $userProducts = Product::where('user_id', $user->id)
                 ->orderBy('created_at', 'desc')
                 ->get();
+
+            // Get orders for rental user's products
+            $orders = \App\Models\Order::whereHas('product', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })->with(['product', 'user', 'payment'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            // Get payments for orders of rental user's products
+            $payments = \App\Models\Payment::whereHas('order.product', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })->with(['order.product', 'order.user'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+        } else {
+            // For regular users, get their own orders
+            $orders = \App\Models\Order::where('user_id', $user->id)
+                ->with(['product', 'payment'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            // For regular users, get their own payments
+            $payments = \App\Models\Payment::whereHas('order', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })->with(['order.product'])
+                ->orderBy('created_at', 'desc')
+                ->get();
         }
 
-        return view('frontend.profile.show', compact('user', 'rentalBiodata', 'userProducts'));
+        return view('frontend.profile.show', compact('user', 'rentalBiodata', 'userProducts', 'orders', 'payments'));
     }
     public function verificationNote()
     {

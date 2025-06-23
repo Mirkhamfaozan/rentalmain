@@ -80,7 +80,7 @@
                                             <span
                                                 class="badge bg-{{ $biodata->getStatusBadgeClass() }} rounded-pill px-3 py-1">
                                                 {{ $biodata->getStatusLabel() }}
-                                            </span>
+                                                </span>
                                         </td>
                                         <td class="text-muted">{{ $biodata->created_at->format('Y-m-d') }}</td>
                                         <td>

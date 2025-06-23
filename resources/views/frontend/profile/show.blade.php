@@ -223,13 +223,46 @@
                                         <h5 class="fw-bold text-primary mb-0">
                                             <i class="bi bi-bag-check me-2"></i>Pesanan Saya
                                         </h5>
+                                    </div>
 
-                                    </div>
-                                    <div class="text-center text-muted py-5">
-                                        <i class="bi bi-bag-x display-1 text-muted mb-3"></i>
-                                        <p>Belum ada pesanan. <a href="{{ route('frontend.product') }}"
-                                                class="text-primary">Mulai berbelanja</a></p>
-                                    </div>
+                                    @if ($orders->isNotEmpty())
+                                        <div class="table-responsive">
+                                            <table class="table table-hover table-bordered rounded-3 overflow-hidden">
+                                                <thead class="bg-primary text-white">
+                                                    <tr>
+                                                        <th scope="col">ID Pesanan</th>
+                                                        <th scope="col">Produk</th>
+                                                        <th scope="col">Tanggal Mulai</th>
+                                                        <th scope="col">Tanggal Selesai</th>
+                                                        <th scope="col">Total Harga</th>
+                                                        <th scope="col">Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($orders as $order)
+                                                        <tr class="hover-scale">
+                                                            <td>{{ $order->id }}</td>
+                                                            <td>{{ $order->product->nama_motor ?? 'N/A' }}</td>
+                                                            <td>{{ $order->tanggal_mulai->format('d/m/Y') }}</td>
+                                                            <td>{{ $order->tanggal_selesai->format('d/m/Y') }}</td>
+                                                            <td>Rp {{ number_format($order->total_harga, 0, ',', '.') }}</td>
+                                                            <td>
+                                                                <span class="badge bg-{{ $order->status === 'completed' ? 'success' : ($order->status === 'pending' ? 'warning' : ($order->status === 'cancelled' ? 'danger' : 'info')) }}">
+                                                                    {{ $order->getStatusLabelAttribute() }}
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    @else
+                                        <div class="text-center text-muted py-5">
+                                            <i class="bi bi-bag-x display-1 text-muted mb-3"></i>
+                                            <p>Belum ada pesanan. <a href="{{ route('frontend.product') }}"
+                                                    class="text-primary">Mulai berbelanja</a></p>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -242,12 +275,45 @@
                                         <h5 class="fw-bold text-primary mb-0">
                                             <i class="bi bi-credit-card me-2"></i>Riwayat Pembayaran
                                         </h5>
+                                    </div>
 
-                                    </div>
-                                    <div class="text-center text-muted py-5">
-                                        <i class="bi bi-credit-card-2-front display-1 text-muted mb-3"></i>
-                                        <p>Belum ada pembayaran</p>
-                                    </div>
+                                    @if ($payments->isNotEmpty())
+                                        <div class="table-responsive">
+                                            <table class="table table-hover table-bordered rounded-3 overflow-hidden">
+                                                <thead class="bg-primary text-white">
+                                                    <tr>
+                                                        <th scope="col">ID Pembayaran</th>
+                                                        <th scope="col">Pesanan</th>
+                                                        <th scope="col">Jumlah</th>
+                                                        <th scope="col">Metode</th>
+                                                        <th scope="col">Status</th>
+                                                        <th scope="col">Waktu Transaksi</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($payments as $payment)
+                                                        <tr class="hover-scale">
+                                                            <td>{{ $payment->id }}</td>
+                                                            <td>{{ $payment->order->product->nama_motor ?? 'N/A' }}</td>
+                                                            <td>Rp {{ number_format($payment->gross_amount, 0, ',', '.') }}</td>
+                                                            <td>{{ $payment->payment_type ?? 'N/A' }}</td>
+                                                            <td>
+                                                                <span class="badge bg-{{ $payment->status === 'success' ? 'success' : ($payment->status === 'pending' ? 'warning' : ($payment->status === 'expired' || $payment->status === 'failed' ? 'danger' : 'info')) }}">
+                                                                    {{ $payment->getStatusLabelAttribute() }}
+                                                                </span>
+                                                            </td>
+                                                            <td>{{ $payment->transaction_time ? $payment->transaction_time->format('d/m/Y H:i') : 'N/A' }}</td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    @else
+                                        <div class="text-center text-muted py-5">
+                                            <i class="bi bi-credit-card-2-front display-1 text-muted mb-3"></i>
+                                            <p>Belum ada pembayaran</p>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -261,12 +327,16 @@
                                             <h5 class="fw-bold text-primary mb-0">
                                                 <i class="bi bi-grid me-2"></i>Produk Saya
                                             </h5>
+                                            <a href="{{ route('products.create') }}"
+                                                class="btn btn-sm btn-gradient rounded-pill">
+                                                <i class="bi bi-plus-circle me-2"></i>Tambah Produk
+                                            </a>
                                         </div>
 
-                                        @if ($userProducts->count() > 0)
-                                            <div class="row g-3">
-                                                @foreach ($userProducts->take(3) as $product)
-                                                    <div class="col-md-4">
+                                        @if ($userProducts->isNotEmpty())
+                                            <div class="row g-4">
+                                                @foreach ($userProducts->take(6) as $product)
+                                                    <div class="col-md-4 col-sm-6">
                                                         <div class="card border-0 shadow-sm rounded-3 hover-scale">
                                                             <img src="{{ $product->gambar_utama ? Storage::url($product->gambar_utama) : '/images/placeholder.jpg' }}"
                                                                 class="card-img-top"
@@ -275,19 +345,44 @@
                                                             <div class="card-body p-3">
                                                                 <h6 class="fw-bold text-truncate mb-2">
                                                                     {{ $product->nama_motor }}</h6>
-                                                                <p class="text-success fw-bold mb-0">
-                                                                    Rp
-                                                                    {{ number_format($product->harga_harian, 0, ',', '.') }}/hari
+                                                                <p class="text-success fw-bold mb-2">
+                                                                    Rp {{ number_format($product->harga_harian, 0, ',', '.') }}/hari
                                                                 </p>
+                                                                <div class="d-flex gap-2">
+                                                                    <a href="{{ route('products.edit', $product->id) }}"
+                                                                        class="btn btn-sm btn-outline-primary rounded-pill">
+                                                                        <i class="bi bi-pencil me-1"></i>Edit
+                                                                    </a>
+                                                                    <form
+                                                                        action="{{ route('products.destroy', $product->id) }}"
+                                                                        method="POST"
+                                                                        onsubmit="return confirm('Hapus produk ini?');">
+                                                                        @csrf
+                                                                        @method('DELETE')
+                                                                        <button type="submit"
+                                                                            class="btn btn-sm btn-outline-danger rounded-pill">
+                                                                            <i class="bi bi-trash me-1"></i>Hapus
+                                                                        </button>
+                                                                    </form>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 @endforeach
                                             </div>
+                                            @if ($userProducts->count() > 6)
+                                                <div class="text-center mt-4">
+                                                    <a href="{{ route('profile.products') }}"
+                                                        class="btn btn-outline-primary rounded-pill">
+                                                        Lihat Semua Produk
+                                                    </a>
+                                                </div>
+                                            @endif
                                         @else
                                             <div class="text-center text-muted py-5">
                                                 <i class="bi bi-plus-circle display-1 text-muted mb-3"></i>
-                                                <p>Belum ada produk. Mulai tambahkan produk Anda</p>
+                                                <p>Belum ada produk. <a href="{{ route('products.create') }}"
+                                                        class="text-primary">Tambah produk sekarang</a></p>
                                             </div>
                                         @endif
                                     </div>
@@ -302,11 +397,12 @@
 
     <!-- Custom Styles -->
     <style>
-        /* Root Variables */
         :root {
             --primary: #0d6efd;
             --warning: #ffc107;
             --success: #28a745;
+            --danger: #dc3545;
+            --info: #17a2b8;
             --animation-duration: 0.3s;
         }
 
@@ -319,7 +415,7 @@
 
         .btn-gradient:hover {
             transform: scale(1.05);
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0,0,0.2);
             color: white;
         }
 
@@ -329,7 +425,7 @@
         }
 
         .hover-scale:hover {
-            transform: scale(1.05);
+            transform: scale(1.02);
             box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
         }
 
@@ -337,12 +433,22 @@
         .alert {
             border-radius: 0.75rem;
             border: none;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0,0.1);
         }
 
         .alert-success {
-            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-            border-left: 5px solid var(--success);
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            border-left: 4px solid var(--success);
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, #fff3cd, #ffeeba);
+            border-left: 4px solid var(--warning);
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #f8d7da, #f5c6);
+            border-left: 4px solid var(--danger);
         }
 
         /* Card Animation */
@@ -352,7 +458,22 @@
 
         .card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0.5rem 2rem rgba(0,0, 0, 0.1);
+        }
+
+        /* Table Styles */
+        .table {
+            background-color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .table th, .table td {
+            vertical-align: middle;
+            padding: 0.75rem;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(13, 110, 253, 0.05);
         }
 
         /* Nav Pills Custom */
@@ -367,7 +488,7 @@
             color: white;
         }
 
-        .nav-pills .nav-link:hover:not(.active) {
+        .nav-pills .nav-link:hover:not(.active):hover {
             background-color: rgba(13, 110, 253, 0.1);
             color: var(--primary);
         }
@@ -381,8 +502,6 @@
             from {
                 opacity: 0;
                 transform: translateY(10px);
-            }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -399,6 +518,10 @@
                 font-size: 0.875rem;
                 padding: 0.5rem 1rem;
             }
+
+            .table th, .table td {
+                font-size: 0.9rem;
+            }
         }
     </style>
 
@@ -409,13 +532,13 @@
             AOS.init({
                 duration: 800,
                 easing: 'ease-in-out',
-                once: false
+                once: true
             });
 
             // Auto-hide alerts after 5 seconds
             setTimeout(function() {
                 const alerts = document.querySelectorAll('.alert');
-                alerts.forEach(function(alert) {
+                alerts.forEach(alert => {
                     if (alert.classList.contains('show')) {
                         const bsAlert = new bootstrap.Alert(alert);
                         bsAlert.close();
