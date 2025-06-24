@@ -82,7 +82,7 @@
                 @endif
 
                 <!-- Manajemen Biodata Rental - Tersedia untuk Admin, Super Admin, dan Rental -->
-                @if($isAdmin || $isRental)
+                @if($isAdmin)
                 <li class="nav-item mb-1">
                     <a class="nav-link d-flex align-items-center px-3 py-2 rounded-pill text-dark hover-item"
                         href="{{ route('dashboard.rental_biodata.index') ?? '#' }}">

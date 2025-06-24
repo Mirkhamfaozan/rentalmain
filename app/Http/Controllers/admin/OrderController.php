@@ -36,10 +36,10 @@ class OrderController extends Controller
                 $q->whereHas('user', function ($q) use ($search) {
                     $q->where('name', 'like', $search);
                 })
-                ->orWhereHas('product', function ($q) use ($search) {
-                    $q->where('nama_motor', 'like', $search);
-                })
-                ->orWhere('name', 'like', $search);
+                    ->orWhereHas('product', function ($q) use ($search) {
+                        $q->where('nama_motor', 'like', $search);
+                    })
+                    ->orWhere('name', 'like', $search);
             });
         }
 
@@ -314,7 +314,7 @@ class OrderController extends Controller
             abort(403, 'Unauthorized action. You do not have permission to delete orders.');
         }
 
-        if ( Auth::user()->isRental() && $order->product && $order->product->user_id !== Auth::id()) {
+        if (Auth::user()->isRental() && $order->product && $order->product->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action. You can only delete orders for your own products.');
         }
 
@@ -334,6 +334,33 @@ class OrderController extends Controller
 
             return redirect()->back()
                 ->with('error', 'Gagal menghapus pesanan. Error: ' . $e->getMessage());
+        }
+    }
+    public function markAsOngoing(Order $order)
+    {
+        if (!Auth::user()->canAccessDashboard()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if (Auth::user()->isRental() && $order->product && $order->product->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action. You can only update orders for your own products.');
+        }
+
+        if ($order->status !== 'confirmed') {
+            return redirect()->back()
+                ->with('error', 'Hanya pesanan dengan status "confirmed" yang bisa diubah menjadi ongoing.');
+        }
+
+        try {
+            $order->update(['status' => 'ongoing']);
+
+            return redirect()->back()
+                ->with('success', 'Status pesanan berhasil diubah menjadi ongoing.');
+        } catch (\Exception $e) {
+            Log::error('Failed to mark order as ongoing: ' . $e->getMessage());
+
+            return redirect()->back()
+                ->with('error', 'Gagal mengubah status pesanan.');
         }
     }
 }

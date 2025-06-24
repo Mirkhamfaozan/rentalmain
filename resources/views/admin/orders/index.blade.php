@@ -20,20 +20,27 @@
                     <form method="GET" action="{{ route('dashboard.orders.index') }}" class="mb-4">
                         <div class="row g-3">
                             <div class="col-md-4">
-                                <input type="text" name="search" class="form-control" placeholder="Cari nama atau motor..." value="{{ request('search') }}">
+                                <input type="text" name="search" class="form-control"
+                                    placeholder="Cari nama atau motor..." value="{{ request('search') }}">
                             </div>
                             <div class="col-md-3">
                                 <select name="status" class="form-select">
                                     <option value="">Semua Status</option>
-                                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                                    <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>Dikonfirmasi</option>
-                                    <option value="ongoing" {{ request('status') == 'ongoing' ? 'selected' : '' }}>Sedang Berlangsung</option>
-                                    <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Selesai</option>
-                                    <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Dibatalkan</option>
+                                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending
+                                    </option>
+                                    <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>
+                                        Dikonfirmasi</option>
+                                    <option value="ongoing" {{ request('status') == 'ongoing' ? 'selected' : '' }}>Sedang
+                                        Berlangsung</option>
+                                    <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>
+                                        Selesai</option>
+                                    <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>
+                                        Dibatalkan</option>
                                 </select>
                             </div>
                             <div class="col-md-3">
-                                <input type="text" name="date_range" id="date_range" class="form-control" placeholder="Pilih rentang tanggal" value="{{ request('date_range') }}">
+                                <input type="text" name="date_range" id="date_range" class="form-control"
+                                    placeholder="Pilih rentang tanggal" value="{{ request('date_range') }}">
                             </div>
                             <div class="col-md-2">
                                 <button type="submit" class="btn btn-primary w-100">Filter</button>
@@ -61,10 +68,12 @@
                                     <tr>
                                         <td>{{ $order->id }}</td>
                                         <td>{{ $order->user ? $order->user->name : $order->name }}</td>
-                                        <td>{{ $order->product ? $order->product->nama_motor : 'Motor Tidak Ditemukan' }}</td>
+                                        <td>{{ $order->product ? $order->product->nama_motor : 'Motor Tidak Ditemukan' }}
+                                        </td>
                                         <td>
-                                            @if($order->product && $order->product->gambar_utama)
-                                                <img src="{{ asset('storage/' . $order->product->gambar_utama) }}" alt="Gambar Motor" class="img-thumbnail" style="max-width: 100px;">
+                                            @if ($order->product && $order->product->gambar_utama)
+                                                <img src="{{ asset('storage/' . $order->product->gambar_utama) }}"
+                                                    alt="Gambar Motor" class="img-thumbnail" style="max-width: 100px;">
                                             @else
                                                 <span>Tidak Ada Gambar</span>
                                             @endif
@@ -73,16 +82,32 @@
                                         <td>{{ \Carbon\Carbon::parse($order->tanggal_mulai)->format('d M Y') }}</td>
                                         <td>Rp {{ number_format($order->total_harga, 0, ',', '.') }}</td>
                                         <td>
-                                            <a href="{{ route('dashboard.orders.show', $order) }}" class="btn btn-sm btn-info">
+                                            <a href="{{ route('dashboard.orders.show', $order) }}"
+                                                class="btn btn-sm btn-info">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="{{ route('dashboard.orders.edit', $order) }}" class="btn btn-sm btn-warning">
+                                            <a href="{{ route('dashboard.orders.edit', $order) }}"
+                                                class="btn btn-sm btn-warning">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <form action="{{ route('dashboard.orders.destroy', $order) }}" method="POST" class="d-inline">
+
+                                            @if ($order->status === 'confirmed')
+                                                <form action="{{ route('dashboard.orders.mark-as-ongoing', $order) }}"
+                                                    method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-success"
+                                                        title="Tandai sebagai Ongoing">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
+
+                                            <form action="{{ route('dashboard.orders.destroy', $order) }}" method="POST"
+                                                class="d-inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus pesanan ini?')">
+                                                <button type="submit" class="btn btn-sm btn-danger"
+                                                    onclick="return confirm('Yakin ingin menghapus pesanan ini?')">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
@@ -105,22 +130,22 @@
     </div>
 
     @push('scripts')
-    <script>
-        $(document).ready(function () {
-            $('#date_range').daterangepicker({
-                locale: {
-                    format: 'YYYY-MM-DD',
-                    applyLabel: 'Terapkan',
-                    cancelLabel: 'Batal',
-                    daysOfWeek: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
-                    monthNames: [
-                        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-                        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-                    ],
-                    firstDay: 1
-                }
+        <script>
+            $(document).ready(function() {
+                $('#date_range').daterangepicker({
+                    locale: {
+                        format: 'YYYY-MM-DD',
+                        applyLabel: 'Terapkan',
+                        cancelLabel: 'Batal',
+                        daysOfWeek: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+                        monthNames: [
+                            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+                        ],
+                        firstDay: 1
+                    }
+                });
             });
-        });
-    </script>
+        </script>
     @endpush
 @endsection
