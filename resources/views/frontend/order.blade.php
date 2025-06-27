@@ -30,6 +30,7 @@
                 </div>
             @endif
             @if (session('error'))
+GMP
                 <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm" role="alert"
                     data-aos="fade-down">
                     <i class="bi bi-exclamation-circle-fill me-2"></i>{{ session('error') }}
@@ -87,6 +88,7 @@
                             <form action="{{ route('frontend.order.submit') }}" method="POST" id="orderForm" enctype="multipart/form-data">
                                 @csrf
                                 <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                <input type="hidden" name="total_harga" id="total_harga_input" value="0">
 
                                 <!-- Phone Number Input -->
                                 <div class="mb-3 form-floating">
@@ -196,8 +198,11 @@
                                                 <strong>Tipe Sewa:</strong> <span id="tipeSewaTerpilih">-</span>
                                             </div>
                                         </div>
-                                        <div class="alert alert-info py-2 rounded-3" id="autoSelectionAlert" style="display: none;">
+                                        <div class croix="alert alert-info py-2 rounded-3" id="autoSelectionAlert" style="display: none;">
                                             <small><i class="bi bi-magic me-1"></i> <span id="autoSelectionText"></span></small>
+                                        </div>
+                                        <div class="alert alert-warning py-2 rounded-3" id="noPriceAlert" style="display: none;">
+                                            <small><i class="bi bi-exclamation-triangle me-1"></i>Silakan pilih tanggal mulai dan selesai untuk menghitung harga.</small>
                                         </div>
                                         <div class="border-top pt-3">
                                             <strong class="text-success fs-5">Total: Rp <span id="totalHarga">-</span></strong>
@@ -405,6 +410,7 @@
             const tipeSewaTerpilih = document.getElementById('tipeSewaTerpilih');
             const autoSelectionAlert = document.getElementById('autoSelectionAlert');
             const autoSelectionText = document.getElementById('autoSelectionText');
+            const noPriceAlert = document.getElementById('noPriceAlert');
             const submitBtn = document.getElementById('submitBtn');
             const orderForm = document.getElementById('orderForm');
             const confirmOrderBtn = document.getElementById('confirmOrderBtn');
@@ -414,6 +420,7 @@
             const ktpPreviewContainer = document.getElementById('ktpPreviewContainer');
             const removeKtpBtn = document.getElementById('removeKtpBtn');
             const currentKtpContainer = document.getElementById('currentKtpContainer');
+            const totalHargaInput = document.getElementById('total_harga_input');
 
             // Pricing data
             const pricing = {
@@ -424,7 +431,7 @@
 
             // Auto-hide alerts after 5 seconds
             setTimeout(function() {
-                const alerts = document.querySelectorAll('.alert:not(#autoSelectionAlert)');
+                const alerts = document.querySelectorAll('.alert:not(#autoSelectionAlert):not(#noPriceAlert)');
                 alerts.forEach(function(alert) {
                     if (alert.classList.contains('show')) {
                         const bsAlert = new bootstrap.Alert(alert);
@@ -503,6 +510,21 @@
                     alert('Mohon upload foto KTP terlebih dahulu!');
                 } else {
                     ktpInput.classList.remove('is-invalid');
+                }
+
+                // Force price calculation
+                calculatePrice();
+
+                // Check if total_harga is valid
+                if (parseFloat(totalHargaInput.value) <= 0) {
+                    allValid = false;
+                    alert('Silakan pilih tanggal sewa yang valid untuk menghitung total harga.');
+                    tanggalMulai.classList.add('is-invalid');
+                    tanggalSelesai.classList.add('is-invalid');
+                    return;
+                } else {
+                    tanggalMulai.classList.remove('is-invalid');
+                    tanggalSelesai.classList.remove('is-invalid');
                 }
 
                 if (!allValid) {
@@ -589,17 +611,16 @@
 
             // Hybrid rental calculation system
             function determineRentalType(days) {
-                if (days > 29) return 'bulanan';  // Lebih dari 29 hari
-                if (days > 7) return 'mingguan';  // Lebih dari 7 hari
-                return 'harian';                  // 7 hari atau kurang
+                if (days >= 30) return 'bulanan';
+                if (days >= 7) return 'mingguan';
+                return 'harian';
             }
 
             function calculateHybridPrice(days, pricing) {
                 let totalPrice = 0;
                 let breakdown = [];
 
-                if (days > 29) {
-                    // Bulanan + sisa hari
+                if (days >= 30) {
                     const months = Math.floor(days / 30);
                     const remainingDays = days % 30;
 
@@ -610,7 +631,6 @@
 
                     if (remainingDays > 0) {
                         if (remainingDays > 7) {
-                            // Sisa hari lebih dari 7, gunakan mingguan + harian
                             const weeks = Math.floor(remainingDays / 7);
                             const extraDays = remainingDays % 7;
 
@@ -624,13 +644,11 @@
                                 breakdown.push(`${extraDays} hari`);
                             }
                         } else {
-                            // Sisa hari 7 atau kurang, gunakan harian
                             totalPrice += remainingDays * pricing.harian;
                             breakdown.push(`${remainingDays} hari`);
                         }
                     }
-                } else if (days > 7) {
-                    // Mingguan + sisa hari
+                } else if (days >= 7) {
                     const weeks = Math.floor(days / 7);
                     const remainingDays = days % 7;
 
@@ -644,10 +662,12 @@
                         breakdown.push(`${remainingDays} hari`);
                     }
                 } else {
-                    // Harian saja
                     totalPrice = days * pricing.harian;
                     breakdown.push(`${days} hari`);
                 }
+
+                console.log('Calculated Price:', totalPrice);
+                console.log('Breakdown:', breakdown);
 
                 return {
                     totalPrice: totalPrice,
@@ -660,7 +680,7 @@
                 const startDate = new Date(tanggalMulai.value);
                 const endDate = new Date(tanggalSelesai.value);
 
-                if (startDate && endDate && endDate >= startDate) {
+                if (startDate && endDate && endDate >= startDate && !isNaN(startDate) && !isNaN(endDate)) {
                     const timeDiff = endDate.getTime() - startDate.getTime();
                     const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
 
@@ -670,11 +690,19 @@
                     durasiHari.textContent = daysDiff;
                     tipeSewaTerpilih.textContent = calculation.breakdown.join(' + ');
                     totalHarga.textContent = calculation.totalPrice.toLocaleString('id-ID');
+                    totalHargaInput.value = calculation.totalPrice; // Update hidden input
 
                     showAutoSelectionInfo(daysDiff, calculation);
                     priceInfo.style.display = 'block';
+                    noPriceAlert.style.display = 'none';
                 } else {
                     priceInfo.style.display = 'none';
+                    noPriceAlert.style.display = 'block';
+                    totalHargaInput.value = 0; // Reset hidden input
+                    durasiHari.textContent = '-';
+                    tipeSewaTerpilih.textContent = '-';
+                    totalHarga.textContent = '-';
+                    autoSelectionAlert.style.display = 'none';
                 }
             }
 

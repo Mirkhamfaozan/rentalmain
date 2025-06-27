@@ -205,19 +205,11 @@
 
                             <hr class="my-4">
 
-                            <!-- Price Breakdown -->
+                            <!-- Simplified Price Breakdown -->
                             <div class="price-breakdown">
                                 <div class="d-flex justify-content-between mb-2">
-                                    <span class="text-muted">Harga per hari:</span>
-                                    <span>Rp {{ number_format($order->product->harga_harian, 0, ',', '.') }}</span>
-                                </div>
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span class="text-muted">Durasi:</span>
-                                    <span>{{ $order->durasi_hari }} hari</span>
-                                </div>
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span class="text-muted">Subtotal:</span>
-                                    <span>Rp {{ number_format($order->product->harga_harian * $order->durasi_hari, 0, ',', '.') }}</span>
+                                    <span class="text-muted">Harga Sewa:</span>
+                                    <span>Rp {{ number_format($order->total_harga, 0, ',', '.') }}</span>
                                 </div>
                                 <div class="d-flex justify-content-between mb-2">
                                     <span class="text-muted">Ongkos Kirim:</span>

@@ -216,9 +216,9 @@ class FrontPaymentController extends Controller
 
             $itemDetails = [
                 [
-                    'id' => $order->product->id,
-                    'price' => (int) round($order->product->harga_harian),
-                    'quantity' => (int) $order->durasi_hari,
+                    'id' => 'ORDER-' . $order->id,
+                    'price' => (int) round($order->total_harga),
+                    'quantity' => 1,
                     'name' => substr($order->product->name ?? 'Product', 0, 50),
                 ],
                 [
@@ -228,20 +228,6 @@ class FrontPaymentController extends Controller
                     'name' => 'Ongkos Kirim',
                 ]
             ];
-
-            // Validate item details sum matches total amount
-            $calculatedAmount = array_reduce($itemDetails, function($carry, $item) {
-                return $carry + ($item['price'] * $item['quantity']);
-            }, 0);
-
-            if ($calculatedAmount != $totalAmount) {
-                Log::error('Amount mismatch', [
-                    'calculated' => $calculatedAmount,
-                    'total_amount' => $totalAmount,
-                    'item_details' => $itemDetails
-                ]);
-                throw new Exception('Item amounts do not match total');
-            }
 
             $transactionDetails = [
                 'order_id' => $transactionId,
@@ -289,14 +275,20 @@ class FrontPaymentController extends Controller
             } else {
                 $errorData = $response->json();
                 $errorMessage = $errorData['error_messages'][0] ??
-                               $errorData['status_message'] ??
-                               'Payment creation failed';
+                    $errorData['status_message'] ??
+                    'Payment creation failed';
 
                 if (isset($errorData['status_code'])) {
                     switch ($errorData['status_code']) {
-                        case '400': $errorMessage = 'Invalid payment data'; break;
-                        case '401': $errorMessage = 'Authentication failed'; break;
-                        case '402': $errorMessage = 'Payment failed'; break;
+                        case '400':
+                            $errorMessage = 'Invalid payment data';
+                            break;
+                        case '401':
+                            $errorMessage = 'Authentication failed';
+                            break;
+                        case '402':
+                            $errorMessage = 'Payment failed';
+                            break;
                     }
                 }
 
