@@ -22,6 +22,7 @@ class Order extends Model
         'durasi_hari',
         'tipe_sewa',
         'total_harga',
+        'ongkir',
         'status',
         'catatan',
         'lokasi_pengambilan',
@@ -33,6 +34,7 @@ class Order extends Model
         'tanggal_selesai' => 'date',
         'status' => 'string',
         'total_harga' => 'decimal:2',
+        'ongkir' => 'decimal:2',
     ];
 
     public function user()
@@ -51,7 +53,10 @@ class Order extends Model
             return 0;
         }
 
-        return $this->product->calculatePrice($this->durasi_hari);
+        $subtotal = $this->product->harga_harian * $this->durasi_hari;
+        $this->ongkir = $this->ongkir ?? 0;
+
+        return $subtotal + $this->ongkir;
     }
 
     public function isOngoing()
@@ -86,5 +91,4 @@ class Order extends Model
     {
         return $this->payment && $this->payment->status === 'paid';
     }
-
 }

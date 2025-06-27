@@ -35,12 +35,10 @@ class FrontPaymentController extends Controller
         try {
             $order = Order::with('product', 'payment')->findOrFail($orderId);
 
-            // Check if order already has payment
             if ($order->hasPayment() && !in_array($order->payment->status, ['failed', 'expired', 'cancelled'])) {
                 return redirect()->route('payment.show', $order->payment->id);
             }
 
-            // Only allow payment for pending orders
             if ($order->status !== 'pending') {
                 return redirect()->back()->with('error', 'Pesanan tidak dapat diproses untuk pembayaran.');
             }
@@ -50,20 +48,13 @@ class FrontPaymentController extends Controller
                 'credit_card' => 'Kartu Kredit/Debit',
                 'gopay' => 'GoPay',
                 'shopeepay' => 'ShopeePay',
-                'dana' => 'DANA',
-                'ovo' => 'OVO',
                 'qris' => 'QRIS',
-                'indomaret' => 'Indomaret',
-                'alfamart' => 'Alfamart',
             ];
 
             return view('frontend.payment.create', compact('order', 'paymentMethods'));
         } catch (Exception $e) {
-            Log::error('Error loading payment page: ' . $e->getMessage(), [
-                'order_id' => $orderId,
-                'trace' => $e->getTraceAsString()
-            ]);
-            return redirect()->back()->with('error', 'Pesanan tidak ditemukan atau terjadi kesalahan sistem.');
+            Log::error('Error loading payment page: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Terjadi kesalahan sistem.');
         }
     }
 
@@ -95,7 +86,9 @@ class FrontPaymentController extends Controller
                 return redirect()->route('payment.show', $order->payment->id);
             }
 
-            if ($order->total_harga <= 0) {
+            $totalAmount = $order->total_harga + $order->ongkir;
+
+            if ($totalAmount <= 0) {
                 DB::rollBack();
                 return redirect()->back()->with('error', 'Total pembayaran tidak valid.');
             }
@@ -113,7 +106,7 @@ class FrontPaymentController extends Controller
                 'order_id' => $order->id,
                 'transaction_id' => $transactionId,
                 'payment_type' => $request->payment_method,
-                'gross_amount' => $order->total_harga,
+                'gross_amount' => $totalAmount,
                 'transaction_status' => 'pending',
                 'status' => 'pending',
                 'transaction_time' => now(),
@@ -169,14 +162,13 @@ class FrontPaymentController extends Controller
                 'transaction_id' => $transactionId,
                 'order_id' => $orderId,
                 'method' => $request->payment_method,
-                'amount' => $order->total_harga
+                'amount' => $totalAmount
             ]);
 
             DB::commit();
 
             return redirect()->route('payment.show', $payment->id)
                 ->with('success', 'Pembayaran berhasil dibuat. Silakan selesaikan pembayaran Anda.');
-
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             DB::rollBack();
             Log::error('Order not found for payment', [
@@ -184,7 +176,6 @@ class FrontPaymentController extends Controller
                 'error' => $e->getMessage()
             ]);
             return redirect()->back()->with('error', 'Pesanan tidak ditemukan.');
-
         } catch (\Illuminate\Database\QueryException $e) {
             DB::rollBack();
             Log::error('Database error during payment creation', [
@@ -198,7 +189,6 @@ class FrontPaymentController extends Controller
             }
 
             return redirect()->back()->with('error', 'Terjadi kesalahan database. Silakan coba lagi.');
-
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Payment creation error', [
@@ -217,23 +207,45 @@ class FrontPaymentController extends Controller
     {
         try {
             $customerDetails = [
-                'first_name' => $order->customer_name ?? 'Customer',
-                'email' => $order->customer_email ?? 'customer@example.com',
-                'phone' => $order->customer_phone ?? '08123456789',
+                'first_name' => substr($order->customer_name ?? 'Customer', 0, 20),
+                'email' => filter_var($order->customer_email ?? 'customer@example.com', FILTER_VALIDATE_EMAIL),
+                'phone' => preg_replace('/[^0-9]/', '', $order->customer_phone ?? '08123456789'),
             ];
+
+            $totalAmount = $order->total_harga + $order->ongkir;
 
             $itemDetails = [
                 [
                     'id' => $order->product->id,
-                    'price' => $order->total_harga,
+                    'price' => (int) round($order->product->harga_harian),
+                    'quantity' => (int) $order->durasi_hari,
+                    'name' => substr($order->product->name ?? 'Product', 0, 50),
+                ],
+                [
+                    'id' => 'ONGKIR-' . $order->id,
+                    'price' => (int) round($order->ongkir),
                     'quantity' => 1,
-                    'name' => $order->product->name ?? 'Product',
+                    'name' => 'Ongkos Kirim',
                 ]
             ];
 
+            // Validate item details sum matches total amount
+            $calculatedAmount = array_reduce($itemDetails, function($carry, $item) {
+                return $carry + ($item['price'] * $item['quantity']);
+            }, 0);
+
+            if ($calculatedAmount != $totalAmount) {
+                Log::error('Amount mismatch', [
+                    'calculated' => $calculatedAmount,
+                    'total_amount' => $totalAmount,
+                    'item_details' => $itemDetails
+                ]);
+                throw new Exception('Item amounts do not match total');
+            }
+
             $transactionDetails = [
                 'order_id' => $transactionId,
-                'gross_amount' => $order->total_harga,
+                'gross_amount' => (int) round($totalAmount),
             ];
 
             $paymentConfig = $this->getPaymentMethodConfig($paymentMethod, $bankType);
@@ -248,6 +260,11 @@ class FrontPaymentController extends Controller
             if (isset($paymentConfig['payment_params'])) {
                 $payload = array_merge($payload, $paymentConfig['payment_params']);
             }
+
+            Log::debug('Midtrans payload', [
+                'payload' => $payload,
+                'endpoint' => $this->coreApiUrl . '/charge'
+            ]);
 
             $response = Http::withHeaders([
                 'Accept' => 'application/json',
@@ -271,19 +288,31 @@ class FrontPaymentController extends Controller
                 ];
             } else {
                 $errorData = $response->json();
+                $errorMessage = $errorData['error_messages'][0] ??
+                               $errorData['status_message'] ??
+                               'Payment creation failed';
+
+                if (isset($errorData['status_code'])) {
+                    switch ($errorData['status_code']) {
+                        case '400': $errorMessage = 'Invalid payment data'; break;
+                        case '401': $errorMessage = 'Authentication failed'; break;
+                        case '402': $errorMessage = 'Payment failed'; break;
+                    }
+                }
+
                 Log::error('Midtrans API error', [
                     'transaction_id' => $transactionId,
                     'status_code' => $response->status(),
                     'error' => $errorData,
+                    'message' => $errorMessage
                 ]);
 
                 return [
                     'success' => false,
                     'data' => $errorData,
-                    'message' => $errorData['status_message'] ?? 'Payment creation failed'
+                    'message' => $errorMessage
                 ];
             }
-
         } catch (Exception $e) {
             Log::error('Error creating Midtrans payment', [
                 'transaction_id' => $transactionId,
@@ -317,7 +346,8 @@ class FrontPaymentController extends Controller
                     'payment_type' => 'credit_card',
                     'payment_params' => [
                         'credit_card' => [
-                            'secure' => true
+                            'secure' => true,
+                            'save_card' => false
                         ]
                     ]
                 ];
@@ -379,7 +409,10 @@ class FrontPaymentController extends Controller
                     'payment_params' => [
                         'cstore' => [
                             'store' => 'indomaret',
-                            'message' => 'Payment for Order #' . time()
+                            'message' => 'Payment for Order #' . time(),
+                            'indomaret_free_text_1' => 'Thank you for shopping',
+                            'indomaret_free_text_2' => 'Please pay before expiry',
+                            'indomaret_free_text_3' => 'Call CS if any questions'
                         ]
                     ]
                 ];
@@ -390,7 +423,10 @@ class FrontPaymentController extends Controller
                     'payment_params' => [
                         'cstore' => [
                             'store' => 'alfamart',
-                            'message' => 'Payment for Order #' . time()
+                            'message' => 'Payment for Order #' . time(),
+                            'alfamart_free_text_1' => 'Thank you for shopping',
+                            'alfamart_free_text_2' => 'Please pay before expiry',
+                            'alfamart_free_text_3' => 'Call CS if any questions'
                         ]
                     ]
                 ];
@@ -501,7 +537,6 @@ class FrontPaymentController extends Controller
                     } else if ($fraudStatus == 'accept') {
                         $updateData['status'] = 'success';
                         $payment->order->update(['status' => 'confirmed']);
-                        // Mark product as unavailable
                         $payment->order->product->update(['is_available' => 0]);
                     }
                     break;
@@ -509,7 +544,6 @@ class FrontPaymentController extends Controller
                 case 'settlement':
                     $updateData['status'] = 'success';
                     $payment->order->update(['status' => 'confirmed']);
-                    // Mark product as unavailable
                     $payment->order->product->update(['is_available' => 0]);
                     break;
 
@@ -526,7 +560,6 @@ class FrontPaymentController extends Controller
                 case 'refund':
                 case 'partial_refund':
                     $updateData['status'] = 'refunded';
-                    // Mark product as available again
                     $payment->order->product->update(['is_available' => 1]);
                     break;
 
@@ -592,7 +625,6 @@ class FrontPaymentController extends Controller
 
             $payment->update($updateData);
             $payment->order->update(['status' => 'confirmed']);
-            // Mark product as unavailable
             $payment->order->product->update(['is_available' => 0]);
 
             Log::info('Payment confirmed successfully', [
@@ -605,7 +637,6 @@ class FrontPaymentController extends Controller
 
             return redirect()->route('payment.show', $payment->id)
                 ->with('success', 'Konfirmasi pembayaran berhasil dikirim. Pesanan Anda akan segera diproses.');
-
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Payment confirmation error', [
@@ -676,4 +707,3 @@ class FrontPaymentController extends Controller
         }
     }
 }
-    

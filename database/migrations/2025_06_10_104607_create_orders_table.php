@@ -14,14 +14,15 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->string('phone_number')->nullable();
             $table->string('email')->nullable();
-            $table->string('foto_ktp')->nullable(); 
+            $table->string('foto_ktp')->nullable();
             $table->foreignId('product_id')->constrained()->onDelete('restrict');
             $table->date('tanggal_mulai');
             $table->date('tanggal_selesai');
             $table->integer('durasi_hari');
             $table->string('tipe_sewa', 20);
             $table->decimal('total_harga', 15, 2);
-            $table->enum('status', ['pending', 'confirmed', 'ongoing', 'completed', 'cancelled'])->default('pending');
+            $table->decimal('ongkir', 15, 2)->nullable()->default(0); // Added shipping cost column
+            $table->enum('status', ['pending', 'confirmed', 'ongoing', 'completed', 'cancelled', 'belum_dikonfirmasi', 'dikonfirmasi'])->default('belum_dikonfirmasi');
             $table->text('catatan')->nullable();
             $table->string('lokasi_pengambilan')->nullable();
             $table->string('lokasi_pengembalian')->nullable();

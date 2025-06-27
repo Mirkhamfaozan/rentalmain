@@ -17,7 +17,6 @@ class FrontProductController extends Controller
         $products = Product::where('is_available', true)->get();
         return view('frontend.product', compact('products'));
     }
-
     public function order($id)
     {
         $product = Product::findOrFail($id);
@@ -28,7 +27,6 @@ class FrontProductController extends Controller
         $user = Auth::user();
         return view('frontend.order', compact('product', 'user'));
     }
-
     public function submitOrder(Request $request)
     {
         $user = Auth::user();
@@ -41,7 +39,7 @@ class FrontProductController extends Controller
             'catatan' => 'nullable|string|max:1000',
             'lokasi_pengambilan' => 'required|string|max:255',
             'lokasi_pengembalian' => 'required|string|max:255',
-            'foto_ktp' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // 2MB max
+            'foto_ktp' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ], [
             'product_id.required' => 'Produk harus dipilih.',
             'product_id.exists' => 'Produk tidak ditemukan.',
@@ -76,31 +74,25 @@ class FrontProductController extends Controller
         try {
             $product = Product::findOrFail($request->product_id);
 
-            // Check if product is still available
             if (!$product->is_available) {
                 return redirect()->back()->with('error', 'Motor tidak tersedia untuk disewa.')->withInput();
             }
 
-            // Use user data if fields are empty
             $name = empty($request->name) ? $user->name : $request->name;
             $email = empty($request->email) ? $user->email : $request->email;
 
-            // Calculate duration
             $startDate = new \DateTime($request->tanggal_mulai);
             $endDate = new \DateTime($request->tanggal_selesai);
-            $durasi_hari = $startDate->diff($endDate)->days + 1; // Include end date
+            $durasi_hari = $startDate->diff($endDate)->days + 1;
 
-            // Auto-determine rental type based on duration
             $tipe_sewa = $this->determineRentalType($durasi_hari);
 
-            // Handle KTP photo upload
             $ktpPath = null;
             if ($request->hasFile('foto_ktp')) {
                 $ktpPath = $this->uploadKtpPhoto($request->file('foto_ktp'), $user->id);
             }
 
-            // Create the order
-            $order = Order::create([
+            Order::create([
                 'user_id' => $user->id,
                 'name' => $name,
                 'email' => $email,
@@ -112,15 +104,16 @@ class FrontProductController extends Controller
                 'durasi_hari' => $durasi_hari,
                 'tipe_sewa' => $tipe_sewa,
                 'total_harga' => $product->calculatePrice($durasi_hari, $tipe_sewa),
-                'status' => 'pending',
+                'status' => 'belum_dikonfirmasi',
                 'catatan' => $request->catatan,
                 'lokasi_pengambilan' => $request->lokasi_pengambilan,
                 'lokasi_pengembalian' => $request->lokasi_pengembalian,
             ]);
 
-            // Redirect to payment creation page
-            return redirect()->route('payment.create', $order->id)
-                ->with('success', 'Pesanan berhasil dikirim! Silakan lanjutkan ke pembayaran.');
+            // Flash session for showing modal and redirect to profile
+            return redirect()->route('profile.show')
+                ->with('showOrderSubmittedModal', true)
+                ->with('success', 'Pesanan berhasil dikirim! Silakan tunggu verifikasi dari rental.');
         } catch (\Exception $e) {
             Log::error('Order submission error: ' . $e->getMessage());
             return redirect()->back()
@@ -129,9 +122,6 @@ class FrontProductController extends Controller
         }
     }
 
-    /**
-     * Upload KTP photo and return the file path
-     */
     private function uploadKtpPhoto($file, $userId)
     {
         try {

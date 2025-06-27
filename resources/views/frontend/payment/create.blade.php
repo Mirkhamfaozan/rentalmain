@@ -39,7 +39,7 @@
             @endif
 
             <div class="row">
-                                <!-- Payment Method Selection -->
+                <!-- Payment Method Selection -->
                 <div class="col-lg-8">
                     <div class="card shadow-lg border-0 rounded-4">
                         <div class="card-header bg-white border-bottom py-4 text-center">
@@ -215,17 +215,20 @@
                                     <span class="text-muted">Durasi:</span>
                                     <span>{{ $order->durasi_hari }} hari</span>
                                 </div>
-                                <div class="d-flex justify-content-between mb-3">
+                                <div class="d-flex justify-content-between mb-2">
                                     <span class="text-muted">Subtotal:</span>
                                     <span>Rp {{ number_format($order->product->harga_harian * $order->durasi_hari, 0, ',', '.') }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Ongkos Kirim:</span>
+                                    <span>Rp {{ number_format($order->ongkir, 0, ',', '.') }}</span>
                                 </div>
                                 <hr>
                                 <div class="d-flex justify-content-between bg-light p-3 rounded-3 shadow-sm">
                                     <strong>Total Pembayaran:</strong>
-                                    <strong class="text-primary fs-4">Rp {{ number_format($order->total_harga, 0, ',', '.') }}</strong>
+                                    <strong class="text-primary fs-4">Rp {{ number_format($order->total_harga + $order->ongkir, 0, ',', '.') }}</strong>
                                 </div>
                             </div>
-
                             <!-- Security Badge -->
                             <div class="text-center mt-4">
                                 <span class="badge bg-success-subtle text-success px-4 py-2 rounded-pill shadow-sm">
@@ -235,8 +238,6 @@
                         </div>
                     </div>
                 </div>
-
-
             </div>
         </div>
     </div>
@@ -371,7 +372,6 @@ body {
     color: #6c757d;
     border-color: #dee2e6;
 }
-
 
 /* Alert Animations */
 .alert-dismissible {

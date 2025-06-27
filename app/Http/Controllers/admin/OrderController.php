@@ -137,7 +137,7 @@ class OrderController extends Controller
             'durasi_hari' => 'required|numeric|min:1',
             'tipe_sewa' => 'required|in:harian,mingguan,bulanan',
             'total_harga' => 'required|numeric|min:0',
-            'status' => 'required|in:pending,confirmed,ongoing,completed,cancelled',
+            'status' => 'required|in:unverified,pending,confirmed,ongoing,completed,cancelled',
             'catatan' => 'nullable|string',
             'lokasi_pengambilan' => 'nullable|string|max:255',
             'lokasi_pengembalian' => 'nullable|string|max:255',
@@ -267,7 +267,7 @@ class OrderController extends Controller
             'durasi_hari' => 'required|numeric|min:1',
             'tipe_sewa' => 'required|in:harian,mingguan,bulanan',
             'total_harga' => 'required|numeric|min:0',
-            'status' => 'required|in:pending,confirmed,ongoing,completed,cancelled',
+            'status' => 'required|in:unverified,pending,confirmed,ongoing,completed,cancelled',
             'catatan' => 'nullable|string',
             'lokasi_pengambilan' => 'nullable|string|max:255',
             'lokasi_pengembalian' => 'nullable|string|max:255',
@@ -336,6 +336,41 @@ class OrderController extends Controller
                 ->with('error', 'Gagal menghapus pesanan. Error: ' . $e->getMessage());
         }
     }
+
+    public function verify(Request $request, Order $order)
+    {
+        if (!Auth::user()->canAccessDashboard()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if (Auth::user()->isRental() && $order->product && $order->product->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized action. You can only verify orders for your own products.');
+        }
+
+        if ($order->status !== 'belum_dikonfirmasi') {
+            return redirect()->back()
+                ->with('error', 'Hanya pesanan dengan status "belum_dikonfirmasi" yang bisa diverifikasi.');
+        }
+
+        $request->validate([
+            'ongkir' => 'required|numeric|min:0',
+        ]);
+
+        try {
+            $order->update([
+                'status' => 'pending',
+                'ongkir' => $request->ongkir,
+            ]);
+
+            return redirect()->back()
+                ->with('success', 'Pesanan berhasil dikonfirmasi.');
+        } catch (\Exception $e) {
+            Log::error('Failed to verify order: ' . $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'Gagal mengkonfirmasi pesanan.');
+        }
+    }
+
     public function markAsOngoing(Order $order)
     {
         if (!Auth::user()->canAccessDashboard()) {

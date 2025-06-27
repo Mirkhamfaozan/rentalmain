@@ -223,13 +223,102 @@
                                         <h5 class="fw-bold text-primary mb-0">
                                             <i class="bi bi-bag-check me-2"></i>Pesanan Saya
                                         </h5>
+                                    </div>
 
-                                    </div>
-                                    <div class="text-center text-muted py-5">
-                                        <i class="bi bi-bag-x display-1 text-muted mb-3"></i>
-                                        <p>Belum ada pesanan. <a href="{{ route('frontend.product') }}"
-                                                class="text-primary">Mulai berbelanja</a></p>
-                                    </div>
+                                    @if ($orders->count() > 0)
+                                        <div class="table-responsive">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Motor</th>
+                                                        <th>Tanggal Sewa</th>
+                                                        <th>Durasi</th>
+                                                        <th>Total</th>
+                                                        <th>Status</th>
+                                                        <th>Aksi</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($orders as $order)
+                                                        <tr>
+                                                            <td>{{ $loop->iteration }}</td>
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <img src="{{ $order->product->gambar_utama ? Storage::url($order->product->gambar_utama) : '/images/placeholder.jpg' }}"
+                                                                        class="rounded me-3" width="60"
+                                                                        height="60" style="object-fit: cover;">
+                                                                    <div>
+                                                                        <h6 class="mb-0">
+                                                                            {{ $order->product->nama_motor }}</h6>
+                                                                        <small
+                                                                            class="text-muted">{{ $order->product->brand->name ?? '-' }}</small>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                {{ \Carbon\Carbon::parse($order->tanggal_mulai)->format('d M Y') }}
+                                                                -
+                                                                {{ \Carbon\Carbon::parse($order->tanggal_selesai)->format('d M Y') }}
+                                                            </td>
+                                                            <td>{{ $order->durasi_hari }} hari</td>
+                                                            <td>Rp {{ number_format($order->total_harga, 0, ',', '.') }}
+                                                            </td>
+                                                            <td>
+                                                                @if ($order->status == 'belum_dikonfirmasi')
+                                                                    <span class="badge bg-secondary">
+                                                                        <i class="bi bi-hourglass me-1"></i> Sedang Dicek Rental
+                                                                    </span>
+                                                                @elseif($order->status == 'pending')
+                                                                    <span class="badge bg-warning text-dark">
+                                                                        <i class="bi bi-credit-card me-1"></i> Belum Bayar
+                                                                    </span>
+                                                                @elseif($order->status == 'confirmed')
+                                                                    <span class="badge bg-success">
+                                                                        <i class="bi bi-check-circle me-1"></i> Sudah Bayar
+                                                                    </span>
+                                                                @elseif($order->status == 'ongoing')
+                                                                    <span class="badge bg-primary">
+                                                                        <i class="bi bi-bicycle me-1"></i> Sedang Dirental
+                                                                    </span>
+                                                                @elseif($order->status == 'completed')
+                                                                    <span class="badge bg-info">
+                                                                        <i class="bi bi-check-circle-fill me-1"></i> Rental Selesai
+                                                                    </span>
+                                                                @elseif($order->status == 'cancelled')
+                                                                    <span class="badge bg-danger">
+                                                                        <i class="bi bi-x-circle me-1"></i> Dibatalkan
+                                                                    </span>
+                                                                @endif
+                                                            </td>
+                                                            <td>
+                                                                @if ($order->status == 'pending')
+                                                                    <a href="{{ route('payment.create', $order->id) }}"
+                                                                        class="btn btn-sm btn-success rounded-pill">
+                                                                        <i class="bi bi-credit-card me-1"></i> Bayar
+                                                                    </a>
+                                                                @elseif($order->status == 'ongoing')
+                                                                    <button class="btn btn-sm btn-outline-primary rounded-pill">
+                                                                        <i class="bi bi-info-circle me-1"></i> Detail
+                                                                    </button>
+                                                                @elseif($order->status == 'completed')
+                                                                    <button class="btn btn-sm btn-outline-secondary rounded-pill">
+                                                                        <i class="bi bi-star me-1"></i> Beri Rating
+                                                                    </button>
+                                                                @endif
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    @else
+                                        <div class="text-center text-muted py-5">
+                                            <i class="bi bi-bag-x display-1 text-muted mb-3"></i>
+                                            <p>Belum ada pesanan. <a href="{{ route('frontend.product') }}"
+                                                    class="text-primary">Mulai berbelanja</a></p>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -242,7 +331,6 @@
                                         <h5 class="fw-bold text-primary mb-0">
                                             <i class="bi bi-credit-card me-2"></i>Riwayat Pembayaran
                                         </h5>
-
                                     </div>
                                     <div class="text-center text-muted py-5">
                                         <i class="bi bi-credit-card-2-front display-1 text-muted mb-3"></i>
@@ -375,6 +463,39 @@
         /* Tab Content Animation */
         .tab-pane {
             animation: fadeIn 0.5s ease-in;
+        }
+
+        /* Orders Table Styling */
+        .table {
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+
+        .table thead th {
+            background-color: #f8f9fa;
+            border-bottom-width: 1px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+
+        .badge {
+            padding: 0.5em 0.75em;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .bg-warning.text-dark {
+            background-color: #fff3cd !important;
+            color: #856404 !important;
+        }
+
+        .btn-outline-primary.rounded-pill {
+            border-radius: 50px !important;
+            padding: 0.25rem 0.75rem;
         }
 
         @keyframes fadeIn {

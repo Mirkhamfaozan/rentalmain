@@ -361,6 +361,32 @@
         </div>
     </div>
 
+    <!-- Order Submitted Success Modal -->
+    <div class="modal fade" id="orderSubmittedModal" tabindex="-1" aria-labelledby="orderSubmittedModalLabel" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header bg-success text-white rounded-top-4 border-0">
+                    <h5 class="modal-title fw-bold" id="orderSubmittedModalLabel">
+                        <i class="bi bi-check-circle me-2"></i>Pesanan Berhasil Dikirim
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-clock-history text-success" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Pesanan Anda sedang diverifikasi</h5>
+                    <p class="text-muted">Pesanan Anda akan diperiksa oleh pihak rental. Anda akan menerima notifikasi setelah pesanan dikonfirmasi.</p>
+                </div>
+                <div class="modal-footer border-0 justify-content-center">
+                    <a href="{{ route('profile.show') }}" class="btn btn-success btn-lg px-4 rounded-pill">
+                        <i class="bi bi-person-circle me-2"></i>Ke Halaman Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Custom Scripts -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -547,6 +573,19 @@
                 confirmOrderBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Ya, Pesan Sekarang!';
                 confirmOrderBtn.disabled = false;
             });
+
+            // Show order submitted modal if session flag exists
+            @if(session('showOrderSubmittedModal'))
+                const orderSubmittedModal = new bootstrap.Modal(document.getElementById('orderSubmittedModal'));
+                orderSubmittedModal.show();
+
+                // Prevent modal from closing when clicking outside
+                document.getElementById('orderSubmittedModal').addEventListener('click', function(event) {
+                    if (event.target === this) {
+                        event.stopPropagation();
+                    }
+                });
+            @endif
 
             // Hybrid rental calculation system
             function determineRentalType(days) {

@@ -1,4 +1,3 @@
-<!-- resources/views/admin/orders/index.blade.php -->
 @extends('layouts.app')
 
 @section('title', 'Daftar Pesanan')
@@ -26,16 +25,13 @@
                             <div class="col-md-3">
                                 <select name="status" class="form-select">
                                     <option value="">Semua Status</option>
-                                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending
-                                    </option>
-                                    <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>
-                                        Dikonfirmasi</option>
-                                    <option value="ongoing" {{ request('status') == 'ongoing' ? 'selected' : '' }}>Sedang
-                                        Berlangsung</option>
-                                    <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>
-                                        Selesai</option>
-                                    <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>
-                                        Dibatalkan</option>
+                                    <option value="belum_dikonfirmasi" {{ request('status') == 'belum_dikonfirmasi' ? 'selected' : '' }}>Belum Dikonfirmasi</option>
+                                    <option value="dikonfirmasi" {{ request('status') == 'dikonfirmasi' ? 'selected' : '' }}>Dikonfirmasi</option>
+                                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Menunggu Pembayaran</option>
+                                    <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>Pembayaran Dikonfirmasi</option>
+                                    <option value="ongoing" {{ request('status') == 'ongoing' ? 'selected' : '' }}>Sedang Berlangsung</option>
+                                    <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Selesai</option>
+                                    <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Dibatalkan</option>
                                 </select>
                             </div>
                             <div class="col-md-3">
@@ -68,8 +64,7 @@
                                     <tr>
                                         <td>{{ $order->id }}</td>
                                         <td>{{ $order->user ? $order->user->name : $order->name }}</td>
-                                        <td>{{ $order->product ? $order->product->nama_motor : 'Motor Tidak Ditemukan' }}
-                                        </td>
+                                        <td>{{ $order->product ? $order->product->nama_motor : 'Motor Tidak Ditemukan' }}</td>
                                         <td>
                                             @if ($order->product && $order->product->gambar_utama)
                                                 <img src="{{ asset('storage/' . $order->product->gambar_utama) }}"
@@ -78,36 +73,84 @@
                                                 <span>Tidak Ada Gambar</span>
                                             @endif
                                         </td>
-                                        <td>{{ ucfirst($order->status) }}</td>
+                                        <td>
+                                            @if($order->status === 'belum_dikonfirmasi')
+                                                <span class="badge bg-secondary">Belum Dikonfirmasi</span>
+                                            @elseif($order->status === 'dikonfirmasi')
+                                                <span class="badge bg-success">Dikonfirmasi</span>
+                                            @elseif($order->status === 'pending')
+                                                <span class="badge bg-warning">Menunggu Pembayaran</span>
+                                            @elseif($order->status === 'confirmed')
+                                                <span class="badge bg-primary">Pembayaran Dikonfirmasi</span>
+                                            @elseif($order->status === 'ongoing')
+                                                <span class="badge bg-info">Sedang Berlangsung</span>
+                                            @elseif($order->status === 'completed')
+                                                <span class="badge bg-success">Selesai</span>
+                                            @elseif($order->status === 'cancelled')
+                                                <span class="badge bg-danger">Dibatalkan</span>
+                                            @endif
+                                        </td>
                                         <td>{{ \Carbon\Carbon::parse($order->tanggal_mulai)->format('d M Y') }}</td>
                                         <td>Rp {{ number_format($order->total_harga, 0, ',', '.') }}</td>
                                         <td>
-                                            <a href="{{ route('dashboard.orders.show', $order) }}"
-                                                class="btn btn-sm btn-info">
+                                            <a href="{{ route('dashboard.orders.show', $order) }}" class="btn btn-sm btn-info">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="{{ route('dashboard.orders.edit', $order) }}"
-                                                class="btn btn-sm btn-warning">
+
+                                            @if(Auth::user()->isRental())
+                                                @if($order->status === 'belum_dikonfirmasi')
+                                                    <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#verifyModal{{ $order->id }}" title="Konfirmasi Pesanan">
+                                                        <i class="fas fa-check"></i> Konfirmasi
+                                                    </button>
+
+                                                    <!-- Verification Modal -->
+                                                    <div class="modal fade" id="verifyModal{{ $order->id }}" tabindex="-1" aria-labelledby="verifyModalLabel{{ $order->id }}" aria-hidden="true">
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <form action="{{ route('dashboard.orders.verify', $order) }}" method="POST">
+                                                                    @csrf
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title" id="verifyModalLabel{{ $order->id }}">Konfirmasi Pesanan</h5>
+                                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        <div class="mb-3">
+                                                                            <label for="ongkir{{ $order->id }}" class="form-label">Ongkos Kirim (Rp)</label>
+                                                                            <input type="number" class="form-control" id="ongkir{{ $order->id }}" name="ongkir" required min="0" value="{{ old('ongkir', $order->ongkir ?? 0) }}">
+                                                                        </div>
+                                                                        <div class="mb-3">
+                                                                            <label for="catatan{{ $order->id }}" class="form-label">Catatan (Opsional)</label>
+                                                                            <textarea class="form-control" id="catatan{{ $order->id }}" name="catatan" rows="3">{{ old('catatan', $order->catatan ?? '') }}</textarea>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                                                        <button type="submit" class="btn btn-primary">Konfirmasi Pesanan</button>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @endif
+
+                                                @if($order->status === 'confirmed')
+                                                    <form action="{{ route('dashboard.orders.mark-as-ongoing', $order) }}" method="POST" class="d-inline">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-sm btn-success" title="Tandai sebagai Ongoing">
+                                                            <i class="fas fa-play"></i> Mulai
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            @endif
+
+                                            <a href="{{ route('dashboard.orders.edit', $order) }}" class="btn btn-sm btn-warning">
                                                 <i class="fas fa-edit"></i>
                                             </a>
 
-                                            @if ($order->status === 'confirmed')
-                                                <form action="{{ route('dashboard.orders.mark-as-ongoing', $order) }}"
-                                                    method="POST" class="d-inline">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-sm btn-success"
-                                                        title="Tandai sebagai Ongoing">
-                                                        <i class="fas fa-check"></i>
-                                                    </button>
-                                                </form>
-                                            @endif
-
-                                            <form action="{{ route('dashboard.orders.destroy', $order) }}" method="POST"
-                                                class="d-inline">
+                                            <form action="{{ route('dashboard.orders.destroy', $order) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-danger"
-                                                    onclick="return confirm('Yakin ingin menghapus pesanan ini?')">
+                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus pesanan ini?')">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
@@ -130,6 +173,10 @@
     </div>
 
     @push('scripts')
+        <!-- Bootstrap JS -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+        <!-- Date Range Picker -->
         <script>
             $(document).ready(function() {
                 $('#date_range').daterangepicker({
@@ -143,6 +190,19 @@
                             'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
                         ],
                         firstDay: 1
+                    }
+                });
+
+                // Validation for verification modal
+                $('[id^="verifyModal"] form').on('submit', function(e) {
+                    const ongkirInput = $(this).find('input[name="ongkir"]');
+                    const ongkir = ongkirInput.val();
+
+                    if (!ongkir || isNaN(ongkir) || parseFloat(ongkir) < 0) {
+                        e.preventDefault();
+                        alert('Harap masukkan ongkos kirim yang valid (angka positif)');
+                        ongkirInput.focus();
+                        return false;
                     }
                 });
             });

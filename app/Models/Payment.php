@@ -98,7 +98,6 @@ class Payment extends Model
         $this->payment_code = $notification['payment_code'] ?? $this->payment_code;
         $this->payment_response = $notification;
 
-        // Update internal status based on Midtrans transaction status
         $this->status = match ($notification['transaction_status']) {
             'capture', 'settlement' => 'success',
             'deny', 'cancel', 'failed' => 'failed',
@@ -109,12 +108,10 @@ class Payment extends Model
 
         $this->save();
 
-        // Trigger notification to the user
         if ($this->order && $this->order->user) {
             $this->order->user->notify(new PaymentNotification($this));
         }
 
-        // Update the related order status
         if ($this->isSuccessful() && $this->order) {
             $this->order->update(['status' => 'confirmed']);
         }
