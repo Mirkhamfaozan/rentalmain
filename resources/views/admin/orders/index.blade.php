@@ -32,6 +32,7 @@
                                     <option value="ongoing" {{ request('status') == 'ongoing' ? 'selected' : '' }}>Sedang Berlangsung</option>
                                     <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Selesai</option>
                                     <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Dibatalkan</option>
+                                    <option value="ditolak" {{ request('status') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
                                 </select>
                             </div>
                             <div class="col-md-3">
@@ -88,6 +89,8 @@
                                                 <span class="badge bg-success">Selesai</span>
                                             @elseif($order->status === 'cancelled')
                                                 <span class="badge bg-danger">Dibatalkan</span>
+                                            @elseif($order->status === 'ditolak')
+                                                <span class="badge bg-danger">Ditolak</span>
                                             @endif
                                         </td>
                                         <td>{{ \Carbon\Carbon::parse($order->tanggal_mulai)->format('d M Y') }}</td>
@@ -103,12 +106,17 @@
                                                         <i class="fas fa-check"></i> Konfirmasi
                                                     </button>
 
+                                                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $order->id }}" title="Tolak Pesanan">
+                                                        <i class="fas fa-times"></i> Tolak
+                                                    </button>
+
                                                     <!-- Verification Modal -->
                                                     <div class="modal fade" id="verifyModal{{ $order->id }}" tabindex="-1" aria-labelledby="verifyModalLabel{{ $order->id }}" aria-hidden="true">
                                                         <div class="modal-dialog">
                                                             <div class="modal-content">
                                                                 <form action="{{ route('dashboard.orders.verify', $order) }}" method="POST">
                                                                     @csrf
+                                                                    <input type="hidden" name="action" value="approve">
                                                                     <div class="modal-header">
                                                                         <h5 class="modal-title" id="verifyModalLabel{{ $order->id }}">Konfirmasi Pesanan</h5>
                                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -126,6 +134,32 @@
                                                                     <div class="modal-footer">
                                                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                                                                         <button type="submit" class="btn btn-primary">Konfirmasi Pesanan</button>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Rejection Modal -->
+                                                    <div class="modal fade" id="rejectModal{{ $order->id }}" tabindex="-1" aria-labelledby="rejectModalLabel{{ $order->id }}" aria-hidden="true">
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <form action="{{ route('dashboard.orders.verify', $order) }}" method="POST">
+                                                                    @csrf
+                                                                    <input type="hidden" name="action" value="reject">
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title" id="rejectModalLabel{{ $order->id }}">Tolak Pesanan</h5>
+                                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        <div class="mb-3">
+                                                                            <label for="catatan_ditolak{{ $order->id }}" class="form-label">Alasan Penolakan</label>
+                                                                            <textarea class="form-control" id="catatan_ditolak{{ $order->id }}" name="catatan_ditolak" rows="3" required></textarea>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                                                        <button type="submit" class="btn btn-danger">Tolak Pesanan</button>
                                                                     </div>
                                                                 </form>
                                                             </div>
@@ -202,6 +236,19 @@
                         e.preventDefault();
                         alert('Harap masukkan ongkos kirim yang valid (angka positif)');
                         ongkirInput.focus();
+                        return false;
+                    }
+                });
+
+                // Validation for rejection modal
+                $('[id^="rejectModal"] form').on('submit', function(e) {
+                    const reasonInput = $(this).find('textarea[name="catatan_ditolak"]');
+                    const reason = reasonInput.val().trim();
+
+                    if (!reason) {
+                        e.preventDefault();
+                        alert('Harap masukkan alasan penolakan');
+                        reasonInput.focus();
                         return false;
                     }
                 });

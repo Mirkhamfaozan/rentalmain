@@ -18,8 +18,8 @@ class FrontRentalController extends Controller
     {
         // Ambil hanya data rental yang sudah terverifikasi dengan pagination
         $rentals = RentalBiodata::forRental()
-                    ->verified() // Hanya yang status verifikasinya 'terverifikasi'
-                    ->paginate(12);
+            ->verified() // Hanya yang status verifikasinya 'terverifikasi'
+            ->paginate(12);
 
         return view('frontend.rental_list', compact('rentals'));
     }
@@ -34,11 +34,12 @@ class FrontRentalController extends Controller
     {
         // Hanya tampilkan rental profile yang sudah terverifikasi
         $rentalProfile = RentalBiodata::forRental()
-                        ->verified()
-                        ->findOrFail($id);
+            ->verified()
+            ->findOrFail($id);
 
-        // Fetch products for the user associated with this rental profile
+        // Fetch only available products for the user associated with this rental profile
         $products = Product::where('user_id', $rentalProfile->user_id)
+            ->where('is_available', true) // Only available products
             ->orderBy('created_at', 'desc')
             ->take(6)
             ->get();

@@ -25,6 +25,7 @@ class Order extends Model
         'ongkir',
         'status',
         'catatan',
+        'catatan_ditolak',
         'lokasi_pengambilan',
         'lokasi_pengembalian',
     ];
@@ -32,7 +33,6 @@ class Order extends Model
     protected $casts = [
         'tanggal_mulai' => 'date',
         'tanggal_selesai' => 'date',
-        'status' => 'string',
         'total_harga' => 'decimal:2',
         'ongkir' => 'decimal:2',
     ];
@@ -72,6 +72,9 @@ class Order extends Model
             'ongoing' => 'Sedang Berlangsung',
             'completed' => 'Selesai',
             'cancelled' => 'Dibatalkan',
+            'belum_dikonfirmasi' => 'Belum Dikonfirmasi',
+            'dikonfirmasi' => 'Dikonfirmasi',
+            'ditolak' => 'Ditolak'
         ];
 
         return $labels[$this->status] ?? $this->status;

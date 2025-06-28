@@ -11,7 +11,8 @@ class HomeController extends Controller
     public function index()
     {
         // Tampilkan produk terbaru (baik tersedia maupun tidak)
-        $products = Product::orderBy('created_at', 'desc')
+        $products = Product::where('is_available', true) // Only available products
+            ->orderBy('created_at', 'desc')
             ->take(6)
             ->get();
 

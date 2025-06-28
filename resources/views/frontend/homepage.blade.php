@@ -253,6 +253,14 @@
                                                     <small class="text-muted">Tahun</small>
                                                 </div>
                                             </div>
+                                            <!-- Add this new row for vehicle number -->
+                                            <div class="col-12 mt-2">
+                                                <div class="text-center p-2 bg-light rounded-3 border hover-scale-sm">
+                                                    <i class="bi bi-123 text-primary d-block mb-1"></i>
+                                                    <div class="fw-bold small">No. Kend: {{ $product->nomor_kendaraan }}
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
 
                                     </div>
@@ -326,7 +334,8 @@
                         <i class="bi bi-shop me-1"></i>Rental Terpercaya
                     </span>
                     <h2 class="display-5 fw-bold mb-3">Temui Mitra Rental Kami</h2>
-                    <p class="fs-5 text-muted">Jelajahi penyedia rental terpercaya untuk pengalaman sewa yang aman dan nyaman</p>
+                    <p class="fs-5 text-muted">Jelajahi penyedia rental terpercaya untuk pengalaman sewa yang aman dan
+                        nyaman</p>
                 </div>
             </div>
 
@@ -338,8 +347,7 @@
                             <!-- Rental Image (Placeholder or logo if available) -->
                             <div class="ratio ratio-4x3 position-relative overflow-hidden">
                                 <img class="card-img-top object-fit-cover w-100 h-100 hover-zoom"
-                                    src="{{ Storage::url($profile->foto_tempat)}}"
-                                    alt="{{ $profile->nama_rental }}">
+                                    src="{{ Storage::url($profile->foto_tempat) }}" alt="{{ $profile->nama_rental }}">
 
                                 <!-- Image Overlay -->
                                 <div
@@ -354,9 +362,12 @@
                             <!-- Card Body -->
                             <div class="card-body p-4">
                                 <h5 class="card-title fw-bold mb-2 text-truncate">{{ $profile->nama_rental }}</h5>
-                                <p class="text-muted small mb-2"><i class="bi bi-person me-2"></i>{{ $profile->nama_pemilik }}</p>
-                                <p class="text-muted small mb-2"><i class="bi bi-geo-alt me-2"></i>{{ $profile->kota }}, {{ $profile->provinsi }}</p>
-                                <p class="text-muted small mb-0"><i class="bi bi-envelope me-2"></i>{{ $profile->email_perusahaan }}</p>
+                                <p class="text-muted small mb-2"><i
+                                        class="bi bi-person me-2"></i>{{ $profile->nama_pemilik }}</p>
+                                <p class="text-muted small mb-2"><i class="bi bi-geo-alt me-2"></i>{{ $profile->kota }},
+                                    {{ $profile->provinsi }}</p>
+                                <p class="text-muted small mb-0"><i
+                                        class="bi bi-envelope me-2"></i>{{ $profile->email_perusahaan }}</p>
                             </div>
 
                             <!-- Card Footer -->
@@ -451,37 +462,40 @@
         </div>
     </section>
 
-<!-- Modal Verifikasi Lokasi -->
-<div class="modal fade" id="locationVerificationModal" tabindex="-1" aria-labelledby="locationVerificationModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content rounded-4">
-            <div class="modal-header border-0 bg-light">
-                <h5 class="modal-title fw-bold text-primary" id="locationVerificationModalLabel">🎉 Selamat Datang di Tegal!</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body py-4">
-                <div class="text-center">
-                    <div class="mb-4">
-                        <i class="bi bi-scooter text-primary" style="font-size: 3rem;"></i>
-                    </div>
-                    <h4 class="fw-bold mb-3">Nikmati perjalanan Anda dengan motor kami</h4>
-                    <p class="text-muted mb-4">
-                        Kami menyambut semua tamu yang ingin menjelajahi Tegal.<br>
-                        Apakah Anda sedang berkunjung ke kota ini?
-                    </p>
+    <!-- Modal Verifikasi Lokasi -->
+    <div class="modal fade" id="locationVerificationModal" tabindex="-1"
+        aria-labelledby="locationVerificationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4">
+                <div class="modal-header border-0 bg-light">
+                    <h5 class="modal-title fw-bold text-primary" id="locationVerificationModalLabel">🎉 Selamat Datang di
+                        Tegal!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-            </div>
-            <div class="modal-footer border-0 bg-light">
-                <button type="button" class="btn btn-lg btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">
-                    Tidak
-                </button>
-                <button type="button" id="confirmLocationBtn" class="btn btn-lg btn-primary rounded-pill px-4">
-                    <i class="bi bi-scooter me-1"></i>Ya, Saya Ingin Sewa
-                </button>
+                <div class="modal-body py-4">
+                    <div class="text-center">
+                        <div class="mb-4">
+                            <i class="bi bi-scooter text-primary" style="font-size: 3rem;"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Nikmati perjalanan Anda dengan motor kami</h4>
+                        <p class="text-muted mb-4">
+                            Kami menyambut semua tamu yang ingin menjelajahi Tegal.<br>
+                            Apakah Anda sedang berkunjung ke kota ini?
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 bg-light">
+                    <button type="button" class="btn btn-lg btn-outline-secondary rounded-pill px-4"
+                        data-bs-dismiss="modal">
+                        Tidak
+                    </button>
+                    <button type="button" id="confirmLocationBtn" class="btn btn-lg btn-primary rounded-pill px-4">
+                        <i class="bi bi-scooter me-1"></i>Ya, Saya Ingin Sewa
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
     <!-- Back to Top Button -->
     <button class="btn btn-primary btn-lg rounded-circle shadow-lg back-to-top" id="backToTop">
@@ -843,7 +857,8 @@
                 button.addEventListener('click', function(e) {
                     e.preventDefault();
                     const productId = this.getAttribute('data-product-id');
-                    const modal = new bootstrap.Modal(document.getElementById('locationVerificationModal'));
+                    const modal = new bootstrap.Modal(document.getElementById(
+                        'locationVerificationModal'));
 
                     // Set the confirm button to redirect to the order page
                     document.getElementById('confirmLocationBtn').onclick = function() {
@@ -855,7 +870,7 @@
             });
 
             // If user clicks "No" in modal, redirect to homepage
-            document.getElementById('locationVerificationModal').addEventListener('hidden.bs.modal', function () {
+            document.getElementById('locationVerificationModal').addEventListener('hidden.bs.modal', function() {
                 window.location.href = "{{ route('frontend.rental') }}";
             });
         });

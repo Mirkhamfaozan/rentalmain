@@ -12,18 +12,48 @@
         </div>
     </header>
 
+    <!-- Success/Error Popup Modals -->
+    @if (session('success'))
+    <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="bi bi-check-circle-fill me-2"></i>Sukses</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {{ session('success') }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @if (session('error'))
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill me-2"></i>Error</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {{ session('error') }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- Profile Content -->
     <section class="py-5 bg-light">
         <div class="container px-4 px-lg-5">
-            <!-- Success/Error Alerts -->
-            @if (session('success'))
-                <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm" role="alert"
-                    data-aos="fade-down">
-                    <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
-
             <div class="row gx-5">
                 <!-- Profile Card -->
                 <div class="col-lg-4 mb-4" data-aos="fade-right" data-aos-delay="100">
@@ -31,9 +61,10 @@
                         <div class="card-body text-center p-4">
                             <!-- Avatar -->
                             <div class="position-relative mb-4">
-                                @if ($user->avatar)
+                                @if ($user->avatar && Storage::exists($user->avatar))
                                     <img src="{{ Storage::url($user->avatar) }}" class="rounded-circle shadow-lg"
-                                        alt="Avatar" style="width: 150px; height: 150px; object-fit: cover;">
+                                        alt="Avatar" style="width: 150px; height: 150px; object-fit: cover;"
+                                        onerror="this.src='/images/default-avatar.png'">
                                 @else
                                     <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center shadow-lg mx-auto"
                                         style="width: 150px; height: 150px;">
@@ -70,7 +101,7 @@
                         </div>
                     </div>
 
-                    @if ($user->role === 'rental' && $rentalBiodata)
+                    @if ($user->role === 'rental' && isset($rentalBiodata) && $rentalBiodata)
                         <!-- Rental Info Card -->
                         <div class="card shadow-sm border-0 rounded-4 mt-4" data-aos="fade-right" data-aos-delay="200">
                             <div class="card-body p-4">
@@ -78,35 +109,15 @@
                                     <i class="bi bi-shop me-2"></i>Info Rental
                                 </h5>
 
-                                <!-- Verification Status Alert -->
+                                <!-- Verification Status Popup Triggers -->
                                 @if ($rentalBiodata->isRejected())
-                                    <div class="alert alert-danger border-0 rounded-3 shadow-sm mb-4">
-                                        <div class="d-flex align-items-center">
-                                            <i class="bi bi-exclamation-triangle-fill me-3 fs-4"></i>
-                                            <div>
-                                                <h6 class="alert-heading mb-1">Verifikasi Ditolak</h6>
-                                                <p class="mb-0">Data rental Anda tidak memenuhi persyaratan verifikasi.
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div class="mt-3">
-                                            <a href="{{ route('profile.verification-note') }}"
-                                                class="btn btn-sm btn-outline-danger">
-                                                <i class="bi bi-info-circle me-1"></i> Lihat Detail Penolakan
-                                            </a>
-                                        </div>
-                                    </div>
+                                    <button class="btn btn-danger w-100 mb-4" data-bs-toggle="modal" data-bs-target="#verificationRejectedModal">
+                                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Verifikasi Ditolak - Klik untuk Detail
+                                    </button>
                                 @elseif($rentalBiodata->isPending())
-                                    <div class="alert alert-warning border-0 rounded-3 shadow-sm mb-4">
-                                        <div class="d-flex align-items-center">
-                                            <i class="bi bi-hourglass-split me-3 fs-4"></i>
-                                            <div>
-                                                <h6 class="alert-heading mb-1">Menunggu Verifikasi</h6>
-                                                <p class="mb-0">Data rental Anda sedang dalam proses verifikasi oleh
-                                                    admin.</p>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <button class="btn btn-warning w-100 mb-4" data-bs-toggle="modal" data-bs-target="#verificationPendingModal">
+                                        <i class="bi bi-hourglass-split me-2"></i>Menunggu Verifikasi
+                                    </button>
                                 @endif
 
                                 <div class="mb-3">
@@ -134,17 +145,9 @@
                                 @endif
 
                                 @if ($rentalBiodata->isVerified())
-                                    <div class="alert alert-success border-0 rounded-3 shadow-sm mt-4">
-                                        <div class="d-flex align-items-center">
-                                            <i class="bi bi-check-circle-fill me-3 fs-4"></i>
-                                            <div>
-                                                <h6 class="alert-heading mb-1">Terverifikasi</h6>
-                                                <p class="mb-0">Data rental Anda telah diverifikasi pada
-                                                    {{ $rentalBiodata->tanggal_verifikasi->format('d F Y') }}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <button class="btn btn-success w-100 mt-4" data-bs-toggle="modal" data-bs-target="#verificationSuccessModal">
+                                        <i class="bi bi-check-circle-fill me-2"></i>Terverifikasi
+                                    </button>
                                 @endif
                             </div>
                         </div>
@@ -159,20 +162,24 @@
                             <nav>
                                 <div class="nav nav-pills nav-fill" id="nav-tab" role="tablist">
                                     <button class="nav-link active rounded-pill" id="nav-info-tab" data-bs-toggle="tab"
-                                        data-bs-target="#nav-info" type="button" role="tab">
+                                        data-bs-target="#nav-info" type="button" role="tab"
+                                        aria-controls="nav-info" aria-selected="true">
                                         <i class="bi bi-person-lines-fill me-2"></i>Info Personal
                                     </button>
                                     <button class="nav-link rounded-pill" id="nav-orders-tab" data-bs-toggle="tab"
-                                        data-bs-target="#nav-orders" type="button" role="tab">
+                                        data-bs-target="#nav-orders" type="button" role="tab"
+                                        aria-controls="nav-orders" aria-selected="false">
                                         <i class="bi bi-bag-check me-2"></i>Pesanan
                                     </button>
                                     <button class="nav-link rounded-pill" id="nav-payments-tab" data-bs-toggle="tab"
-                                        data-bs-target="#nav-payments" type="button" role="tab">
+                                        data-bs-target="#nav-payments" type="button" role="tab"
+                                        aria-controls="nav-payments" aria-selected="false">
                                         <i class="bi bi-credit-card me-2"></i>Pembayaran
                                     </button>
                                     @if ($user->role === 'rental')
                                         <button class="nav-link rounded-pill" id="nav-products-tab" data-bs-toggle="tab"
-                                            data-bs-target="#nav-products" type="button" role="tab">
+                                            data-bs-target="#nav-products" type="button" role="tab"
+                                            aria-controls="nav-products" aria-selected="false">
                                             <i class="bi bi-grid me-2"></i>Produk
                                         </button>
                                     @endif
@@ -184,7 +191,7 @@
                     <!-- Tab Content -->
                     <div class="tab-content" id="nav-tabContent">
                         <!-- Personal Info Tab -->
-                        <div class="tab-pane fade show active" id="nav-info" role="tabpanel">
+                        <div class="tab-pane fade show active" id="nav-info" role="tabpanel" aria-labelledby="nav-info-tab">
                             <div class="card shadow-sm border-0 rounded-4">
                                 <div class="card-body p-4">
                                     <h5 class="fw-bold text-primary mb-4">
@@ -207,7 +214,7 @@
                                         <div class="col-12">
                                             <div class="bg-light rounded-3 p-3">
                                                 <strong class="text-muted d-block mb-1">Bergabung Sejak</strong>
-                                                <span class="fw-semibold">{{ $user->created_at->format('d F Y') }}</span>
+                                                <span class="fw-semibold">{{ $user->created_at->translatedFormat('d F Y') }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -216,7 +223,7 @@
                         </div>
 
                         <!-- Orders Tab -->
-                        <div class="tab-pane fade" id="nav-orders" role="tabpanel">
+                        <div class="tab-pane fade" id="nav-orders" role="tabpanel" aria-labelledby="nav-orders-tab">
                             <div class="card shadow-sm border-0 rounded-4">
                                 <div class="card-body p-4">
                                     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -247,7 +254,8 @@
                                                                 <div class="d-flex align-items-center">
                                                                     <img src="{{ $order->product->gambar_utama ? Storage::url($order->product->gambar_utama) : '/images/placeholder.jpg' }}"
                                                                         class="rounded me-3" width="60"
-                                                                        height="60" style="object-fit: cover;">
+                                                                        height="60" style="object-fit: cover;"
+                                                                        onerror="this.src='/images/placeholder.jpg'">
                                                                     <div>
                                                                         <h6 class="mb-0">
                                                                             {{ $order->product->nama_motor }}</h6>
@@ -257,9 +265,9 @@
                                                                 </div>
                                                             </td>
                                                             <td>
-                                                                {{ \Carbon\Carbon::parse($order->tanggal_mulai)->format('d M Y') }}
+                                                                {{ $order->tanggal_mulai->translatedFormat('d M Y') }}
                                                                 -
-                                                                {{ \Carbon\Carbon::parse($order->tanggal_selesai)->format('d M Y') }}
+                                                                {{ $order->tanggal_selesai->translatedFormat('d M Y') }}
                                                             </td>
                                                             <td>{{ $order->durasi_hari }} hari</td>
                                                             <td>Rp {{ number_format($order->total_harga, 0, ',', '.') }}
@@ -289,6 +297,10 @@
                                                                     <span class="badge bg-danger">
                                                                         <i class="bi bi-x-circle me-1"></i> Dibatalkan
                                                                     </span>
+                                                                @elseif($order->status == 'ditolak')
+                                                                    <span class="badge bg-danger">
+                                                                        <i class="bi bi-x-circle me-1"></i> Ditolak
+                                                                    </span>
                                                                 @endif
                                                             </td>
                                                             <td>
@@ -304,6 +316,12 @@
                                                                 @elseif($order->status == 'completed')
                                                                     <button class="btn btn-sm btn-outline-secondary rounded-pill">
                                                                         <i class="bi bi-star me-1"></i> Beri Rating
+                                                                    </button>
+                                                                @elseif($order->status == 'ditolak')
+                                                                    <button class="btn btn-sm btn-outline-danger rounded-pill"
+                                                                        data-bs-toggle="modal"
+                                                                        data-bs-target="#rejectionNoteModal{{ $order->id }}">
+                                                                        <i class="bi bi-info-circle me-1"></i> Lihat Penolakan
                                                                     </button>
                                                                 @endif
                                                             </td>
@@ -324,7 +342,7 @@
                         </div>
 
                         <!-- Payments Tab -->
-                        <div class="tab-pane fade" id="nav-payments" role="tabpanel">
+                        <div class="tab-pane fade" id="nav-payments" role="tabpanel" aria-labelledby="nav-payments-tab">
                             <div class="card shadow-sm border-0 rounded-4">
                                 <div class="card-body p-4">
                                     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -332,34 +350,72 @@
                                             <i class="bi bi-credit-card me-2"></i>Riwayat Pembayaran
                                         </h5>
                                     </div>
-                                    <div class="text-center text-muted py-5">
-                                        <i class="bi bi-credit-card-2-front display-1 text-muted mb-3"></i>
-                                        <p>Belum ada pembayaran</p>
-                                    </div>
+
+                                    @if(isset($payments) && $payments->count() > 0)
+                                        <div class="table-responsive">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Order ID</th>
+                                                        <th>Metode</th>
+                                                        <th>Jumlah</th>
+                                                        <th>Status</th>
+                                                        <th>Tanggal</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach($payments as $payment)
+                                                    <tr>
+                                                        <td>{{ $loop->iteration }}</td>
+                                                        <td>#{{ $payment->order_id }}</td>
+                                                        <td>{{ ucfirst($payment->metode_pembayaran) }}</td>
+                                                        <td>Rp {{ number_format($payment->jumlah, 0, ',', '.') }}</td>
+                                                        <td>
+                                                            <span class="badge bg-{{ $payment->status == 'success' ? 'success' : ($payment->status == 'pending' ? 'warning' : 'danger') }}">
+                                                                {{ ucfirst($payment->status) }}
+                                                            </span>
+                                                        </td>
+                                                        <td>{{ $payment->created_at->translatedFormat('d M Y H:i') }}</td>
+                                                    </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    @else
+                                        <div class="text-center text-muted py-5">
+                                            <i class="bi bi-credit-card-2-front display-1 text-muted mb-3"></i>
+                                            <p>Belum ada pembayaran</p>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>
 
                         <!-- Products Tab (Rental Only) -->
                         @if ($user->role === 'rental')
-                            <div class="tab-pane fade" id="nav-products" role="tabpanel">
+                            <div class="tab-pane fade" id="nav-products" role="tabpanel" aria-labelledby="nav-products-tab">
                                 <div class="card shadow-sm border-0 rounded-4">
                                     <div class="card-body p-4">
                                         <div class="d-flex justify-content-between align-items-center mb-4">
                                             <h5 class="fw-bold text-primary mb-0">
                                                 <i class="bi bi-grid me-2"></i>Produk Saya
                                             </h5>
+                                            <a href="{{ route('products.create') }}" class="btn btn-primary btn-sm rounded-pill">
+                                                <i class="bi bi-plus-circle me-1"></i> Tambah Produk
+                                            </a>
                                         </div>
 
-                                        @if ($userProducts->count() > 0)
+                                        @if(isset($userProducts) && $userProducts->count() > 0)
                                             <div class="row g-3">
-                                                @foreach ($userProducts->take(3) as $product)
+                                                @foreach ($userProducts as $product)
                                                     <div class="col-md-4">
                                                         <div class="card border-0 shadow-sm rounded-3 hover-scale">
                                                             <img src="{{ $product->gambar_utama ? Storage::url($product->gambar_utama) : '/images/placeholder.jpg' }}"
                                                                 class="card-img-top"
                                                                 style="height: 150px; object-fit: cover;"
-                                                                alt="{{ $product->nama_motor }}">
+                                                                alt="{{ $product->nama_motor }}"
+                                                                onerror="this.src='/images/placeholder.jpg'">
                                                             <div class="card-body p-3">
                                                                 <h6 class="fw-bold text-truncate mb-2">
                                                                     {{ $product->nama_motor }}</h6>
@@ -367,6 +423,20 @@
                                                                     Rp
                                                                     {{ number_format($product->harga_harian, 0, ',', '.') }}/hari
                                                                 </p>
+                                                                <div class="d-flex justify-content-between mt-2">
+                                                                    <a href="{{ route('products.edit', $product->id) }}"
+                                                                       class="btn btn-sm btn-outline-primary rounded-pill">
+                                                                        <i class="bi bi-pencil"></i>
+                                                                    </a>
+                                                                    <form action="{{ route('products.destroy', $product->id) }}" method="POST">
+                                                                        @csrf
+                                                                        @method('DELETE')
+                                                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill"
+                                                                                onclick="return confirm('Apakah Anda yakin ingin menghapus produk ini?')">
+                                                                            <i class="bi bi-trash"></i>
+                                                                        </button>
+                                                                    </form>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -375,7 +445,7 @@
                                         @else
                                             <div class="text-center text-muted py-5">
                                                 <i class="bi bi-plus-circle display-1 text-muted mb-3"></i>
-                                                <p>Belum ada produk. Mulai tambahkan produk Anda</p>
+                                                <p>Belum ada produk. <a href="{{ route('products.create') }}" class="text-primary">Mulai tambahkan produk Anda</a></p>
                                             </div>
                                         @endif
                                     </div>
@@ -388,161 +458,338 @@
         </div>
     </section>
 
+    <!-- Rejection Note Modals - Placed at the bottom of the page -->
+    @foreach ($orders as $order)
+        @if ($order->status == 'ditolak')
+        <div class="modal fade" id="rejectionNoteModal{{ $order->id }}" tabindex="-1" aria-labelledby="rejectionNoteModalLabel{{ $order->id }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="rejectionNoteModalLabel{{ $order->id }}">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>Alasan Penolakan
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            Pesanan #{{ $order->id }} ditolak oleh rental
+                        </div>
+                        <div class="mb-3">
+                            <strong>Catatan Penolakan:</strong>
+                            <p class="mt-2">{{ $order->catatan_ditolak ?? 'Tidak ada catatan tambahan' }}</p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+    @endforeach
+
+    <!-- Verification Status Modals -->
+    @if ($user->role === 'rental' && isset($rentalBiodata) && $rentalBiodata)
+        <!-- Verification Rejected Modal -->
+        @if ($rentalBiodata->isRejected())
+        <div class="modal fade" id="verificationRejectedModal" tabindex="-1" aria-labelledby="verificationRejectedModalLabel" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="verificationRejectedModalLabel">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>Verifikasi Ditolak
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-danger mb-3">
+                            <i class="bi bi-x-circle-fill me-2"></i>
+                            <strong>Data rental Anda tidak memenuhi persyaratan verifikasi.</strong>
+                        </div>
+
+                        @if($rentalBiodata->catatan_ditolak)
+                        <div class="mb-3">
+                            <h6 class="fw-bold">Alasan Penolakan:</h6>
+                            <div class="bg-light p-3 rounded">
+                                {{ $rentalBiodata->catatan_ditolak }}
+                            </div>
+                        </div>
+                        @endif
+
+                        <div class="mb-3">
+                            <h6 class="fw-bold">Langkah Selanjutnya:</h6>
+                            <ul class="mb-0">
+                                <li>Perbaiki data sesuai catatan yang diberikan</li>
+                                <li>Upload ulang dokumen yang diminta</li>
+                                <li>Tunggu proses verifikasi ulang</li>
+                            </ul>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            @if(Route::has('profile.verification-note'))
+                            <a href="{{ route('profile.verification-note') }}" class="btn btn-outline-danger">
+                                <i class="bi bi-info-circle me-1"></i> Lihat Detail Lengkap
+                            </a>
+                            @endif
+
+                            @if(Route::has('profile.edit') || Route::has('rental.biodata.edit'))
+                            <a href="{{ route('profile.edit') }}" class="btn btn-primary">
+                                <i class="bi bi-pencil-square me-1"></i> Perbaiki Data
+                            </a>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+
+        <!-- Verification Pending Modal -->
+        @if ($rentalBiodata->isPending())
+        <div class="modal fade" id="verificationPendingModal" tabindex="-1" aria-labelledby="verificationPendingModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning text-dark">
+                        <h5 class="modal-title" id="verificationPendingModalLabel">
+                            <i class="bi bi-hourglass-split me-2"></i>Verifikasi Sedang Diproses
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-warning mb-3">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            <strong>Data rental Anda sedang dalam proses verifikasi oleh admin.</strong>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 class="fw-bold">Status Saat Ini:</h6>
+                            <ul class="mb-0">
+                                <li>Data telah diterima dan sedang direview</li>
+                                <li>Admin akan melakukan verifikasi dalam 1-3 hari kerja</li>
+                                <li>Anda akan mendapat notifikasi hasil verifikasi</li>
+                            </ul>
+                        </div>
+
+                        <div class="text-center">
+                            <div class="spinner-border text-warning" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2 text-muted">Mohon bersabar menunggu...</p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+
+        <!-- Verification Success Modal -->
+        @if ($rentalBiodata->isVerified())
+        <div class="modal fade" id="verificationSuccessModal" tabindex="-1" aria-labelledby="verificationSuccessModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title" id="verificationSuccessModalLabel">
+                            <i class="bi bi-check-circle-fill me-2"></i>Verifikasi Berhasil
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-success mb-3">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <strong>Selamat! Rental Anda telah terverifikasi.</strong>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 class="fw-bold">Keuntungan Verifikasi:</h6>
+                            <ul class="mb-0">
+                                <li>Dapat menambahkan dan mengelola produk rental</li>
+                                <li>Menerima pesanan dari customer</li>
+                                <li>Mendapat badge verifikasi di profil</li>
+                                <li>Prioritas dalam pencarian</li>
+                            </ul>
+                        </div>
+
+                        <div class="d-grid">
+                            @if(Route::has('products.create'))
+                            <a href="{{ route('products.create') }}" class="btn btn-success">
+                                <i class="bi bi-plus-circle me-1"></i> Mulai Tambah Produk
+                            </a>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+    @endif
+
     <!-- Custom Styles -->
     <style>
-        /* Root Variables */
-        :root {
-            --primary: #0d6efd;
-            --warning: #ffc107;
-            --success: #28a745;
-            --animation-duration: 0.3s;
-        }
-
-        /* Gradient Button */
         .btn-gradient {
-            background: linear-gradient(135deg, var(--primary), #4dabf7);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
             color: white;
-            transition: transform var(--animation-duration) ease, box-shadow var(--animation-duration) ease;
         }
 
         .btn-gradient:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
             color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
-        /* Hover Effects */
         .hover-scale {
-            transition: transform var(--animation-duration) ease, box-shadow var(--animation-duration) ease;
+            transition: transform 0.3s ease;
         }
 
         .hover-scale:hover {
             transform: scale(1.05);
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
         }
 
-        /* Alerts */
-        .alert {
-            border-radius: 0.75rem;
-            border: none;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        .nav-pills .nav-link {
+            border: 1px solid #dee2e6;
+            margin: 0 2px;
+            color: #6c757d;
         }
 
-        .alert-success {
-            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-            border-left: 5px solid var(--success);
+        .nav-pills .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: transparent;
         }
 
-        /* Card Animation */
+        .table th {
+            border-top: none;
+            font-weight: 600;
+            color: #495057;
+            background-color: #f8f9fa;
+        }
+
+        .table td {
+            vertical-align: middle;
+        }
+
         .card {
-            transition: transform var(--animation-duration) ease, box-shadow var(--animation-duration) ease;
+            transition: all 0.3s ease;
         }
 
         .card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
         }
 
-        /* Nav Pills Custom */
-        .nav-pills .nav-link {
-            color: #6c757d;
-            font-weight: 500;
-            transition: all var(--animation-duration) ease;
+        .bg-light {
+            background-color: #f8f9fa !important;
         }
 
-        .nav-pills .nav-link.active {
-            background: linear-gradient(135deg, var(--primary), #4dabf7);
-            color: white;
+        .text-white-75 {
+            color: rgba(255, 255, 255, 0.75) !important;
         }
 
-        .nav-pills .nav-link:hover:not(.active) {
-            background-color: rgba(13, 110, 253, 0.1);
-            color: var(--primary);
+        /* Fix for modal z-index */
+        .modal {
+            z-index: 1060 !important;
         }
 
-        /* Tab Content Animation */
-        .tab-pane {
-            animation: fadeIn 0.5s ease-in;
-        }
-
-        /* Orders Table Styling */
-        .table {
-            border-radius: 0.75rem;
-            overflow: hidden;
-        }
-
-        .table thead th {
-            background-color: #f8f9fa;
-            border-bottom-width: 1px;
-            font-weight: 600;
-            color: #495057;
-        }
-
-        .table-hover tbody tr:hover {
-            background-color: rgba(13, 110, 253, 0.05);
-        }
-
-        .badge {
-            padding: 0.5em 0.75em;
-            font-weight: 500;
-            letter-spacing: 0.5px;
-        }
-
-        .bg-warning.text-dark {
-            background-color: #fff3cd !important;
-            color: #856404 !important;
-        }
-
-        .btn-outline-primary.rounded-pill {
-            border-radius: 50px !important;
-            padding: 0.25rem 0.75rem;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Responsive Adjustments */
         @media (max-width: 768px) {
             .display-4 {
                 font-size: 2rem;
             }
 
+            .nav-pills {
+                flex-direction: column;
+            }
+
             .nav-pills .nav-link {
-                font-size: 0.875rem;
-                padding: 0.5rem 1rem;
+                margin: 2px 0;
             }
         }
     </style>
 
-    <!-- Custom Scripts -->
+    <!-- JavaScript for Modal Auto-show and AOS -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize AOS
-            AOS.init({
-                duration: 800,
-                easing: 'ease-in-out',
-                once: false
+            // Auto-show success/error modals
+            @if (session('success'))
+                var successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                successModal.show();
+            @endif
+
+            @if (session('error'))
+                var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                errorModal.show();
+            @endif
+
+            // Initialize AOS (Animate On Scroll)
+            if (typeof AOS !== 'undefined') {
+                AOS.init({
+                    duration: 800,
+                    easing: 'ease-in-out',
+                    once: true
+                });
+            }
+
+            // Add smooth scrolling for tab navigation
+            const tabLinks = document.querySelectorAll('[data-bs-toggle="tab"]');
+            tabLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // Add active state animation
+                    setTimeout(() => {
+                        const activePane = document.querySelector('.tab-pane.active');
+                        if (activePane) {
+                            activePane.style.opacity = '0';
+                            activePane.style.transform = 'translateY(20px)';
+
+                            setTimeout(() => {
+                                activePane.style.transition = 'all 0.3s ease';
+                                activePane.style.opacity = '1';
+                                activePane.style.transform = 'translateY(0)';
+                            }, 50);
+                        }
+                    }, 150);
+                });
             });
 
-            // Auto-hide alerts after 5 seconds
-            setTimeout(function() {
-                const alerts = document.querySelectorAll('.alert');
-                alerts.forEach(function(alert) {
-                    if (alert.classList.contains('show')) {
-                        const bsAlert = new bootstrap.Alert(alert);
-                        bsAlert.close();
+            // Enhanced table row hover effects
+            const tableRows = document.querySelectorAll('tbody tr');
+            tableRows.forEach(row => {
+                row.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.01)';
+                    this.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+                });
+
+                row.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1)';
+                    this.style.boxShadow = 'none';
+                });
+            });
+
+            // Add loading state for action buttons
+            const actionButtons = document.querySelectorAll('.btn[href]');
+            actionButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    if (!this.classList.contains('btn-outline-danger')) {
+                        const originalText = this.innerHTML;
+                        this.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Loading...';
+                        this.disabled = true;
+
+                        // Re-enable after 3 seconds (fallback)
+                        setTimeout(() => {
+                            this.innerHTML = originalText;
+                            this.disabled = false;
+                        }, 3000);
                     }
                 });
-            }, 5000);
+            });
         });
     </script>
 @endsection

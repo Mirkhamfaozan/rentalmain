@@ -25,7 +25,7 @@
                 <!-- Profile Image -->
                 <div class="col-lg-4" data-aos="fade-right" data-aos-delay="100">
                     <div class="card shadow-lg rounded-4 overflow-hidden">
-                        <img src="{{Storage::url($rentalProfile->foto_tempat)}}"
+                        <img src="{{ Storage::url($rentalProfile->foto_tempat) }}"
                             class="d-block w-100 rounded-top hover-zoom" alt="{{ $rentalProfile->business_name }}"
                             style="object-fit: cover; height: 300px;">
                     </div>
@@ -129,6 +129,13 @@
                                                 </div>
                                                 <div class="col-6">
                                                     <div class="spec-item">
+                                                        <i class="bi bi-123 text-primary me-1"></i>
+                                                        <small class="text-muted">No. Kend:
+                                                            {{ $product->nomor_kendaraan ?? '-' }}</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="spec-item">
                                                         <i class="bi bi-tag text-success me-1"></i>
                                                         <small
                                                             class="text-muted">{{ $product->tipe_motor ?? 'Sport' }}</small>
@@ -153,7 +160,8 @@
                                                 <i class="bi bi-eye me-2"></i>Detail
                                             </a>
                                             @if ($product->is_available)
-                                                <button class="btn btn-success rounded-pill px-4 py-2 hover-scale-sm fw-bold rent-btn"
+                                                <button
+                                                    class="btn btn-success rounded-pill px-4 py-2 hover-scale-sm fw-bold rent-btn"
                                                     data-product-id="{{ $product->id }}" data-bs-toggle="modal"
                                                     data-bs-target="#locationVerificationModal">
                                                     <i class="bi bi-cart-plus me-2"></i>Sewa Sekarang
