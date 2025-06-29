@@ -18,11 +18,11 @@
                     <!-- Search and Filter Form -->
                     <form method="GET" action="{{ route('dashboard.orders.index') }}" class="mb-4">
                         <div class="row g-3">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <input type="text" name="search" class="form-control"
                                     placeholder="Cari nama atau motor..." value="{{ request('search') }}">
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <select name="status" class="form-select">
                                     <option value="">Semua Status</option>
                                     <option value="belum_dikonfirmasi" {{ request('status') == 'belum_dikonfirmasi' ? 'selected' : '' }}>Belum Dikonfirmasi</option>
@@ -53,9 +53,9 @@
                                     <th>ID</th>
                                     <th>Pelanggan</th>
                                     <th>Motor</th>
-                                    <th>Gambar</th>
                                     <th>Status</th>
-                                    <th>Tanggal Mulai</th>
+                                    <th>Tanggal & Waktu</th>
+                                    <th>Durasi</th>
                                     <th>Total Harga</th>
                                     <th>Aksi</th>
                                 </tr>
@@ -64,16 +64,13 @@
                                 @forelse($orders as $order)
                                     <tr>
                                         <td>{{ $order->id }}</td>
-                                        <td>{{ $order->user ? $order->user->name : $order->name }}</td>
-                                        <td>{{ $order->product ? $order->product->nama_motor : 'Motor Tidak Ditemukan' }}</td>
                                         <td>
-                                            @if ($order->product && $order->product->gambar_utama)
-                                                <img src="{{ asset('storage/' . $order->product->gambar_utama) }}"
-                                                    alt="Gambar Motor" class="img-thumbnail" style="max-width: 100px;">
-                                            @else
-                                                <span>Tidak Ada Gambar</span>
+                                            {{ $order->user ? $order->user->name : $order->name }}
+                                            @if($order->phone_number)
+                                                <br><small class="text-muted">{{ $order->phone_number }}</small>
                                             @endif
                                         </td>
+                                        <td>{{ $order->product ? $order->product->nama_motor : 'Motor Tidak Ditemukan' }}</td>
                                         <td>
                                             @if($order->status === 'belum_dikonfirmasi')
                                                 <span class="badge bg-secondary">Belum Dikonfirmasi</span>
@@ -93,101 +90,112 @@
                                                 <span class="badge bg-danger">Ditolak</span>
                                             @endif
                                         </td>
-                                        <td>{{ \Carbon\Carbon::parse($order->tanggal_mulai)->format('d M Y') }}</td>
+                                        <td>
+                                            <div class="d-flex flex-column">
+                                                <span class="fw-bold">{{ \Carbon\Carbon::parse($order->tanggal_mulai)->format('d M Y') }}</span>
+                                                <small class="text-muted">
+                                                    {{ $order->waktu_mulai ? \Carbon\Carbon::parse($order->waktu_mulai)->format('H:i') : '--:--' }} -
+                                                    {{ $order->waktu_selesai ? \Carbon\Carbon::parse($order->waktu_selesai)->format('H:i') : '--:--' }}
+                                                </small>
+                                            </div>
+                                        </td>
+                                        <td>{{ $order->durasi_hari }} hari</td>
                                         <td>Rp {{ number_format($order->total_harga, 0, ',', '.') }}</td>
                                         <td>
-                                            <a href="{{ route('dashboard.orders.show', $order) }}" class="btn btn-sm btn-info">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
+                                            <div class="d-flex gap-1">
+                                                <a href="{{ route('dashboard.orders.show', $order) }}" class="btn btn-sm btn-info" title="Detail">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
 
-                                            @if(Auth::user()->isRental())
-                                                @if($order->status === 'belum_dikonfirmasi')
-                                                    <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#verifyModal{{ $order->id }}" title="Konfirmasi Pesanan">
-                                                        <i class="fas fa-check"></i> Konfirmasi
-                                                    </button>
-
-                                                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $order->id }}" title="Tolak Pesanan">
-                                                        <i class="fas fa-times"></i> Tolak
-                                                    </button>
-
-                                                    <!-- Verification Modal -->
-                                                    <div class="modal fade" id="verifyModal{{ $order->id }}" tabindex="-1" aria-labelledby="verifyModalLabel{{ $order->id }}" aria-hidden="true">
-                                                        <div class="modal-dialog">
-                                                            <div class="modal-content">
-                                                                <form action="{{ route('dashboard.orders.verify', $order) }}" method="POST">
-                                                                    @csrf
-                                                                    <input type="hidden" name="action" value="approve">
-                                                                    <div class="modal-header">
-                                                                        <h5 class="modal-title" id="verifyModalLabel{{ $order->id }}">Konfirmasi Pesanan</h5>
-                                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                                    </div>
-                                                                    <div class="modal-body">
-                                                                        <div class="mb-3">
-                                                                            <label for="ongkir{{ $order->id }}" class="form-label">Ongkos Kirim (Rp)</label>
-                                                                            <input type="number" class="form-control" id="ongkir{{ $order->id }}" name="ongkir" required min="0" value="{{ old('ongkir', $order->ongkir ?? 0) }}">
-                                                                        </div>
-                                                                        <div class="mb-3">
-                                                                            <label for="catatan{{ $order->id }}" class="form-label">Catatan (Opsional)</label>
-                                                                            <textarea class="form-control" id="catatan{{ $order->id }}" name="catatan" rows="3">{{ old('catatan', $order->catatan ?? '') }}</textarea>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="modal-footer">
-                                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                                                        <button type="submit" class="btn btn-primary">Konfirmasi Pesanan</button>
-                                                                    </div>
-                                                                </form>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Rejection Modal -->
-                                                    <div class="modal fade" id="rejectModal{{ $order->id }}" tabindex="-1" aria-labelledby="rejectModalLabel{{ $order->id }}" aria-hidden="true">
-                                                        <div class="modal-dialog">
-                                                            <div class="modal-content">
-                                                                <form action="{{ route('dashboard.orders.verify', $order) }}" method="POST">
-                                                                    @csrf
-                                                                    <input type="hidden" name="action" value="reject">
-                                                                    <div class="modal-header">
-                                                                        <h5 class="modal-title" id="rejectModalLabel{{ $order->id }}">Tolak Pesanan</h5>
-                                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                                    </div>
-                                                                    <div class="modal-body">
-                                                                        <div class="mb-3">
-                                                                            <label for="catatan_ditolak{{ $order->id }}" class="form-label">Alasan Penolakan</label>
-                                                                            <textarea class="form-control" id="catatan_ditolak{{ $order->id }}" name="catatan_ditolak" rows="3" required></textarea>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="modal-footer">
-                                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                                                        <button type="submit" class="btn btn-danger">Tolak Pesanan</button>
-                                                                    </div>
-                                                                </form>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                @endif
-
-                                                @if($order->status === 'confirmed')
-                                                    <form action="{{ route('dashboard.orders.mark-as-ongoing', $order) }}" method="POST" class="d-inline">
-                                                        @csrf
-                                                        <button type="submit" class="btn btn-sm btn-success" title="Tandai sebagai Ongoing">
-                                                            <i class="fas fa-play"></i> Mulai
+                                                @if(Auth::user()->isRental())
+                                                    @if($order->status === 'belum_dikonfirmasi')
+                                                        <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#verifyModal{{ $order->id }}" title="Konfirmasi Pesanan">
+                                                            <i class="fas fa-check"></i>
                                                         </button>
-                                                    </form>
+
+                                                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $order->id }}" title="Tolak Pesanan">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+
+                                                        <!-- Verification Modal -->
+                                                        <div class="modal fade" id="verifyModal{{ $order->id }}" tabindex="-1" aria-labelledby="verifyModalLabel{{ $order->id }}" aria-hidden="true">
+                                                            <div class="modal-dialog">
+                                                                <div class="modal-content">
+                                                                    <form action="{{ route('dashboard.orders.verify', $order) }}" method="POST">
+                                                                        @csrf
+                                                                        <input type="hidden" name="action" value="approve">
+                                                                        <div class="modal-header">
+                                                                            <h5 class="modal-title" id="verifyModalLabel{{ $order->id }}">Konfirmasi Pesanan</h5>
+                                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                        </div>
+                                                                        <div class="modal-body">
+                                                                            <div class="mb-3">
+                                                                                <label for="ongkir{{ $order->id }}" class="form-label">Ongkos Kirim (Rp)</label>
+                                                                                <input type="number" class="form-control" id="ongkir{{ $order->id }}" name="ongkir" required min="0" value="{{ old('ongkir', $order->ongkir ?? 0) }}">
+                                                                            </div>
+                                                                            <div class="mb-3">
+                                                                                <label for="catatan{{ $order->id }}" class="form-label">Catatan (Opsional)</label>
+                                                                                <textarea class="form-control" id="catatan{{ $order->id }}" name="catatan" rows="3">{{ old('catatan', $order->catatan ?? '') }}</textarea>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="modal-footer">
+                                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                                                            <button type="submit" class="btn btn-primary">Konfirmasi Pesanan</button>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Rejection Modal -->
+                                                        <div class="modal fade" id="rejectModal{{ $order->id }}" tabindex="-1" aria-labelledby="rejectModalLabel{{ $order->id }}" aria-hidden="true">
+                                                            <div class="modal-dialog">
+                                                                <div class="modal-content">
+                                                                    <form action="{{ route('dashboard.orders.verify', $order) }}" method="POST">
+                                                                        @csrf
+                                                                        <input type="hidden" name="action" value="reject">
+                                                                        <div class="modal-header">
+                                                                            <h5 class="modal-title" id="rejectModalLabel{{ $order->id }}">Tolak Pesanan</h5>
+                                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                        </div>
+                                                                        <div class="modal-body">
+                                                                            <div class="mb-3">
+                                                                                <label for="catatan_ditolak{{ $order->id }}" class="form-label">Alasan Penolakan</label>
+                                                                                <textarea class="form-control" id="catatan_ditolak{{ $order->id }}" name="catatan_ditolak" rows="3" required></textarea>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="modal-footer">
+                                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                                                            <button type="submit" class="btn btn-danger">Tolak Pesanan</button>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    @endif
+
+                                                    @if($order->status === 'confirmed')
+                                                        <form action="{{ route('dashboard.orders.mark-as-ongoing', $order) }}" method="POST" class="d-inline">
+                                                            @csrf
+                                                            <button type="submit" class="btn btn-sm btn-success" title="Tandai sebagai Ongoing">
+                                                                <i class="fas fa-play"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endif
                                                 @endif
-                                            @endif
 
-                                            <a href="{{ route('dashboard.orders.edit', $order) }}" class="btn btn-sm btn-warning">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
+                                                <a href="{{ route('dashboard.orders.edit', $order) }}" class="btn btn-sm btn-warning" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
 
-                                            <form action="{{ route('dashboard.orders.destroy', $order) }}" method="POST" class="d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus pesanan ini?')">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
+                                                <form action="{{ route('dashboard.orders.destroy', $order) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus pesanan ini?')" title="Hapus">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </td>
                                     </tr>
                                 @empty

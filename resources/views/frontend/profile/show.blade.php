@@ -239,7 +239,7 @@
                                                     <tr>
                                                         <th>#</th>
                                                         <th>Motor</th>
-                                                        <th>Tanggal Sewa</th>
+                                                        <th>Tanggal & Waktu Sewa</th>
                                                         <th>Durasi</th>
                                                         <th>Total</th>
                                                         <th>Status</th>
@@ -265,9 +265,18 @@
                                                                 </div>
                                                             </td>
                                                             <td>
-                                                                {{ $order->tanggal_mulai->translatedFormat('d M Y') }}
-                                                                -
-                                                                {{ $order->tanggal_selesai->translatedFormat('d M Y') }}
+                                                                <div class="d-flex flex-column">
+                                                                    <div>
+                                                                        <strong>Mulai:</strong>
+                                                                        {{ $order->tanggal_mulai->translatedFormat('d M Y') }}
+                                                                        {{ $order->waktu_mulai ? $order->waktu_mulai->format('H:i') : '00:00' }}
+                                                                    </div>
+                                                                    <div>
+                                                                        <strong>Selesai:</strong>
+                                                                        {{ $order->tanggal_selesai->translatedFormat('d M Y') }}
+                                                                        {{ $order->waktu_selesai ? $order->waktu_selesai->format('H:i') : '00:00' }}
+                                                                    </div>
+                                                                </div>
                                                             </td>
                                                             <td>{{ $order->durasi_hari }} hari</td>
                                                             <td>Rp {{ number_format($order->total_harga, 0, ',', '.') }}
@@ -700,6 +709,16 @@
             z-index: 1060 !important;
         }
 
+        /* Custom styles for time display */
+        .table td small.text-muted {
+            font-size: 0.8rem;
+            display: block;
+        }
+
+        .table td div.d-flex {
+            gap: 0.5rem;
+        }
+
         @media (max-width: 768px) {
             .display-4 {
                 font-size: 2rem;
@@ -711,6 +730,11 @@
 
             .nav-pills .nav-link {
                 margin: 2px 0;
+            }
+
+            .table td div.d-flex {
+                flex-direction: column;
+                gap: 0.25rem;
             }
         }
     </style>

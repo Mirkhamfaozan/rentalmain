@@ -19,6 +19,8 @@ class Order extends Model
         'product_id',
         'tanggal_mulai',
         'tanggal_selesai',
+        'waktu_mulai', // Added waktu_mulai
+        'waktu_selesai', // Added waktu_selesai
         'durasi_hari',
         'tipe_sewa',
         'total_harga',
@@ -33,6 +35,8 @@ class Order extends Model
     protected $casts = [
         'tanggal_mulai' => 'date',
         'tanggal_selesai' => 'date',
+        'waktu_mulai' => 'datetime:H:i', // Cast waktu_mulai as time
+        'waktu_selesai' => 'datetime:H:i', // Cast waktu_selesai as time
         'total_harga' => 'decimal:2',
         'ongkir' => 'decimal:2',
     ];
@@ -61,7 +65,17 @@ class Order extends Model
 
     public function isOngoing()
     {
-        return $this->status === 'ongoing' && now()->between($this->tanggal_mulai, $this->tanggal_selesai);
+        $startDateTime = $this->tanggal_mulai->copy();
+        if ($this->waktu_mulai) {
+            $startDateTime->setTimeFrom($this->waktu_mulai);
+        }
+
+        $endDateTime = $this->tanggal_selesai->copy();
+        if ($this->waktu_selesai) {
+            $endDateTime->setTimeFrom($this->waktu_selesai);
+        }
+
+        return $this->status === 'ongoing' && now()->between($startDateTime, $endDateTime);
     }
 
     public function getStatusLabelAttribute()
@@ -93,5 +107,28 @@ class Order extends Model
     public function isPaid()
     {
         return $this->payment && $this->payment->status === 'paid';
+    }
+
+    // Additional helper methods for time handling
+    public function getStartDateTimeAttribute()
+    {
+        if (!$this->tanggal_mulai) return null;
+
+        $date = $this->tanggal_mulai->copy();
+        if ($this->waktu_mulai) {
+            $date->setTimeFrom($this->waktu_mulai);
+        }
+        return $date;
+    }
+
+    public function getEndDateTimeAttribute()
+    {
+        if (!$this->tanggal_selesai) return null;
+
+        $date = $this->tanggal_selesai->copy();
+        if ($this->waktu_selesai) {
+            $date->setTimeFrom($this->waktu_selesai);
+        }
+        return $date;
     }
 }

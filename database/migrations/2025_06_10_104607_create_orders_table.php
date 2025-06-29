@@ -18,6 +18,8 @@ return new class extends Migration
             $table->foreignId('product_id')->constrained()->onDelete('restrict');
             $table->date('tanggal_mulai');
             $table->date('tanggal_selesai');
+            $table->time('waktu_mulai')->nullable(); // Added waktu_mulai field
+            $table->time('waktu_selesai')->nullable(); // Added waktu_selesai field
             $table->integer('durasi_hari');
             $table->string('tipe_sewa', 20);
             $table->decimal('total_harga', 15, 2);

@@ -30,7 +30,6 @@
                 </div>
             @endif
             @if (session('error'))
-GMP
                 <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm" role="alert"
                     data-aos="fade-down">
                     <i class="bi bi-exclamation-circle-fill me-2"></i>{{ session('error') }}
@@ -100,23 +99,51 @@ GMP
                                     @enderror
                                 </div>
 
-                                <!-- Date Inputs -->
-                                <div class="mb-3 form-floating">
-                                    <input type="date" class="form-control @error('tanggal_mulai') is-invalid @enderror"
-                                        name="tanggal_mulai" id="tanggal_mulai" value="{{ old('tanggal_mulai') }}" min="{{ date('Y-m-d') }}" required>
-                                    <label for="tanggal_mulai">Tanggal Mulai Sewa <span class="text-danger">*</span></label>
-                                    @error('tanggal_mulai')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                <!-- Date and Time Inputs -->
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3 form-floating">
+                                            <input type="date" class="form-control @error('tanggal_mulai') is-invalid @enderror"
+                                                name="tanggal_mulai" id="tanggal_mulai" value="{{ old('tanggal_mulai') }}" min="{{ date('Y-m-d') }}" required>
+                                            <label for="tanggal_mulai">Tanggal Mulai Sewa <span class="text-danger">*</span></label>
+                                            @error('tanggal_mulai')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3 form-floating">
+                                            <input type="time" class="form-control @error('waktu_mulai') is-invalid @enderror"
+                                                name="waktu_mulai" id="waktu_mulai" value="{{ old('waktu_mulai', '08:00') }}" required>
+                                            <label for="waktu_mulai">Waktu Mulai <span class="text-danger">*</span></label>
+                                            @error('waktu_mulai')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div class="mb-3 form-floating">
-                                    <input type="date" class="form-control @error('tanggal_selesai') is-invalid @enderror"
-                                        name="tanggal_selesai" id="tanggal_selesai" value="{{ old('tanggal_selesai') }}" required>
-                                    <label for="tanggal_selesai">Tanggal Selesai Sewa <span class="text-danger">*</span></label>
-                                    @error('tanggal_selesai')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3 form-floating">
+                                            <input type="date" class="form-control @error('tanggal_selesai') is-invalid @enderror"
+                                                name="tanggal_selesai" id="tanggal_selesai" value="{{ old('tanggal_selesai') }}" required>
+                                            <label for="tanggal_selesai">Tanggal Selesai Sewa <span class="text-danger">*</span></label>
+                                            @error('tanggal_selesai')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3 form-floating">
+                                            <input type="time" class="form-control @error('waktu_selesai') is-invalid @enderror"
+                                                name="waktu_selesai" id="waktu_selesai" value="{{ old('waktu_selesai', '17:00') }}" required>
+                                            <label for="waktu_selesai">Waktu Selesai <span class="text-danger">*</span></label>
+                                            @error('waktu_selesai')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!-- Notes -->
@@ -198,7 +225,7 @@ GMP
                                                 <strong>Tipe Sewa:</strong> <span id="tipeSewaTerpilih">-</span>
                                             </div>
                                         </div>
-                                        <div class croix="alert alert-info py-2 rounded-3" id="autoSelectionAlert" style="display: none;">
+                                        <div class="alert alert-info py-2 rounded-3" id="autoSelectionAlert" style="display: none;">
                                             <small><i class="bi bi-magic me-1"></i> <span id="autoSelectionText"></span></small>
                                         </div>
                                         <div class="alert alert-warning py-2 rounded-3" id="noPriceAlert" style="display: none;">
@@ -284,6 +311,10 @@ GMP
                                     <div class="mb-2">
                                         <small class="text-muted">Durasi:</small><br>
                                         <span class="fw-semibold" id="confirmDuration">-</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <small class="text-muted">Waktu:</small><br>
+                                        <span class="fw-semibold" id="confirmTime">-</span>
                                     </div>
                                 </div>
                             </div>
@@ -404,6 +435,8 @@ GMP
 
             const tanggalMulai = document.getElementById('tanggal_mulai');
             const tanggalSelesai = document.getElementById('tanggal_selesai');
+            const waktuMulai = document.getElementById('waktu_mulai');
+            const waktuSelesai = document.getElementById('waktu_selesai');
             const priceInfo = document.getElementById('priceInfo');
             const durasiHari = document.getElementById('durasiHari');
             const totalHarga = document.getElementById('totalHarga');
@@ -490,7 +523,7 @@ GMP
                 }
 
                 // Check if required fields are filled
-                const requiredFields = ['phone_number', 'tanggal_mulai', 'tanggal_selesai', 'lokasi_pengambilan', 'lokasi_pengembalian'];
+                const requiredFields = ['phone_number', 'tanggal_mulai', 'tanggal_selesai', 'waktu_mulai', 'waktu_selesai', 'lokasi_pengambilan', 'lokasi_pengembalian'];
                 let allValid = true;
 
                 requiredFields.forEach(field => {
@@ -574,6 +607,8 @@ GMP
                     `${formatDate(startDate)} - ${formatDate(endDate)}`;
                 document.getElementById('confirmDuration').textContent =
                     `${durasiHari.textContent} hari (${tipeSewaTerpilih.textContent})`;
+                document.getElementById('confirmTime').textContent =
+                    `${waktuMulai.value} - ${waktuSelesai.value}`;
                 document.getElementById('confirmTotal').textContent = totalHarga.textContent;
 
                 // Locations
@@ -730,3 +765,4 @@ GMP
         });
     </script>
 @endsection
+    

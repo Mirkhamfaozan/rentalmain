@@ -38,11 +38,13 @@ class FrontProductController extends Controller
             'phone_number' => 'required|string|max:20',
             'tanggal_mulai' => 'required|date|after_or_equal:today',
             'tanggal_selesai' => 'required|date|after:tanggal_mulai',
+            'waktu_mulai' => 'required|date_format:H:i',
+            'waktu_selesai' => 'required|date_format:H:i',
             'catatan' => 'nullable|string|max:1000',
             'lokasi_pengambilan' => 'required|string|max:255',
             'lokasi_pengembalian' => 'required|string|max:255',
             'foto_ktp' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'total_harga' => 'required|numeric|min:1', // Updated to min:1
+            'total_harga' => 'required|numeric|min:1',
         ], [
             'product_id.required' => 'Produk harus dipilih.',
             'product_id.exists' => 'Produk tidak ditemukan.',
@@ -54,6 +56,10 @@ class FrontProductController extends Controller
             'tanggal_selesai.required' => 'Tanggal selesai sewa harus diisi.',
             'tanggal_selesai.date' => 'Format tanggal selesai tidak valid.',
             'tanggal_selesai.after' => 'Tanggal selesai harus setelah tanggal mulai.',
+            'waktu_mulai.required' => 'Waktu mulai sewa harus diisi.',
+            'waktu_mulai.date_format' => 'Format waktu mulai tidak valid (HH:MM).',
+            'waktu_selesai.required' => 'Waktu selesai sewa harus diisi.',
+            'waktu_selesai.date_format' => 'Format waktu selesai tidak valid (HH:MM).',
             'catatan.max' => 'Catatan maksimal 1000 karakter.',
             'lokasi_pengambilan.required' => 'Lokasi pengambilan harus diisi.',
             'lokasi_pengambilan.max' => 'Lokasi pengambilan maksimal 255 karakter.',
@@ -115,6 +121,8 @@ class FrontProductController extends Controller
                 'product_id' => $request->product_id,
                 'tanggal_mulai' => $request->tanggal_mulai,
                 'tanggal_selesai' => $request->tanggal_selesai,
+                'waktu_mulai' => $request->waktu_mulai,
+                'waktu_selesai' => $request->waktu_selesai,
                 'durasi_hari' => $durasi_hari,
                 'tipe_sewa' => $tipe_sewa,
                 'total_harga' => $request->total_harga,
@@ -239,6 +247,8 @@ class FrontProductController extends Controller
             'product_id' => 'required|exists:products,id',
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'required|date|after:tanggal_mulai',
+            'waktu_mulai' => 'nullable|date_format:H:i',
+            'waktu_selesai' => 'nullable|date_format:H:i',
         ]);
 
         if ($validator->fails()) {
@@ -247,8 +257,21 @@ class FrontProductController extends Controller
 
         $product = Product::findOrFail($request->product_id);
 
+        // Check if there are any overlapping orders
+        $overlappingOrders = Order::where('product_id', $request->product_id)
+            ->where(function($query) use ($request) {
+                $query->whereBetween('tanggal_mulai', [$request->tanggal_mulai, $request->tanggal_selesai])
+                    ->orWhereBetween('tanggal_selesai', [$request->tanggal_mulai, $request->tanggal_selesai])
+                    ->orWhere(function($q) use ($request) {
+                        $q->where('tanggal_mulai', '<=', $request->tanggal_mulai)
+                            ->where('tanggal_selesai', '>=', $request->tanggal_selesai);
+                    });
+            })
+            ->whereIn('status', ['belum_dikonfirmasi', 'dikonfirmasi', 'ongoing'])
+            ->count();
+
         return response()->json([
-            'is_available' => $product->is_available
+            'is_available' => $product->is_available && ($overlappingOrders === 0)
         ]);
     }
 }

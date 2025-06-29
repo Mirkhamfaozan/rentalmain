@@ -32,7 +32,10 @@
                                 <select name="user_id" id="user_id" class="form-select @error('user_id') is-invalid @enderror">
                                     <option value="">Pilih Pengguna (Opsional untuk Offline)</option>
                                     @foreach($users as $user)
-                                        <option value="{{ $user->id }}" {{ old('user_id', $order->user_id) == $user->id ? 'selected' : '' }}>
+                                        <option value="{{ $user->id }}"
+                                            data-email="{{ $user->email }}"
+                                            data-phone="{{ $user->phone_number }}"
+                                            {{ old('user_id', $order->user_id) == $user->id ? 'selected' : '' }}>
                                             {{ $user->name }} ({{ $user->email }})
                                         </option>
                                     @endforeach
@@ -110,8 +113,12 @@
                                 <select name="product_id" id="product_id" class="form-select @error('product_id') is-invalid @enderror">
                                     <option value="">Pilih Motor</option>
                                     @foreach($products as $product)
-                                        <option value="{{ $product->id }}" {{ old('product_id', $order->product_id) == $product->id ? 'selected' : '' }}>
-                                            {{ $product->nama_motor }} ({{ $product->brand }})
+                                        <option value="{{ $product->id }}"
+                                            data-harga-harian="{{ $product->harga_harian }}"
+                                            data-harga-mingguan="{{ $product->harga_mingguan }}"
+                                            data-harga-bulanan="{{ $product->harga_bulanan }}"
+                                            {{ old('product_id', $order->product_id) == $product->id ? 'selected' : '' }}>
+                                            {{ $product->nama_motor }} ({{ $product->brand }}) - Rp {{ number_format($product->harga_harian) }}/hari
                                         </option>
                                     @endforeach
                                 </select>
@@ -157,7 +164,7 @@
                                 <input type="number" name="durasi_hari" id="durasi_hari"
                                        class="form-control @error('durasi_hari') is-invalid @enderror"
                                        value="{{ old('durasi_hari', $order->durasi_hari) }}"
-                                       min="1">
+                                       min="1" readonly>
                                 @error('durasi_hari')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -180,7 +187,10 @@
                                 <input type="number" name="total_harga" id="total_harga"
                                        class="form-control @error('total_harga') is-invalid @enderror"
                                        value="{{ old('total_harga', $order->total_harga) }}"
-                                       min="0">
+                                       min="0" readonly>
+                                <div class="form-text text-end fw-bold" id="total_harga_text">
+                                    Rp {{ number_format(old('total_harga', $order->total_harga), 0, ',', '.') }}
+                                </div>
                                 @error('total_harga')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -255,6 +265,7 @@
             // Initialize datepickers
             $('#tanggal_mulai').daterangepicker({
                 singleDatePicker: true,
+                minDate: new Date(),
                 locale: {
                     format: 'YYYY-MM-DD',
                     applyLabel: 'Terapkan',
@@ -270,6 +281,7 @@
 
             $('#tanggal_selesai').daterangepicker({
                 singleDatePicker: true,
+                minDate: new Date(),
                 locale: {
                     format: 'YYYY-MM-DD',
                     applyLabel: 'Terapkan',
@@ -288,22 +300,88 @@
                 if ($('#user_id').val() !== '') {
                     $('#name_field, #phone_number_field, #email_field').hide();
                     $('#name, #phone_number, #email').prop('disabled', true);
+
+                    // Auto-fill email and phone if user is selected
+                    const selectedUser = $('#user_id option:selected');
+                    $('#email').val(selectedUser.data('email'));
+                    $('#phone_number').val(selectedUser.data('phone'));
                 } else {
                     $('#name_field, #phone_number_field, #email_field').show();
                     $('#name, #phone_number, #email').prop('disabled', false);
                 }
             }
 
+            // Calculate duration between dates
+            function calculateDuration() {
+                const startDate = new Date($('#tanggal_mulai').val());
+                const endDate = new Date($('#tanggal_selesai').val());
+
+                if (startDate && endDate && endDate > startDate) {
+                    const diffTime = endDate - startDate;
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    $('#durasi_hari').val(diffDays);
+                    calculateTotalPrice();
+                } else {
+                    $('#durasi_hari').val(0);
+                    $('#total_harga').val(0);
+                    $('#total_harga_text').text('Rp 0');
+                }
+            }
+
+            // Calculate total price based on product, duration, and rental type
+            function calculateTotalPrice() {
+                const productId = $('#product_id').val();
+                const duration = parseInt($('#durasi_hari').val()) || 0;
+                const rentalType = $('#tipe_sewa').val();
+
+                if (productId && duration > 0) {
+                    const selectedProduct = $('#product_id option:selected');
+                    let pricePerUnit = 0;
+
+                    if (rentalType === 'harian') {
+                        pricePerUnit = parseFloat(selectedProduct.data('harga-harian'));
+                    } else if (rentalType === 'mingguan') {
+                        pricePerUnit = parseFloat(selectedProduct.data('harga-mingguan'));
+                        // Convert weeks to days for display (7 days = 1 week)
+                    } else if (rentalType === 'bulanan') {
+                        pricePerUnit = parseFloat(selectedProduct.data('harga-bulanan'));
+                        // Convert months to days for display (30 days = 1 month)
+                    }
+
+                    const totalPrice = pricePerUnit * duration;
+                    $('#total_harga').val(totalPrice);
+                    $('#total_harga_text').text('Rp ' + totalPrice.toLocaleString('id-ID'));
+                } else {
+                    $('#total_harga').val(0);
+                    $('#total_harga_text').text('Rp 0');
+                }
+            }
+
             // Initial toggle based on current user_id value
             toggleFields();
 
-            // Toggle fields when user_id changes
+            // Event listeners
             $('#user_id').on('change', toggleFields);
+
+            $('#tanggal_mulai, #tanggal_selesai').on('apply.daterangepicker', function() {
+                calculateDuration();
+            });
+
+            $('#product_id, #tipe_sewa, #durasi_hari').on('change', function() {
+                calculateTotalPrice();
+            });
 
             // Preview image before upload
             $('#foto_ktp').on('change', function() {
                 const file = this.files[0];
                 if (file) {
+                    // Validate file size (max 2MB)
+                    if (file.size > 2 * 1024 * 1024) {
+                        alert('Ukuran file maksimal 2MB');
+                        $(this).val('');
+                        return;
+                    }
+
                     const reader = new FileReader();
                     reader.onload = function(e) {
                         // Create preview if not exists
@@ -318,6 +396,10 @@
                     reader.readAsDataURL(file);
                 }
             });
+
+            // Initial calculations
+            calculateDuration();
+            calculateTotalPrice();
         });
     </script>
     @endpush

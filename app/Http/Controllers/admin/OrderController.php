@@ -96,6 +96,7 @@ class OrderController extends Controller
             'image' => 'Kolom :attribute harus berupa file gambar.',
             'mimes' => 'Kolom :attribute harus berupa file dengan tipe: :values.',
             'max' => 'Kolom :attribute tidak boleh lebih besar dari :max KB.',
+            'date_format' => 'Format waktu tidak valid (HH:MM).',
         ];
 
         $attributes = [
@@ -107,6 +108,8 @@ class OrderController extends Controller
             'product_id' => 'Produk',
             'tanggal_mulai' => 'Tanggal Mulai',
             'tanggal_selesai' => 'Tanggal Selesai',
+            'waktu_mulai' => 'Waktu Mulai',
+            'waktu_selesai' => 'Waktu Selesai',
             'durasi_hari' => 'Durasi Hari',
             'tipe_sewa' => 'Tipe Sewa',
             'total_harga' => 'Total Harga',
@@ -135,6 +138,8 @@ class OrderController extends Controller
             ],
             'tanggal_mulai' => 'required|date|after_or_equal:today',
             'tanggal_selesai' => 'required|date|after:tanggal_mulai',
+            'waktu_mulai' => 'required|date_format:H:i',
+            'waktu_selesai' => 'required|date_format:H:i',
             'durasi_hari' => 'required|numeric|min:1',
             'tipe_sewa' => 'required|in:harian,mingguan,bulanan',
             'total_harga' => 'required|numeric|min:0',
@@ -209,18 +214,70 @@ class OrderController extends Controller
 
         $messages = [
             'required' => 'Kolom :attribute wajib diisi.',
-            // ... (keep other messages the same)
+            'date' => 'Kolom :attribute harus berupa tanggal yang valid.',
+            'after_or_equal' => 'Kolom :attribute harus hari ini atau setelahnya.',
+            'after' => 'Kolom :attribute harus setelah tanggal mulai.',
+            'numeric' => 'Kolom :attribute harus berupa angka.',
+            'min' => 'Kolom :attribute minimal :min.',
+            'in' => 'Kolom :attribute harus salah satu dari: :values.',
+            'exists' => 'Kolom :attribute tidak valid.',
+            'required_without' => 'Kolom :attribute wajib diisi jika tidak ada akun pengguna.',
+            'email' => 'Kolom :attribute harus berupa alamat email yang valid.',
+            'image' => 'Kolom :attribute harus berupa file gambar.',
+            'mimes' => 'Kolom :attribute harus berupa file dengan tipe: :values.',
+            'max' => 'Kolom :attribute tidak boleh lebih besar dari :max KB.',
+            'date_format' => 'Format waktu tidak valid (HH:MM).',
         ];
 
         $attributes = [
-            // ... (keep other attributes the same)
+            'user_id' => 'Pengguna',
+            'name' => 'Nama',
+            'phone_number' => 'Nomor HP',
+            'email' => 'Email',
+            'foto_ktp' => 'Foto KTP',
+            'product_id' => 'Produk',
+            'tanggal_mulai' => 'Tanggal Mulai',
+            'tanggal_selesai' => 'Tanggal Selesai',
+            'waktu_mulai' => 'Waktu Mulai',
+            'waktu_selesai' => 'Waktu Selesai',
+            'durasi_hari' => 'Durasi Hari',
+            'tipe_sewa' => 'Tipe Sewa',
+            'total_harga' => 'Total Harga',
+            'status' => 'Status',
+            'catatan' => 'Catatan',
             'catatan_ditolak' => 'Catatan Penolakan',
+            'lokasi_pengambilan' => 'Lokasi Pengambilan',
+            'lokasi_pengembalian' => 'Lokasi Pengembalian',
         ];
 
         $validated = $request->validate([
-            // ... (keep other validation rules the same)
+            'user_id' => 'nullable|exists:users,id',
+            'name' => 'required_without:user_id|string|max:255',
+            'phone_number' => 'required_without:user_id|string|max:20',
+            'email' => 'required_without:user_id|email|max:255',
+            'foto_ktp' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'product_id' => [
+                'required',
+                'exists:products,id',
+                Rule::exists('products', 'id')->where(function ($query) {
+                    $query->where('is_available', true);
+                    if (Auth::user()->isRental()) {
+                        $query->where('user_id', Auth::id());
+                    }
+                }),
+            ],
+            'tanggal_mulai' => 'required|date',
+            'tanggal_selesai' => 'required|date|after:tanggal_mulai',
+            'waktu_mulai' => 'required|date_format:H:i',
+            'waktu_selesai' => 'required|date_format:H:i',
+            'durasi_hari' => 'required|numeric|min:1',
+            'tipe_sewa' => 'required|in:harian,mingguan,bulanan',
+            'total_harga' => 'required|numeric|min:0',
             'status' => 'required|in:belum_dikonfirmasi,pending,dikonfirmasi,ditolak,ongoing,completed,cancelled',
+            'catatan' => 'nullable|string',
             'catatan_ditolak' => 'nullable|string|max:500',
+            'lokasi_pengambilan' => 'nullable|string|max:255',
+            'lokasi_pengembalian' => 'nullable|string|max:255',
         ], $messages, $attributes);
 
         try {
