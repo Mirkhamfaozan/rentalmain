@@ -171,11 +171,6 @@
                                         aria-controls="nav-orders" aria-selected="false">
                                         <i class="bi bi-bag-check me-2"></i>Pesanan
                                     </button>
-                                    <button class="nav-link rounded-pill" id="nav-payments-tab" data-bs-toggle="tab"
-                                        data-bs-target="#nav-payments" type="button" role="tab"
-                                        aria-controls="nav-payments" aria-selected="false">
-                                        <i class="bi bi-credit-card me-2"></i>Pembayaran
-                                    </button>
                                     @if ($user->role === 'rental')
                                         <button class="nav-link rounded-pill" id="nav-products-tab" data-bs-toggle="tab"
                                             data-bs-target="#nav-products" type="button" role="tab"
@@ -350,57 +345,6 @@
                             </div>
                         </div>
 
-                        <!-- Payments Tab -->
-                        <div class="tab-pane fade" id="nav-payments" role="tabpanel" aria-labelledby="nav-payments-tab">
-                            <div class="card shadow-sm border-0 rounded-4">
-                                <div class="card-body p-4">
-                                    <div class="d-flex justify-content-between align-items-center mb-4">
-                                        <h5 class="fw-bold text-primary mb-0">
-                                            <i class="bi bi-credit-card me-2"></i>Riwayat Pembayaran
-                                        </h5>
-                                    </div>
-
-                                    @if(isset($payments) && $payments->count() > 0)
-                                        <div class="table-responsive">
-                                            <table class="table table-hover">
-                                                <thead>
-                                                    <tr>
-                                                        <th>#</th>
-                                                        <th>Order ID</th>
-                                                        <th>Metode</th>
-                                                        <th>Jumlah</th>
-                                                        <th>Status</th>
-                                                        <th>Tanggal</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @foreach($payments as $payment)
-                                                    <tr>
-                                                        <td>{{ $loop->iteration }}</td>
-                                                        <td>#{{ $payment->order_id }}</td>
-                                                        <td>{{ ucfirst($payment->metode_pembayaran) }}</td>
-                                                        <td>Rp {{ number_format($payment->jumlah, 0, ',', '.') }}</td>
-                                                        <td>
-                                                            <span class="badge bg-{{ $payment->status == 'success' ? 'success' : ($payment->status == 'pending' ? 'warning' : 'danger') }}">
-                                                                {{ ucfirst($payment->status) }}
-                                                            </span>
-                                                        </td>
-                                                        <td>{{ $payment->created_at->translatedFormat('d M Y H:i') }}</td>
-                                                    </tr>
-                                                    @endforeach
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    @else
-                                        <div class="text-center text-muted py-5">
-                                            <i class="bi bi-credit-card-2-front display-1 text-muted mb-3"></i>
-                                            <p>Belum ada pembayaran</p>
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Products Tab (Rental Only) -->
                         @if ($user->role === 'rental')
                             <div class="tab-pane fade" id="nav-products" role="tabpanel" aria-labelledby="nav-products-tab">
@@ -410,7 +354,7 @@
                                             <h5 class="fw-bold text-primary mb-0">
                                                 <i class="bi bi-grid me-2"></i>Produk Saya
                                             </h5>
-                                            <a href="{{ route('products.create') }}" class="btn btn-primary btn-sm rounded-pill">
+                                            <a href="{{ route('dashboard.products.create') }}" class="btn btn-primary btn-sm rounded-pill">
                                                 <i class="bi bi-plus-circle me-1"></i> Tambah Produk
                                             </a>
                                         </div>
@@ -433,11 +377,11 @@
                                                                     {{ number_format($product->harga_harian, 0, ',', '.') }}/hari
                                                                 </p>
                                                                 <div class="d-flex justify-content-between mt-2">
-                                                                    <a href="{{ route('products.edit', $product->id) }}"
+                                                                    <a href="{{ route('dashboard.products.edit', $product->id) }}"
                                                                        class="btn btn-sm btn-outline-primary rounded-pill">
                                                                         <i class="bi bi-pencil"></i>
                                                                     </a>
-                                                                    <form action="{{ route('products.destroy', $product->id) }}" method="POST">
+                                                                    <form action="{{ route('dashboard.products.destroy', $product->id) }}" method="POST">
                                                                         @csrf
                                                                         @method('DELETE')
                                                                         <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill"
@@ -454,7 +398,7 @@
                                         @else
                                             <div class="text-center text-muted py-5">
                                                 <i class="bi bi-plus-circle display-1 text-muted mb-3"></i>
-                                                <p>Belum ada produk. <a href="{{ route('products.create') }}" class="text-primary">Mulai tambahkan produk Anda</a></p>
+                                                <p>Belum ada produk. <a href="{{ route('dashboard.products.create') }}" class="text-primary">Mulai tambahkan produk Anda</a></p>
                                             </div>
                                         @endif
                                     </div>
@@ -626,8 +570,8 @@
                         </div>
 
                         <div class="d-grid">
-                            @if(Route::has('products.create'))
-                            <a href="{{ route('products.create') }}" class="btn btn-success">
+                            @if(Route::has('dashboard.products.create'))
+                            <a href="{{ route('dashboard.products.create') }}" class="btn btn-success">
                                 <i class="bi bi-plus-circle me-1"></i> Mulai Tambah Produk
                             </a>
                             @endif
