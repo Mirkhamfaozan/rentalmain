@@ -46,6 +46,40 @@
                         @csrf
                         @method('PUT')
 
+                        <!-- Jika admin, tampilkan pilihan rental user -->
+                        @if(auth()->user()->isAdmin())
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h6 class="text-primary fw-bold mb-3">
+                                        <i class="fas fa-user-tie me-1"></i>Pemilik Rental
+                                    </h6>
+                                </div>
+                            </div>
+
+                            <div class="row g-4 mb-4">
+                                <div class="col-12">
+                                    <label for="rental_user_id" class="form-label fw-semibold">
+                                        <i class="fas fa-store me-1 text-primary"></i>Pemilik Rental
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select @error('rental_user_id') is-invalid @enderror"
+                                            id="rental_user_id"
+                                            name="rental_user_id"
+                                            required>
+                                        <option value="">Pilih pemilik rental</option>
+                                        @foreach($rentalUsers as $user)
+                                            <option value="{{ $user->id }}" {{ old('rental_user_id', $product->user_id) == $user->id ? 'selected' : '' }}>
+                                                {{ $user->name }} ({{ $user->email }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('rental_user_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        @endif
+
                         <!-- Bagian Informasi Dasar -->
                         <div class="row mb-4">
                             <div class="col-12">

@@ -171,14 +171,11 @@
                                                 <a href="{{ route('dashboard.users.edit', $user->id) }}" class="btn btn-outline-secondary" title="Edit">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <form action="{{ route('dashboard.users.destroy', $user->id) }}" method="POST" class="d-inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-outline-danger" title="Hapus"
-                                                            onclick="return confirm('Apakah Anda yakin ingin menghapus pengguna ini?')">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </form>
+                                                <button type="button" class="btn btn-outline-danger" title="Hapus"
+                                                    data-bs-toggle="modal" data-bs-target="#deleteConfirmationModal"
+                                                    onclick="setDeleteFormAction('{{ route('dashboard.users.destroy', $user->id) }}')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -217,6 +214,29 @@
                             {{ $users->appends(request()->query())->links('pagination::bootstrap-5') }}
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteConfirmationModalLabel">Konfirmasi Penghapusan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Apakah Anda yakin ingin menghapus pengguna ini? Tindakan ini tidak dapat dibatalkan.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <form id="deleteForm" method="POST" class="d-inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger">Hapus</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -266,5 +286,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
+
+// Set delete form action dynamically
+function setDeleteFormAction(action) {
+    document.getElementById('deleteForm').action = action;
+}
 </script>
 @endpush

@@ -45,8 +45,43 @@
                     <form action="{{ route('dashboard.products.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
+                        <!-- Bagian Pemilik Rental (Hanya untuk Admin) -->
+                        @if(auth()->user()->isAdmin())
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h6 class="text-primary fw-bold mb-3">
+                                        <i class="fas fa-user-tie me-1"></i>Pemilik Rental
+                                    </h6>
+                                </div>
+                            </div>
+
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <label for="rental_user_id" class="form-label fw-semibold">
+                                        <i class="fas fa-store me-1 text-primary"></i>Pilih Rental
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select @error('rental_user_id') is-invalid @enderror"
+                                            id="rental_user_id"
+                                            name="rental_user_id"
+                                            required>
+                                        <option value="">Pilih rental</option>
+                                        @foreach($rentalUsers as $rental)
+                                            <option value="{{ $rental->id }}" {{ old('rental_user_id') == $rental->id ? 'selected' : '' }}>
+                                                {{ $rental->name }} ({{ $rental->email }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('rental_user_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <div class="form-text">Pilih rental yang akan memiliki motor ini</div>
+                                </div>
+                            </div>
+                        @endif
+
                         <!-- Bagian Informasi Dasar -->
-                        <div class="row mb-4">
+                        <div class="row mb-4 mt-5">
                             <div class="col-12">
                                 <h6 class="text-primary fw-bold mb-3">
                                     <i class="fas fa-info-circle me-1"></i>Informasi Dasar
