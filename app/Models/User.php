@@ -42,6 +42,7 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->notify(new CustomVerifyEmail);
     }
 
+
     public function canAccessDashboard(): bool
     {
         return in_array($this->role, ['admin', 'rental']);
@@ -77,4 +78,5 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasOne(RentalBiodata::class);
     }
+
 }
