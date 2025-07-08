@@ -7,13 +7,11 @@ use App\Models\User;
 use App\Models\RentalBiodata;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Log;
 
@@ -59,15 +57,16 @@ class RegisteredUserController extends Controller
             DB::commit();
 
             event(new Registered($user));
-            Auth::login($user);
 
             $message = $request->role === 'rental'
-                ? 'Registrasi rental berhasil! Email verifikasi telah dikirim. Silakan lengkapi dokumen untuk verifikasi rental.'
-                : 'Registrasi berhasil! Email verifikasi telah dikirim.';
+                ? 'Rental registration successful! Please verify your email and complete your documents for rental verification.'
+                : 'Registration successful! Please verify your email.';
 
+            // Redirect to verification notice without requiring auth
             return redirect()->route('verification.notice')
                 ->with('status', $message)
                 ->with('email', $user->email);
+
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Registration error:', [
@@ -78,7 +77,7 @@ class RegisteredUserController extends Controller
 
             return back()
                 ->withInput($request->except('password', 'password_confirmation'))
-                ->withErrors(['error' => 'Terjadi kesalahan saat registrasi: ' . $e->getMessage()]);
+                ->withErrors(['error' => 'Registration failed: ' . $e->getMessage()]);
         }
     }
 

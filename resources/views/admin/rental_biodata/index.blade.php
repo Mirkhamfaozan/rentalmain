@@ -23,8 +23,6 @@
 @endsection
 
 @section('content')
-    <!-- Previous sections (Stats Cards, Search and Filter, Messages) remain unchanged -->
-
     <!-- Biodata Table -->
     <div class="row">
         <div class="col-12">
@@ -80,7 +78,7 @@
                                             <span
                                                 class="badge bg-{{ $biodata->getStatusBadgeClass() }} rounded-pill px-3 py-1">
                                                 {{ $biodata->getStatusLabel() }}
-                                                </span>
+                                            </span>
                                         </td>
                                         <td class="text-muted">{{ $biodata->created_at->format('Y-m-d') }}</td>
                                         <td>
@@ -96,64 +94,25 @@
                                                         <i class="fas fa-edit"></i>
                                                     </a>
                                                 @endif
-                                                    <form
-                                                        action="{{ route('dashboard.rental_biodata.destroy', $biodata->id) }}"
-                                                        method="POST" class="d-inline">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-outline-danger rounded-circle"
-                                                            data-bs-toggle="tooltip" data-bs-placement="top"
-                                                            title="Hapus Biodata"
-                                                            onclick="return confirm('Apakah Anda yakin ingin menghapus biodata ini?')">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    </form>
+                                                <button class="btn btn-outline-danger rounded-circle delete-btn"
+                                                    data-id="{{ $biodata->id }}" title="Hapus Biodata">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
                                                 @if ($biodata->canVerify(auth()->user()))
-                                                    <form
-                                                        action="{{ route('dashboard.rental_biodata.verify', $biodata->id) }}"
-                                                        method="POST" class="d-inline">
-                                                        @csrf
-                                                        <button type="submit"
-                                                            class="btn btn-outline-success rounded-circle"
-                                                            title="Verifikasi"
-                                                            onclick="return confirm('Apakah Anda yakin ingin memverifikasi biodata ini?')">
-                                                            <i class="fas fa-check"></i>
-                                                        </button>
-                                                    </form>
-                                                    <a href="{{ route('dashboard.rental_biodata.reject', $biodata->id) }}"
-                                                        class="d-inline">
-                                                        @csrf
-                                                        <button type="submit"
-                                                            class="btn btn-outline-warning rounded-circle" title="Tolak">
-                                                            <i class="fas fa-times"></i>
-                                                        </button>
-                                                    </a>
-                                                @endif
-                                                @if ($biodata->canDelete(auth()->user()))
-                                                    <form
-                                                        action="{{ route('dashboard.rental_biodata.destroy', $biodata->id) }}"
-                                                        method="POST" class="d-inline">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-outline-danger rounded-circle"
-                                                            data-bs-toggle="tooltip" data-bs-placement="top"
-                                                            title="Hapus Biodata"
-                                                            onclick="return confirm('Apakah Anda yakin ingin menghapus biodata ini?')">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    </form>
+                                                    <button class="btn btn-outline-success rounded-circle verify-btn"
+                                                        data-id="{{ $biodata->id }}" title="Verifikasi">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-warning rounded-circle reject-btn"
+                                                        data-id="{{ $biodata->id }}" title="Tolak">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
                                                 @endif
                                                 @if (auth()->user()->isAdmin() && !$biodata->isPending())
-                                                    <form
-                                                        action="{{ route('dashboard.rental_biodata.reset-verification', $biodata->id) }}"
-                                                        method="POST" class="d-inline">
-                                                        @csrf
-                                                        <button type="submit" class="btn btn-outline-info rounded-circle"
-                                                            title="Reset Verifikasi"
-                                                            onclick="return confirm('Apakah Anda yakin ingin mereset status verifikasi?')">
-                                                            <i class="fas fa-undo"></i>
-                                                        </button>
-                                                    </form>
+                                                    <button class="btn btn-outline-info rounded-circle reset-btn"
+                                                        data-id="{{ $biodata->id }}" title="Reset Verifikasi">
+                                                        <i class="fas fa-undo"></i>
+                                                    </button>
                                                 @endif
                                             </div>
                                         </td>
@@ -168,7 +127,7 @@
                         </table>
                     </div>
 
-                    <!-- Selected Actions Bar (unchanged) -->
+                    <!-- Selected Actions Bar -->
                     <div class="border-top p-3 bg-light d-none" id="selectedActions">
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="text-muted">
@@ -176,24 +135,21 @@
                             </span>
                             <div class="btn-group btn-group-sm gap-2">
                                 @if (auth()->user()->isAdmin())
-                                    <button class="btn btn-outline-success rounded-pill shadow-sm"
-                                        onclick="bulkAction('verify')">
+                                    <button class="btn btn-outline-success rounded-pill shadow-sm bulk-verify-btn">
                                         <i class="fas fa-check me-1"></i> Verifikasi
                                     </button>
-                                    <button class="btn btn-outline-warning rounded-pill shadow-sm"
-                                        onclick="bulkAction('reject')">
+                                    <button class="btn btn-outline-warning rounded-pill shadow-sm bulk-reject-btn">
                                         <i class="fas fa-times me-1"></i> Tolak
                                     </button>
                                 @endif
-                                <button class="btn btn-outline-danger rounded-pill shadow-sm"
-                                    onclick="bulkAction('delete')">
+                                <button class="btn btn-outline-danger rounded-pill shadow-sm bulk-delete-btn">
                                     <i class="fas fa-trash me-1"></i> Hapus
                                 </button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Pagination (unchanged) -->
+                    <!-- Pagination -->
                     <div class="card-footer bg-transparent border-0 py-3">
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="text-muted small">
@@ -315,12 +271,12 @@
 @endpush
 
 @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize Bootstrap tooltips
             const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-            const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(
-                tooltipTriggerEl));
+            const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
 
             // Handle select all checkbox
             const selectAllCheckbox = document.querySelector('#selectAll');
@@ -362,33 +318,291 @@
                 }
             }
 
-            // Bulk action handler
-            window.bulkAction = function(action) {
-                const checkedBoxes = document.querySelectorAll(
-                'tbody input[name="selectedBiodatas[]"]:checked');
+            // SweetAlert2 configuration
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+
+            // Single delete action
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const biodataId = this.getAttribute('data-id');
+
+                    Swal.fire({
+                        title: 'Apakah Anda yakin?',
+                        text: "Anda akan menghapus biodata ini secara permanen!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Ya, hapus!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = `/dashboard/rental_biodata/${biodataId}`;
+                            form.innerHTML = `@csrf @method('DELETE')`;
+                            document.body.appendChild(form);
+                            form.submit();
+
+                            Toast.fire({
+                                icon: 'success',
+                                title: 'Biodata berhasil dihapus!'
+                            });
+                        }
+                    });
+                });
+            });
+
+            // Single verify action
+            document.querySelectorAll('.verify-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const biodataId = this.getAttribute('data-id');
+
+                    Swal.fire({
+                        title: 'Verifikasi Biodata',
+                        text: "Apakah Anda yakin ingin memverifikasi biodata ini?",
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#28a745',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Ya, verifikasi!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = `/dashboard/rental_biodata/${biodataId}/verify`;
+                            form.innerHTML = `@csrf`;
+                            document.body.appendChild(form);
+                            form.submit();
+
+                            Toast.fire({
+                                icon: 'success',
+                                title: 'Biodata berhasil diverifikasi!'
+                            });
+                        }
+                    });
+                });
+            });
+
+            // Single reject action
+            document.querySelectorAll('.reject-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const biodataId = this.getAttribute('data-id');
+
+                    Swal.fire({
+                        title: 'Tolak Biodata',
+                        text: "Apakah Anda yakin ingin menolak biodata ini?",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#ffc107',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Ya, tolak!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = `/dashboard/rental_biodata/${biodataId}/reject`;
+                            form.innerHTML = `@csrf`;
+                            document.body.appendChild(form);
+                            form.submit();
+
+                            Toast.fire({
+                                icon: 'success',
+                                title: 'Biodata berhasil ditolak!'
+                            });
+                        }
+                    });
+                });
+            });
+
+            // Single reset verification action
+            document.querySelectorAll('.reset-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const biodataId = this.getAttribute('data-id');
+
+                    Swal.fire({
+                        title: 'Reset Verifikasi',
+                        text: "Apakah Anda yakin ingin mereset status verifikasi biodata ini?",
+                        icon: 'info',
+                        showCancelButton: true,
+                        confirmButtonColor: '#17a2b8',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Ya, reset!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = `/dashboard/rental_biodata/${biodataId}/reset-verification`;
+                            form.innerHTML = `@csrf`;
+                            document.body.appendChild(form);
+                            form.submit();
+
+                            Toast.fire({
+                                icon: 'success',
+                                title: 'Status verifikasi berhasil direset!'
+                            });
+                        }
+                    });
+                });
+            });
+
+            // Bulk actions
+            document.querySelector('.bulk-delete-btn').addEventListener('click', function() {
+                const checkedBoxes = document.querySelectorAll('tbody input[name="selectedBiodatas[]"]:checked');
                 if (checkedBoxes.length === 0) {
-                    alert('Pilih setidaknya satu biodata untuk melakukan aksi ini.');
+                    Swal.fire({
+                        title: 'Tidak ada biodata dipilih',
+                        text: 'Silakan pilih setidaknya satu biodata untuk dihapus.',
+                        icon: 'warning',
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: 'Mengerti'
+                    });
                     return;
                 }
 
+                Swal.fire({
+                    title: 'Hapus Biodata Terpilih',
+                    html: `Anda yakin ingin menghapus <strong>${checkedBoxes.length}</strong> biodata yang dipilih?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '/dashboard/rental_biodata/bulk-delete';
+                        form.innerHTML = `@csrf @method('DELETE')`;
 
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = action === 'verify' ? '{{ route('dashboard.rental_biodata.verify', '') }}' :
-                    '{{ route('dashboard.rental_biodata.destroy', '') }}';
-                form.innerHTML = '@csrf' + (action === 'delete' ? '@method('DELETE')' : '');
+                        checkedBoxes.forEach(checkbox => {
+                            const input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = 'selectedBiodatas[]';
+                            input.value = checkbox.value;
+                            form.appendChild(input);
+                        });
 
-                checkedBoxes.forEach(checkbox => {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = 'selectedBiodatas[]';
-                    input.value = checkbox.value;
-                    form.appendChild(input);
+                        document.body.appendChild(form);
+                        form.submit();
+
+                        Toast.fire({
+                            icon: 'success',
+                            title: 'Biodata berhasil dihapus!'
+                        });
+                    }
                 });
+            });
 
-                document.body.appendChild(form);
-                form.submit();
-            };
+            document.querySelector('.bulk-verify-btn').addEventListener('click', function() {
+                const checkedBoxes = document.querySelectorAll('tbody input[name="selectedBiodatas[]"]:checked');
+                if (checkedBoxes.length === 0) {
+                    Swal.fire({
+                        title: 'Tidak ada biodata dipilih',
+                        text: 'Silakan pilih setidaknya satu biodata untuk diverifikasi.',
+                        icon: 'warning',
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: 'Mengerti'
+                    });
+                    return;
+                }
+
+                Swal.fire({
+                    title: 'Verifikasi Biodata Terpilih',
+                    html: `Anda yakin ingin memverifikasi <strong>${checkedBoxes.length}</strong> biodata yang dipilih?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, verifikasi!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '/dashboard/rental_biodata/bulk-verify';
+                        form.innerHTML = `@csrf`;
+
+                        checkedBoxes.forEach(checkbox => {
+                            const input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = 'selectedBiodatas[]';
+                            input.value = checkbox.value;
+                            form.appendChild(input);
+                        });
+
+                        document.body.appendChild(form);
+                        form.submit();
+
+                        Toast.fire({
+                            icon: 'success',
+                            title: 'Biodata berhasil diverifikasi!'
+                        });
+                    }
+                });
+            });
+
+            document.querySelector('.bulk-reject-btn').addEventListener('click', function() {
+                const checkedBoxes = document.querySelectorAll('tbody input[name="selectedBiodatas[]"]:checked');
+                if (checkedBoxes.length === 0) {
+                    Swal.fire({
+                        title: 'Tidak ada biodata dipilih',
+                        text: 'Silakan pilih setidaknya satu biodata untuk ditolak.',
+                        icon: 'warning',
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: 'Mengerti'
+                    });
+                    return;
+                }
+
+                Swal.fire({
+                    title: 'Tolak Biodata Terpilih',
+                    html: `Anda yakin ingin menolak <strong>${checkedBoxes.length}</strong> biodata yang dipilih?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ffc107',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, tolak!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '/dashboard/rental_biodata/bulk-reject';
+                        form.innerHTML = `@csrf`;
+
+                        checkedBoxes.forEach(checkbox => {
+                            const input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = 'selectedBiodatas[]';
+                            input.value = checkbox.value;
+                            form.appendChild(input);
+                        });
+
+                        document.body.appendChild(form);
+                        form.submit();
+
+                        Toast.fire({
+                            icon: 'success',
+                            title: 'Biodata berhasil ditolak!'
+                        });
+                    }
+                });
+            });
         });
     </script>
 @endpush
