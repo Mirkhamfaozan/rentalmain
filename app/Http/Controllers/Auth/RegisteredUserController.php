@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\RentalBiodata;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +14,8 @@ use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\Log;
 
 class RegisteredUserController extends Controller
 {
@@ -33,7 +34,6 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        // Base validation for all users
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
@@ -44,7 +44,6 @@ class RegisteredUserController extends Controller
         try {
             DB::beginTransaction();
 
-            // Create user
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
@@ -53,7 +52,6 @@ class RegisteredUserController extends Controller
                 'email_verified_at' => null,
             ]);
 
-            // If rental role, create rental biodata
             if ($request->role === 'rental') {
                 $this->createRentalBiodata($user, $request);
             }
@@ -61,6 +59,7 @@ class RegisteredUserController extends Controller
             DB::commit();
 
             event(new Registered($user));
+            Auth::login($user);
 
             $message = $request->role === 'rental'
                 ? 'Registrasi rental berhasil! Email verifikasi telah dikirim. Silakan lengkapi dokumen untuk verifikasi rental.'
@@ -69,14 +68,17 @@ class RegisteredUserController extends Controller
             return redirect()->route('verification.notice')
                 ->with('status', $message)
                 ->with('email', $user->email);
-
         } catch (\Exception $e) {
             DB::rollBack();
-            logger()->error('Registration error: ' . $e->getMessage());
+            Log::error('Registration error:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'input' => $request->except('password', 'password_confirmation')
+            ]);
 
             return back()
                 ->withInput($request->except('password', 'password_confirmation'))
-                ->withErrors(['error' => 'Terjadi kesalahan saat registrasi. Silakan coba lagi.']);
+                ->withErrors(['error' => 'Terjadi kesalahan saat registrasi: ' . $e->getMessage()]);
         }
     }
 
