@@ -196,7 +196,7 @@
                                             </a>
                                         </li>
                                     @endif
-                                @else
+                                @elseif(Auth::user()->isAdmin())
                                     <li>
                                         <a class="dropdown-item py-2" href="/dashboard">
                                             <i class="bi bi-speedometer2 me-2"></i>Dashboard

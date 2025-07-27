@@ -17,19 +17,49 @@
                             <p class="text-muted">Masuk ke akun Anda</p>
                         </div>
 
-                        <!-- Display session status -->
+                        <!-- Session Status -->
                         @if (session('status'))
                             <div class="alert alert-success">
-                                {{ session('status') }}
+                                @if(session('status') === 'verification-link-sent')
+                                    Link verifikasi baru telah dikirim ke email Anda.
+                                @else
+                                    {{ session('status') }}
+                                @endif
                             </div>
                         @endif
 
-                        <!-- Display validation errors -->
+                        <!-- Success Message -->
+                        @if (session('success'))
+                            <div class="alert alert-success">
+                                {{ session('success') }}
+                            </div>
+                        @endif
+
+                        <!-- Warning Message -->
+                        @if (session('warning'))
+                            <div class="alert alert-warning">
+                                {{ session('warning') }}
+                            </div>
+                        @endif
+
+                        <!-- Validation Errors -->
                         @if ($errors->any())
                             <div class="alert alert-danger">
                                 <ul class="mb-0">
                                     @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
+                                        <li>
+                                            @if($error === 'These credentials do not match our records.')
+                                                Email atau password tidak valid
+                                            @elseif($error === 'The password field is required.')
+                                                Password wajib diisi
+                                            @elseif($error === 'The email field is required.')
+                                                Email wajib diisi
+                                            @elseif($error === 'The email must be a valid email address.')
+                                                Format email tidak valid
+                                            @else
+                                                {{ $error }}
+                                            @endif
+                                        </li>
                                     @endforeach
                                 </ul>
                             </div>
@@ -38,7 +68,7 @@
                         <form method="POST" action="{{ route('login') }}">
                             @csrf
 
-                            <!-- Email -->
+                            <!-- Email Input -->
                             <div class="mb-4">
                                 <label for="email" class="form-label fw-semibold text-dark">
                                     <i class="bi bi-envelope me-2"></i> Email
@@ -56,14 +86,22 @@
                                            required autofocus>
                                 </div>
                                 @error('email')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    <div class="invalid-feedback d-block">
+                                        @if($message === 'The email field is required.')
+                                            Email wajib diisi
+                                        @elseif($message === 'The email must be a valid email address.')
+                                            Format email tidak valid
+                                        @else
+                                            {{ $message }}
+                                        @endif
+                                    </div>
                                 @enderror
                             </div>
 
-                            <!-- Password -->
+                            <!-- Password Input -->
                             <div class="mb-4">
                                 <label for="password" class="form-label fw-semibold text-dark">
-                                    <i class="bi bi-lock me-2"></i>Kata Sandi
+                                    <i class="bi bi-lock me-2"></i>Password
                                 </label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light border-end-0">
@@ -73,14 +111,20 @@
                                            class="form-control border-start-0 @error('password') is-invalid @enderror"
                                            id="password"
                                            name="password"
-                                           placeholder="Masukkan kata sandi Anda"
+                                           placeholder="Masukkan password Anda"
                                            required>
                                     <button class="btn btn-outline-secondary border-start-0" type="button" id="togglePassword">
                                         <i class="bi bi-eye" id="toggleIcon"></i>
                                     </button>
                                 </div>
                                 @error('password')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    <div class="invalid-feedback d-block">
+                                        @if($message === 'The password field is required.')
+                                            Password wajib diisi
+                                        @else
+                                            {{ $message }}
+                                        @endif
+                                    </div>
                                 @enderror
                             </div>
 
@@ -94,7 +138,7 @@
                                 </div>
                                 @if (Route::has('password.request'))
                                     <a href="{{ route('password.request') }}" class="text-decoration-none text-primary fw-semibold">
-                                        Lupa Kata Sandi?
+                                        Lupa Password?
                                     </a>
                                 @endif
                             </div>
@@ -106,10 +150,10 @@
                                 </button>
                             </div>
 
-                            <!-- Register -->
+                            <!-- Register Link -->
                             <div class="text-center">
                                 <p class="text-muted mb-0">Belum memiliki akun?
-                                    <a href="{{ route('register') }}" class="text-decoration-none fw-semibold">Buat akun di sini</a>
+                                    <a href="{{ route('register') }}" class="text-decoration-none fw-semibold">Daftar disini</a>
                                 </p>
                             </div>
                         </form>
@@ -122,7 +166,7 @@
 </div>
 
 <script>
-// Toggle password visibility
+// Toggle Password Visibility
 document.getElementById('togglePassword').addEventListener('click', function() {
     const password = document.getElementById('password');
     const icon = document.getElementById('toggleIcon');

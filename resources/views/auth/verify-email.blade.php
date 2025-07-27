@@ -15,18 +15,30 @@
                                 <i class="bi bi-envelope-check text-primary" style="font-size: 3rem;"></i>
                             </div>
                             <h2 class="card-title fw-bold text-dark mb-2">Verifikasi Email Anda</h2>
-                            <p class="text-muted">Kami telah mengirimkan tautan verifikasi ke email Anda</p>
+                            <p class="text-muted">Kami telah mengirimkan tautan verifikasi ke alamat email Anda</p>
                         </div>
 
                         @if (session('status'))
                             <div class="alert alert-success" role="alert">
-                                <i class="bi bi-check-circle me-2"></i>{{ session('status') }}
+                                <i class="bi bi-check-circle me-2"></i>
+                                @if(session('status') == 'verification-link-sent')
+                                    Tautan verifikasi baru telah dikirim ke email Anda!
+                                @else
+                                    {{ session('status') }}
+                                @endif
+                            </div>
+                        @endif
+
+                        @if (session('error'))
+                            <div class="alert alert-danger" role="alert">
+                                <i class="bi bi-exclamation-circle me-2"></i>
+                                {{ session('error') }}
                             </div>
                         @endif
 
                         <div class="text-center mb-4">
                             <p class="lead">
-                                Kami telah mengirim email verifikasi ke:
+                                Email verifikasi telah dikirim ke:
                                 <span class="fw-bold text-primary">{{ $email ?? '' }}</span>
                             </p>
                             <p class="text-muted">

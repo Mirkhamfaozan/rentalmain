@@ -182,34 +182,15 @@
                                 <h6 class="fw-semibold mb-0">Aksi Verifikasi</h6>
                             </div>
                             <div class="card-body">
-                                <form action="{{ route('dashboard.rental_biodata.verify', $biodata->id) }}" method="POST"
-                                    class="mb-3">
-                                    @csrf
-                                    <div class="mb-3">
-                                        <label for="catatan_verifikasi" class="form-label">Catatan Verifikasi
-                                            (Opsional)</label>
-                                        <textarea name="catatan_verifikasi" id="catatan_verifikasi" class="form-control" rows="4"
-                                            placeholder="Masukkan catatan verifikasi..."></textarea>
-                                    </div>
-                                    <button type="submit" class="btn btn-success"
-                                        onclick="return confirm('Apakah Anda yakin ingin memverifikasi biodata ini?')">
-                                        <i class="fas fa-check me-1"></i>Verifikasi
-                                    </button>
-                                </form>
-                                <form action="{{ route('dashboard.rental_biodata.reject', $biodata->id) }}"
-                                    method="POST">
-                                    @csrf
-                                    <div class="mb-3">
-                                        <label for="catatan_verifikasi_reject" class="form-label">Catatan Penolakan <span
-                                                class="text-danger">*</span></label>
-                                        <textarea name="catatan_verifikasi" id="catatan_verifikasi_reject" class="form-control" rows="4"
-                                            placeholder="Masukkan alasan penolakan..." required></textarea>
-                                    </div>
-                                    <button type="submit" class="btn btn-warning"
-                                        onclick="return confirm('Apakah Anda yakin ingin menolak biodata ini?')">
-                                        <i class="fas fa-times me-1"></i>Tolak
-                                    </button>
-                                </form>
+                                <!-- Verify Button with Modal -->
+                                <button type="button" class="btn btn-success mb-2" data-bs-toggle="modal" data-bs-target="#verifyModal">
+                                    <i class="fas fa-check me-1"></i>Verifikasi
+                                </button>
+
+                                <!-- Reject Button with Modal -->
+                                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                                    <i class="fas fa-times me-1"></i>Tolak
+                                </button>
                             </div>
                         </div>
                     @endif
@@ -217,4 +198,67 @@
             </div>
         </div>
     </div>
+
+    <!-- Verify Modal -->
+    <div class="modal fade" id="verifyModal" tabindex="-1" aria-labelledby="verifyModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{{ route('dashboard.rental_biodata.verify', $biodata->id) }}" method="POST">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="verifyModalLabel">Verifikasi Biodata Rental</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Apakah Anda yakin ingin memverifikasi biodata rental ini?</p>
+                        <div class="mb-3">
+                            <label for="catatan_verifikasi" class="form-label">Catatan Verifikasi (Opsional)</label>
+                            <textarea name="catatan_verifikasi" id="catatan_verifikasi" class="form-control" rows="3"
+                                placeholder="Masukkan catatan verifikasi..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-success">Ya, Verifikasi</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reject Modal -->
+    <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{{ route('dashboard.rental_biodata.reject', $biodata->id) }}" method="POST">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="rejectModalLabel">Tolak Biodata Rental</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Apakah Anda yakin ingin menolak biodata rental ini?</p>
+                        <div class="mb-3">
+                            <label for="catatan_verifikasi_reject" class="form-label">Catatan Penolakan <span class="text-danger">*</span></label>
+                            <textarea name="catatan_verifikasi" id="catatan_verifikasi_reject" class="form-control" rows="3"
+                                placeholder="Masukkan alasan penolakan..." required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-warning">Ya, Tolak</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
+
+@push('scripts')
+    <script>
+        // Initialize modals
+        document.addEventListener('DOMContentLoaded', function() {
+            // Optional: Add any additional modal initialization code here
+        });
+    </script>
+@endpush

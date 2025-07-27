@@ -159,6 +159,39 @@
                                 </div>
                             </div>
 
+                            <!-- Time Fields -->
+                            <div class="col-md-6">
+                                <label for="waktu_mulai" class="form-label fw-semibold">Waktu Mulai</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-clock"></i>
+                                    </span>
+                                    <input type="time" name="waktu_mulai" id="waktu_mulai"
+                                           class="form-control @error('waktu_mulai') is-invalid @enderror"
+                                           value="{{ old('waktu_mulai', $order->waktu_mulai ? \Carbon\Carbon::parse($order->waktu_mulai)->format('H:i') : '') }}"
+                                           required>
+                                    @error('waktu_mulai')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="waktu_selesai" class="form-label fw-semibold">Waktu Selesai</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-clock"></i>
+                                    </span>
+                                    <input type="time" name="waktu_selesai" id="waktu_selesai"
+                                           class="form-control @error('waktu_selesai') is-invalid @enderror"
+                                           value="{{ old('waktu_selesai', $order->waktu_selesai ? \Carbon\Carbon::parse($order->waktu_selesai)->format('H:i') : '') }}"
+                                           required>
+                                    @error('waktu_selesai')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
                             <div class="col-md-4">
                                 <label for="durasi_hari" class="form-label fw-semibold">Durasi Hari</label>
                                 <input type="number" name="durasi_hari" id="durasi_hari"
@@ -199,8 +232,10 @@
                             <div class="col-12">
                                 <label for="status" class="form-label fw-semibold">Status</label>
                                 <select name="status" id="status" class="form-select @error('status') is-invalid @enderror">
+                                    <option value="belum_dikonfirmasi" {{ old('status', $order->status) == 'belum_dikonfirmasi' ? 'selected' : '' }}>Belum Dikonfirmasi</option>
                                     <option value="pending" {{ old('status', $order->status) == 'pending' ? 'selected' : '' }}>Pending</option>
-                                    <option value="confirmed" {{ old('status', $order->status) == 'confirmed' ? 'selected' : '' }}>Dikonfirmasi</option>
+                                    <option value="dikonfirmasi" {{ old('status', $order->status) == 'dikonfirmasi' ? 'selected' : '' }}>Dikonfirmasi</option>
+                                    <option value="ditolak" {{ old('status', $order->status) == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
                                     <option value="ongoing" {{ old('status', $order->status) == 'ongoing' ? 'selected' : '' }}>Sedang Berlangsung</option>
                                     <option value="completed" {{ old('status', $order->status) == 'completed' ? 'selected' : '' }}>Selesai</option>
                                     <option value="cancelled" {{ old('status', $order->status) == 'cancelled' ? 'selected' : '' }}>Dibatalkan</option>
@@ -260,6 +295,7 @@
     </div>
 
     @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
     <script>
         $(document).ready(function () {
             // Initialize datepickers
@@ -342,10 +378,8 @@
                         pricePerUnit = parseFloat(selectedProduct.data('harga-harian'));
                     } else if (rentalType === 'mingguan') {
                         pricePerUnit = parseFloat(selectedProduct.data('harga-mingguan'));
-                        // Convert weeks to days for display (7 days = 1 week)
                     } else if (rentalType === 'bulanan') {
                         pricePerUnit = parseFloat(selectedProduct.data('harga-bulanan'));
-                        // Convert months to days for display (30 days = 1 month)
                     }
 
                     const totalPrice = pricePerUnit * duration;
@@ -356,6 +390,20 @@
                     $('#total_harga_text').text('Rp 0');
                 }
             }
+
+            // Format time values for display
+            function formatTime(time) {
+                if (!time) return '';
+                // If already in HH:MM format
+                if (time.match(/^\d{2}:\d{2}$/)) return time;
+                // If in HH:MM:SS format
+                if (time.match(/^\d{2}:\d{2}:\d{2}$/)) return time.substring(0, 5);
+                return time;
+            }
+
+            // Set initial time values
+            $('#waktu_mulai').val(formatTime('{{ old("waktu_mulai", $order->waktu_mulai ? \Carbon\Carbon::parse($order->waktu_mulai)->format("H:i") : "") }}'));
+            $('#waktu_selesai').val(formatTime('{{ old("waktu_selesai", $order->waktu_selesai ? \Carbon\Carbon::parse($order->waktu_selesai)->format("H:i") : "") }}'));
 
             // Initial toggle based on current user_id value
             toggleFields();

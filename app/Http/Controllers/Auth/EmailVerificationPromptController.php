@@ -17,21 +17,22 @@ class EmailVerificationPromptController extends Controller
 
         if (!$email) {
             return redirect()->route('register')
-                ->with('error', 'Please register or login to verify your email.');
+                ->with('error', 'Silakan daftar atau masuk untuk memverifikasi email Anda.');
         }
 
-        // If user is logged in and already verified
+        // Jika pengguna sudah login dan email sudah terverifikasi
         if ($user && $user->hasVerifiedEmail()) {
-            return redirect()->intended(route('frontend.login'));
+            return redirect()->intended(route('frontend.homepage'))
+                ->with('success', 'Email Anda sudah terverifikasi.');
         }
 
-        // If user is not logged in but we have their email in session
+        // Jika pengguna belum login tetapi email ada di session
         if (!$user) {
             $user = User::where('email', $email)->first();
 
             if ($user && $user->hasVerifiedEmail()) {
                 return redirect()->route('login')
-                    ->with('status', 'Email already verified. Please login.');
+                    ->with('status', 'Email sudah terverifikasi. Silakan masuk.');
             }
         }
 

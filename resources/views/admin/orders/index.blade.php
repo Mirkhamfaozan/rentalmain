@@ -207,8 +207,23 @@
                         </table>
                     </div>
 
-                    <!-- Pagination -->
-                    {{ $orders->links() }}
+                    <!-- Pagination - Fixed Version -->
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="text-muted">
+                                Menampilkan {{ $orders->firstItem() }} sampai {{ $orders->lastItem() }} dari {{ $orders->total() }} entri
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-end">
+                                <nav aria-label="Page navigation">
+                                    <ul class="pagination mb-0">
+                                        {{ $orders->onEachSide(1)->links('pagination::bootstrap-4') }}
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -217,8 +232,12 @@
     @push('scripts')
         <!-- Bootstrap JS -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <!-- Date Range Picker -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css">
+        <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
         <script>
             $(document).ready(function() {
                 $('#date_range').daterangepicker({
