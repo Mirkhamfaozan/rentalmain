@@ -7,7 +7,7 @@
 @section('page-actions')
     <div class="btn-group me-2">
         <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
-            <i class="fas fa-download me-1"></i>Ekspor
+            <i class="fas fa-download me-1"></i>
         </button>
         <ul class="dropdown-menu">
             <li><a class="dropdown-item" href="{{ route('dashboard.products.index') }}?export=csv">Ekspor ke CSV</a></li>
@@ -15,7 +15,7 @@
             <li><a class="dropdown-item" href="{{ route('dashboard.products.index') }}?export=pdf">Ekspor ke PDF</a></li>
         </ul>
         <button type="button" class="btn btn-outline-info">
-            <i class="fas fa-upload me-1"></i>Impor
+            <i class="fas fa-upload me-1"></i>
         </button>
     </div>
     <a href="{{ route('dashboard.products.create') }}" class="btn btn-primary">

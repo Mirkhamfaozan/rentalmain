@@ -197,8 +197,8 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content rounded-4">
                 <div class="modal-header border-0 bg-light">
-                    <h5 class="modal-title fw-bold text-primary" id="locationVerificationModalLabel">🎉 Selamat Datang di
-                        Tegal!</h5>
+                    <h5 class="modal-title fw-bold text-primary" id="locationVerificationModalLabel">🎉 Selamat Datang dirental motor
+                        Kota Tegal!</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body py-4">
@@ -208,8 +208,8 @@
                         </div>
                         <h4 class="fw-bold mb-3">Nikmati perjalanan Anda dengan motor kami</h4>
                         <p class="text-muted mb-4">
-                            Kami menyambut semua tamu yang ingin menjelajahi Tegal.<br>
-                            Apakah Anda sedang berkunjung ke kota ini?
+                            Kami menyambut semua kalangan yang ingin menjelajahi Tegal.<br>
+                            Apakah Anda ingin menyewa motor ini?
                         </p>
                     </div>
                 </div>

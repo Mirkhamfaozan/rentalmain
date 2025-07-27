@@ -6,9 +6,7 @@
 
 @section('page-actions')
     <div class="btn-group me-2 gap-2">
-        <button type="button" class="btn btn-outline-secondary rounded-pill shadow-sm">
-            <i class="fas fa-download me-1"></i> Ekspor Biodata
-        </button>
+        
         <button type="button" class="btn btn-outline-info rounded-pill shadow-sm" data-bs-toggle="collapse"
             data-bs-target="#filterCollapse">
             <i class="fas fa-filter me-1"></i> Filter
