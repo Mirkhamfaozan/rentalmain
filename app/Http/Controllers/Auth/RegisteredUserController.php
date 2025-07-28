@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Log;
 class RegisteredUserController extends Controller
 {
     /**
-     * Display the registration view.
+     * Menampilkan halaman registrasi.
      */
     public function create(): View
     {
@@ -26,7 +26,7 @@ class RegisteredUserController extends Controller
     }
 
     /**
-     * Handle an incoming registration request.
+     * Menangani permintaan registrasi yang masuk.
      *
      * @throws \Illuminate\Validation\ValidationException
      */
@@ -59,17 +59,17 @@ class RegisteredUserController extends Controller
             event(new Registered($user));
 
             $message = $request->role === 'rental'
-                ? 'Rental registration successful! Please verify your email and complete your documents for rental verification.'
-                : 'Registration successful! Please verify your email.';
+                ? 'Registrasi berhasil! Silakan verifikasi email Anda.'
+                : 'Registrasi berhasil! Silakan verifikasi email Anda.';
 
-            // Redirect to verification notice without requiring auth
+            // Redirect ke halaman pemberitahuan verifikasi tanpa memerlukan autentikasi
             return redirect()->route('verification.notice')
                 ->with('status', $message)
                 ->with('email', $user->email);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Registration error:', [
+            Log::error('Error registrasi:', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'input' => $request->except('password', 'password_confirmation')
@@ -77,12 +77,12 @@ class RegisteredUserController extends Controller
 
             return back()
                 ->withInput($request->except('password', 'password_confirmation'))
-                ->withErrors(['error' => 'Registration failed: ' . $e->getMessage()]);
+                ->withErrors(['error' => 'Registrasi gagal: ' . $e->getMessage()]);
         }
     }
 
     /**
-     * Create rental biodata for the user
+     * Membuat biodata rental untuk pengguna
      */
     protected function createRentalBiodata(User $user, Request $request): void
     {
@@ -115,7 +115,7 @@ class RegisteredUserController extends Controller
             'status_verifikasi' => RentalBiodata::STATUS_BELUM_VERIFIKASI,
         ];
 
-        // Handle file uploads
+        // Menangani upload file
         $rentalData['foto_ktp'] = $request->file('foto_ktp')->store('rental/ktp', 'public');
         $rentalData['foto_surat_izin_usaha'] = $request->file('foto_surat_izin_usaha')->store('rental/license', 'public');
         $rentalData['foto_tempat'] = $request->file('foto_tempat')->store('rental/place', 'public');
