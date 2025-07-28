@@ -56,7 +56,7 @@ Route::group(['prefix' => 'payment'], function () {
 Route::middleware('auth')->group(function () {
     Route::group(['prefix' => 'profile'], function () {
         // View profile
-            Route::get('/verification-note', [FrontProfileController::class, 'verificationNote'])->name('profile.verification-note');
+        Route::get('/verification-note', [FrontProfileController::class, 'verificationNote'])->name('profile.verification-note');
 
         Route::get('/', [FrontProfileController::class, 'show'])->name('profile.show');
 
@@ -146,7 +146,10 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
         Route::post('/orders/{order}/verify', [OrderController::class, 'verify'])->name('orders.verify');
         Route::post('/orders/{order}/mark-as-ongoing', [OrderController::class, 'markAsOngoing'])
-    ->name('orders.mark-as-ongoing');
+            ->name('orders.mark-as-ongoing');
+
+        Route::patch('/orders/{order}/update-status', [OrderController::class, 'updateStatus'])
+            ->name('orders.update-status');
 
         Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
         Route::get('/payments/{payment}', [PaymentController::class, 'show'])->name('payments.show');

@@ -14,6 +14,17 @@ use Illuminate\Validation\Rule;
 
 class OrderController extends Controller
 {
+    public function updateStatus(Request $request, Order $order)
+    {
+        $request->validate([
+            'status' => 'required|in:approved,rejected,ongoing,completed'
+        ]);
+
+        // Add your status transition logic here
+        $order->update(['status' => $request->status]);
+
+        return back()->with('success', 'Status updated');
+    }
     public function index(Request $request)
     {
         if (!Auth::user()->canAccessDashboard()) {

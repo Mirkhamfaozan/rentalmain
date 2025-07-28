@@ -188,13 +188,35 @@
                                                     <i class="fas fa-edit"></i>
                                                 </a>
 
-                                                <form action="{{ route('dashboard.orders.destroy', $order) }}" method="POST" class="d-inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus pesanan ini?')" title="Hapus">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </form>
+                                                <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $order->id }}" title="Hapus">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+
+                                                <!-- Delete Confirmation Modal -->
+                                                <div class="modal fade" id="deleteModal{{ $order->id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ $order->id }}" aria-hidden="true">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <form action="{{ route('dashboard.orders.destroy', $order) }}" method="POST">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title" id="deleteModalLabel{{ $order->id }}">Konfirmasi Penghapusan</h5>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <p>Apakah Anda yakin ingin menghapus pesanan ini?</p>
+                                                                    <p><strong>ID Pesanan:</strong> {{ $order->id }}</p>
+                                                                    <p><strong>Pelanggan:</strong> {{ $order->user ? $order->user->name : $order->name }}</p>
+                                                                    <p><strong>Motor:</strong> {{ $order->product ? $order->product->nama_motor : 'Motor Tidak Ditemukan' }}</p>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                                                    <button type="submit" class="btn btn-danger">Hapus</button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>
