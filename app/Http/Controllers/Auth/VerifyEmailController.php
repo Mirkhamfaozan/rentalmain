@@ -13,22 +13,22 @@ use Illuminate\Support\Facades\URL;
 class VerifyEmailController extends Controller
 {
     /**
-     * Mark the user's email address as verified.
+     * Tandai alamat email pengguna sebagai diverifikasi.
      */
     public function __invoke(Request $request): RedirectResponse
     {
-        // Get the user from the route ID first
+        // Ambil pengguna dari ID rute terlebih dahulu
         $user = User::find($request->route('id'));
 
         if (!$user) {
             return redirect()->route('register')
-                ->with('error', 'Invalid verification link. Please register again.');
+                ->with('error', 'Tautan verifikasi tidak valid. Silakan daftar kembali.');
         }
 
-        // Manually validate the signature using the user's email
+        // Validasi tanda tangan secara manual menggunakan email pengguna
         if (!$this->hasValidSignature($request, $user)) {
             return redirect()->route('register')
-                ->with('error', 'The verification link is invalid or has expired.');
+                ->with('error', 'Tautan verifikasi tidak valid atau telah kadaluarsa.');
         }
 
         if ($user->hasVerifiedEmail()) {
@@ -39,27 +39,27 @@ class VerifyEmailController extends Controller
             event(new Verified($user));
         }
 
-        // Different messages based on auth state
+        // Pesan berbeda berdasarkan status autentikasi
         if (Auth::check()) {
             return redirect()->route('frontend.homepage')
-                ->with('status', 'Your email has been successfully verified!');
+                ->with('status', 'Email Anda telah berhasil diverifikasi!');
         }
 
         return redirect()->route('login')
-            ->with('status', 'Your email has been successfully verified! You can now login to your account.');
+            ->with('status', 'Email Anda telah berhasil diverifikasi! Anda sekarang dapat masuk ke akun Anda.');
     }
 
     /**
-     * Manually validate the signature for email verification
+     * Validasi tanda tangan untuk verifikasi email secara manual
      */
     private function hasValidSignature(Request $request, User $user): bool
     {
-        // Check if the request has a valid signature
+        // Periksa apakah permintaan memiliki tanda tangan yang valid
         if (!$request->hasValidSignature()) {
             return false;
         }
 
-        // Verify the hash matches the user's email
+        // Verifikasi apakah hash sesuai dengan email pengguna
         $hash = sha1($user->getEmailForVerification());
 
         return hash_equals($hash, $request->route('hash'));
