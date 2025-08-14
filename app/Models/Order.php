@@ -19,11 +19,12 @@ class Order extends Model
         'product_id',
         'tanggal_mulai',
         'tanggal_selesai',
-        'waktu_mulai', // Added waktu_mulai
-        'waktu_selesai', // Added waktu_selesai
+        'waktu_mulai',
+        'waktu_selesai',
         'durasi_hari',
         'tipe_sewa',
         'total_harga',
+        'fee', // Added fee field
         'ongkir',
         'status',
         'catatan',
@@ -35,9 +36,10 @@ class Order extends Model
     protected $casts = [
         'tanggal_mulai' => 'date',
         'tanggal_selesai' => 'date',
-        'waktu_mulai' => 'datetime:H:i', // Cast waktu_mulai as time
-        'waktu_selesai' => 'datetime:H:i', // Cast waktu_selesai as time
+        'waktu_mulai' => 'datetime:H:i',
+        'waktu_selesai' => 'datetime:H:i',
         'total_harga' => 'decimal:2',
+        'fee' => 'decimal:2', // Added fee cast
         'ongkir' => 'decimal:2',
     ];
 
@@ -59,8 +61,9 @@ class Order extends Model
 
         $subtotal = $this->product->harga_harian * $this->durasi_hari;
         $this->ongkir = $this->ongkir ?? 0;
+        $this->fee = $this->fee ?? 5000; // Default fee if not set
 
-        return $subtotal + $this->ongkir;
+        return $subtotal + $this->ongkir + $this->fee;
     }
 
     public function isOngoing()
@@ -109,7 +112,6 @@ class Order extends Model
         return $this->payment && $this->payment->status === 'paid';
     }
 
-    // Additional helper methods for time handling
     public function getStartDateTimeAttribute()
     {
         if (!$this->tanggal_mulai) return null;
@@ -130,5 +132,11 @@ class Order extends Model
             $date->setTimeFrom($this->waktu_selesai);
         }
         return $date;
+    }
+
+    // Add this method to get the formatted fee
+    public function getFormattedFeeAttribute()
+    {
+        return number_format($this->fee, 2);
     }
 }

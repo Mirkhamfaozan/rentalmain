@@ -11,7 +11,7 @@
 @endsection
 
 @section('content')
-    <div class="row justify-content-center ">
+    <div class="row justify-content-center">
         <div class="col-lg-10">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-transparent border-0 pt-4">
@@ -90,24 +90,6 @@
                         </div>
 
                         <div class="row g-4">
-                            <!-- Nama Motor -->
-                            <div class="col-md-6">
-                                <label for="nama_motor" class="form-label fw-semibold">
-                                    <i class="fas fa-motorcycle me-1 text-primary"></i>Nama Motor
-                                    <span class="text-danger">*</span>
-                                </label>
-                                <input type="text"
-                                       class="form-control @error('nama_motor') is-invalid @enderror"
-                                       id="nama_motor"
-                                       name="nama_motor"
-                                       value="{{ old('nama_motor', $product->nama_motor) }}"
-                                       placeholder="Contoh: Honda Vario 125, Yamaha NMAX, dll."
-                                       required>
-                                @error('nama_motor')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
                             <!-- Merek -->
                             <div class="col-md-6">
                                 <label for="brand" class="form-label fw-semibold">
@@ -127,6 +109,24 @@
                                     <option value="Lainnya" {{ old('brand', $product->brand) == 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
                                 </select>
                                 @error('brand')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Nama Motor -->
+                            <div class="col-md-6">
+                                <label for="nama_motor" class="form-label fw-semibold">
+                                    <i class="fas fa-motorcycle me-1 text-primary"></i>Nama Motor
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input type="text"
+                                       class="form-control @error('nama_motor') is-invalid @enderror"
+                                       id="nama_motor"
+                                       name="nama_motor"
+                                       value="{{ old('nama_motor', $product->nama_motor) }}"
+                                       placeholder="Contoh: Vario 125, NMAX, dll."
+                                       required>
+                                @error('nama_motor')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -347,11 +347,11 @@
                             </div>
                         </div>
 
-                        <!-- Bagian Harga & Stok -->
+                        <!-- Bagian Harga & Ketersediaan -->
                         <div class="row mb-4 mt-5">
                             <div class="col-12">
                                 <h6 class="text-primary fw-bold mb-3">
-                                    <i class="fas fa-money-bill-wave me-1"></i>Harga
+                                    <i class="fas fa-money-bill-wave me-1"></i>Harga & Ketersediaan
                                 </h6>
                             </div>
                         </div>
@@ -560,7 +560,7 @@
                                     <i class="fas fa-check"></i>
                                 </div>
                                 <div class="small">
-                                    <strong>Informasi:</strong> Pastikan semua data sesuai dengan dokumen kendaraan
+                                    <strong>Merek & Nama Motor:</strong> Pilih merek terlebih dahulu, lalu masukkan model untuk kejelasan
                                 </div>
                             </div>
                         </div>
@@ -571,7 +571,7 @@
                                     <i class="fas fa-check"></i>
                                 </div>
                                 <div class="small">
-                                    <strong>Gambar:</strong> Unggah foto terbaru untuk tampilan yang lebih baik
+                                    <strong>Registrasi:</strong> Pastikan semua nomor unik dan benar
                                 </div>
                             </div>
                         </div>
@@ -583,6 +583,17 @@
                                 </div>
                                 <div class="small">
                                     <strong>Harga:</strong> Sesuaikan harga sesuai kondisi pasar saat ini
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex">
+                                <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0"
+                                     style="width: 24px; height: 24px; font-size: 12px;">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div class="small">
+                                    <strong>Gambar:</strong> Unggah foto terbaru untuk tampilan yang lebih baik
                                 </div>
                             </div>
                         </div>

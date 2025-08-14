@@ -57,7 +57,6 @@ Route::middleware('auth')->group(function () {
     Route::group(['prefix' => 'profile'], function () {
         // View profile
         Route::get('/verification-note', [FrontProfileController::class, 'verificationNote'])->name('profile.verification-note');
-
         Route::get('/', [FrontProfileController::class, 'show'])->name('profile.show');
 
         // Edit profile
@@ -75,6 +74,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/orders', [FrontProfileController::class, 'orders'])->name('profile.orders');
         Route::get('/payments', [FrontProfileController::class, 'payments'])->name('profile.payments');
 
+        // Invoice routes
+        Route::get('/order/invoice/{id}', [FrontProfileController::class, 'showInvoice'])->name('profile.order.invoice');
+        Route::get('/order/invoice/{id}/download', [FrontProfileController::class, 'downloadInvoice'])->name('profile.order.invoice.download');
+
         // Products (for rental users only)
         Route::get('/products', [FrontProfileController::class, 'products'])->name('profile.products');
     });
@@ -87,32 +90,17 @@ Route::middleware('auth')->group(function () {
 
     // Payment routes
     Route::group(['prefix' => 'payment'], function () {
-        // Create payment form
         Route::get('/create/{orderId}', [FrontPaymentController::class, 'create'])->name('payment.create');
-
-        // Process payment creation
         Route::post('/store/{orderId}', [FrontPaymentController::class, 'store'])->name('payment.store');
-
-        // Show payment details
         Route::get('/{paymentId}', [FrontPaymentController::class, 'show'])->name('payment.show');
-
-        // Manual payment confirmation (for bank transfer, etc.)
         Route::post('/confirm/{paymentId}', [FrontPaymentController::class, 'confirm'])->name('payment.confirm');
-
-        // Cancel payment
         Route::delete('/cancel/{paymentId}', [FrontPaymentController::class, 'cancel'])->name('payment.cancel');
-
-        // Check payment status (AJAX endpoint)
         Route::get('/status/{paymentId}', [FrontPaymentController::class, 'checkStatus'])->name('payment.status');
-
-        // Payment success page
         Route::get('/success/{paymentId}', [FrontPaymentController::class, 'success'])->name('payment.success');
-
-        // Payment failed page
         Route::get('/failed/{paymentId}', [FrontPaymentController::class, 'failed'])->name('payment.failed');
     });
 
-    // User dashboard routes (if you have user accounts)
+    // User dashboard routes
     Route::group(['prefix' => 'dashboard'], function () {
         Route::get('/', [HomeController::class, 'dashboard'])->name('frontend.dashboard');
         Route::get('/orders', [FrontProductController::class, 'userOrders'])->name('frontend.user.orders');

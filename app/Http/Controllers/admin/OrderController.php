@@ -16,6 +16,11 @@ class OrderController extends Controller
 {
     public function updateStatus(Request $request, Order $order)
     {
+        // Only allow rental users to update status
+        if (!Auth::user()->isRental()) {
+            abort(403, 'Unauthorized action. Only rental owners can update order status.');
+        }
+
         $request->validate([
             'status' => 'required|in:approved,rejected,ongoing,completed'
         ]);
@@ -25,6 +30,7 @@ class OrderController extends Controller
 
         return back()->with('success', 'Status updated');
     }
+
     public function index(Request $request)
     {
         if (!Auth::user()->canAccessDashboard()) {
@@ -72,111 +78,14 @@ class OrderController extends Controller
 
     public function create()
     {
-        if (!Auth::user()->canAccessDashboard()) {
-            abort(403, 'Unauthorized action. You do not have permission to access this page.');
-        }
-
-        $products = Product::where('is_available', true)
-            ->when(Auth::user()->isRental(), function ($query) {
-                $query->where('user_id', Auth::id());
-            })
-            ->get();
-
-        $users = User::select('id', 'name', 'email')->get();
-
-        return view('admin.orders.create', compact('products', 'users'));
+        // Admins can only view, not create orders
+        abort(403, 'Unauthorized action. Admins can only view orders.');
     }
 
     public function store(Request $request)
     {
-        if (!Auth::user()->canAccessDashboard()) {
-            abort(403, 'Unauthorized action. You do not have permission to perform this action.');
-        }
-
-        $messages = [
-            'required' => 'Kolom :attribute wajib diisi.',
-            'date' => 'Kolom :attribute harus berupa tanggal yang valid.',
-            'after_or_equal' => 'Kolom :attribute harus hari ini atau setelahnya.',
-            'after' => 'Kolom :attribute harus setelah tanggal mulai.',
-            'numeric' => 'Kolom :attribute harus berupa angka.',
-            'min' => 'Kolom :attribute minimal :min.',
-            'in' => 'Kolom :attribute harus salah satu dari: :values.',
-            'exists' => 'Kolom :attribute tidak valid.',
-            'required_without' => 'Kolom :attribute wajib diisi jika tidak ada akun pengguna.',
-            'email' => 'Kolom :attribute harus berupa alamat email yang valid.',
-            'image' => 'Kolom :attribute harus berupa file gambar.',
-            'mimes' => 'Kolom :attribute harus berupa file dengan tipe: :values.',
-            'max' => 'Kolom :attribute tidak boleh lebih besar dari :max KB.',
-            'date_format' => 'Format waktu tidak valid (HH:MM).',
-        ];
-
-        $attributes = [
-            'user_id' => 'Pengguna',
-            'name' => 'Nama',
-            'phone_number' => 'Nomor HP',
-            'email' => 'Email',
-            'foto_ktp' => 'Foto KTP',
-            'product_id' => 'Produk',
-            'tanggal_mulai' => 'Tanggal Mulai',
-            'tanggal_selesai' => 'Tanggal Selesai',
-            'waktu_mulai' => 'Waktu Mulai',
-            'waktu_selesai' => 'Waktu Selesai',
-            'durasi_hari' => 'Durasi Hari',
-            'tipe_sewa' => 'Tipe Sewa',
-            'total_harga' => 'Total Harga',
-            'status' => 'Status',
-            'catatan' => 'Catatan',
-            'catatan_ditolak' => 'Catatan Penolakan',
-            'lokasi_pengambilan' => 'Lokasi Pengambilan',
-            'lokasi_pengembalian' => 'Lokasi Pengembalian',
-        ];
-
-        $validated = $request->validate([
-            'user_id' => 'nullable|exists:users,id',
-            'name' => 'required_without:user_id|string|max:255',
-            'phone_number' => 'required_without:user_id|string|max:20',
-            'email' => 'required_without:user_id|email|max:255',
-            'foto_ktp' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'product_id' => [
-                'required',
-                'exists:products,id',
-                Rule::exists('products', 'id')->where(function ($query) {
-                    $query->where('is_available', true);
-                    if (Auth::user()->isRental()) {
-                        $query->where('user_id', Auth::id());
-                    }
-                }),
-            ],
-            'tanggal_mulai' => 'required|date|after_or_equal:today',
-            'tanggal_selesai' => 'required|date|after:tanggal_mulai',
-            'waktu_mulai' => 'required|date_format:H:i',
-            'waktu_selesai' => 'required|date_format:H:i',
-            'durasi_hari' => 'required|numeric|min:1',
-            'tipe_sewa' => 'required|in:harian,mingguan,bulanan',
-            'total_harga' => 'required|numeric|min:0',
-            'status' => 'required|in:belum_dikonfirmasi,pending,dikonfirmasi,ditolak,ongoing,completed,cancelled',
-            'catatan' => 'nullable|string',
-            'catatan_ditolak' => 'nullable|string|max:500',
-            'lokasi_pengambilan' => 'nullable|string|max:255',
-            'lokasi_pengembalian' => 'nullable|string|max:255',
-        ], $messages, $attributes);
-
-        try {
-            if ($request->hasFile('foto_ktp')) {
-                $path = $request->file('foto_ktp')->store('public/ktp');
-                $validated['foto_ktp'] = str_replace('public/', '', $path);
-            }
-
-            $order = Order::create($validated);
-
-            return redirect()->route('dashboard.orders.index')
-                ->with('success', 'Pesanan berhasil ditambahkan.');
-        } catch (\Exception $e) {
-            Log::error('Order creation failed: ' . $e->getMessage());
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Gagal menambahkan pesanan. Error: ' . $e->getMessage());
-        }
+        // Admins can only view, not create orders
+        abort(403, 'Unauthorized action. Admins can only view orders.');
     }
 
     public function show(Order $order)
@@ -185,6 +94,7 @@ class OrderController extends Controller
             abort(403, 'Unauthorized action. You do not have permission to view this order.');
         }
 
+        // Admins can view all orders, rental users can only view their own
         if (Auth::user()->isRental() && $order->product && $order->product->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action. This order belongs to another rental.');
         }
@@ -194,164 +104,30 @@ class OrderController extends Controller
 
     public function edit(Order $order)
     {
-        if (!Auth::user()->canAccessDashboard()) {
-            abort(403, 'Unauthorized action. You do not have permission to edit orders.');
-        }
-
-        if (Auth::user()->isRental() && $order->product && $order->product->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action. You can only edit orders for your own products.');
-        }
-
-        $products = Product::where('is_available', true)
-            ->when(Auth::user()->isRental(), function ($query) {
-                $query->where('user_id', Auth::id());
-            })
-            ->get();
-
-        $users = User::select('id', 'name', 'email')->get();
-
-        return view('admin.orders.edit', compact('order', 'products', 'users'));
+        // Admins can only view, not edit orders
+        abort(403, 'Unauthorized action. Admins can only view orders.');
     }
 
     public function update(Request $request, Order $order)
     {
-        if (!Auth::user()->canAccessDashboard()) {
-            abort(403, 'Unauthorized action. You do not have permission to update orders.');
-        }
-
-        if (Auth::user()->isRental() && $order->product && $order->product->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action. You can only update orders for your own products.');
-        }
-
-        $messages = [
-            'required' => 'Kolom :attribute wajib diisi.',
-            'date' => 'Kolom :attribute harus berupa tanggal yang valid.',
-            'after_or_equal' => 'Kolom :attribute harus hari ini atau setelahnya.',
-            'after' => 'Kolom :attribute harus setelah tanggal mulai.',
-            'numeric' => 'Kolom :attribute harus berupa angka.',
-            'min' => 'Kolom :attribute minimal :min.',
-            'in' => 'Kolom :attribute harus salah satu dari: :values.',
-            'exists' => 'Kolom :attribute tidak valid.',
-            'required_without' => 'Kolom :attribute wajib diisi jika tidak ada akun pengguna.',
-            'email' => 'Kolom :attribute harus berupa alamat email yang valid.',
-            'image' => 'Kolom :attribute harus berupa file gambar.',
-            'mimes' => 'Kolom :attribute harus berupa file dengan tipe: :values.',
-            'max' => 'Kolom :attribute tidak boleh lebih besar dari :max KB.',
-            'date_format' => 'Format waktu tidak valid (HH:MM).',
-        ];
-
-        $attributes = [
-            'user_id' => 'Pengguna',
-            'name' => 'Nama',
-            'phone_number' => 'Nomor HP',
-            'email' => 'Email',
-            'foto_ktp' => 'Foto KTP',
-            'product_id' => 'Produk',
-            'tanggal_mulai' => 'Tanggal Mulai',
-            'tanggal_selesai' => 'Tanggal Selesai',
-            'waktu_mulai' => 'Waktu Mulai',
-            'waktu_selesai' => 'Waktu Selesai',
-            'durasi_hari' => 'Durasi Hari',
-            'tipe_sewa' => 'Tipe Sewa',
-            'total_harga' => 'Total Harga',
-            'status' => 'Status',
-            'catatan' => 'Catatan',
-            'catatan_ditolak' => 'Catatan Penolakan',
-            'lokasi_pengambilan' => 'Lokasi Pengambilan',
-            'lokasi_pengembalian' => 'Lokasi Pengembalian',
-        ];
-
-        $validated = $request->validate([
-            'user_id' => 'nullable|exists:users,id',
-            'name' => 'required_without:user_id|string|max:255',
-            'phone_number' => 'required_without:user_id|string|max:20',
-            'email' => 'required_without:user_id|email|max:255',
-            'foto_ktp' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'product_id' => [
-                'required',
-                'exists:products,id',
-                Rule::exists('products', 'id')->where(function ($query) {
-                    $query->where('is_available', true);
-                    if (Auth::user()->isRental()) {
-                        $query->where('user_id', Auth::id());
-                    }
-                }),
-            ],
-            'tanggal_mulai' => 'required|date',
-            'tanggal_selesai' => 'required|date|after:tanggal_mulai',
-            'waktu_mulai' => 'required|date_format:H:i',
-            'waktu_selesai' => 'required|date_format:H:i',
-            'durasi_hari' => 'required|numeric|min:1',
-            'tipe_sewa' => 'required|in:harian,mingguan,bulanan',
-            'total_harga' => 'required|numeric|min:0',
-            'status' => 'required|in:belum_dikonfirmasi,pending,dikonfirmasi,ditolak,ongoing,completed,cancelled',
-            'catatan' => 'nullable|string',
-            'catatan_ditolak' => 'nullable|string|max:500',
-            'lokasi_pengambilan' => 'nullable|string|max:255',
-            'lokasi_pengembalian' => 'nullable|string|max:255',
-        ], $messages, $attributes);
-
-        try {
-            if ($request->hasFile('foto_ktp')) {
-                if ($order->foto_ktp) {
-                    Storage::delete('public/' . $order->foto_ktp);
-                }
-                $path = $request->file('foto_ktp')->store('public/ktp');
-                $validated['foto_ktp'] = str_replace('public/', '', $path);
-            } else {
-                $validated['foto_ktp'] = $order->foto_ktp;
-            }
-
-            if ($request->has('hapus_foto_ktp') && $order->foto_ktp) {
-                Storage::delete('public/' . $order->foto_ktp);
-                $validated['foto_ktp'] = null;
-            }
-
-            $order->update($validated);
-
-            return redirect()->route('dashboard.orders.index')
-                ->with('success', 'Pesanan berhasil diperbarui.');
-        } catch (\Exception $e) {
-            Log::error('Order update failed: ' . $e->getMessage());
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Gagal memperbarui pesanan. Error: ' . $e->getMessage());
-        }
+        // Admins can only view, not update orders
+        abort(403, 'Unauthorized action. Admins can only view orders.');
     }
 
     public function destroy(Order $order)
     {
-        if (!Auth::user()->canAccessDashboard()) {
-            abort(403, 'Unauthorized action. You do not have permission to delete orders.');
-        }
-
-        if (Auth::user()->isRental() && $order->product && $order->product->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action. You can only delete orders for your own products.');
-        }
-
-        try {
-            if ($order->foto_ktp) {
-                Storage::delete('public/' . $order->foto_ktp);
-            }
-
-            $order->delete();
-
-            return redirect()->route('dashboard.orders.index')
-                ->with('success', 'Pesanan berhasil dihapus.');
-        } catch (\Exception $e) {
-            Log::error('Order deletion failed: ' . $e->getMessage());
-            return redirect()->back()
-                ->with('error', 'Gagal menghapus pesanan. Error: ' . $e->getMessage());
-        }
+        // Admins can only view, not delete orders
+        abort(403, 'Unauthorized action. Admins can only view orders.');
     }
 
     public function verify(Request $request, Order $order)
     {
-        if (!Auth::user()->canAccessDashboard()) {
-            abort(403, 'Unauthorized action.');
+        // Only allow rental users to verify orders
+        if (!Auth::user()->isRental()) {
+            abort(403, 'Unauthorized action. Only rental owners can verify orders.');
         }
 
-        if (Auth::user()->isRental() && $order->product && $order->product->user_id !== Auth::id()) {
+        if ($order->product && $order->product->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action. You can only verify orders for your own products.');
         }
 
@@ -394,11 +170,12 @@ class OrderController extends Controller
 
     public function markAsOngoing(Order $order)
     {
-        if (!Auth::user()->canAccessDashboard()) {
-            abort(403, 'Unauthorized action.');
+        // Only allow rental users to mark orders as ongoing
+        if (!Auth::user()->isRental()) {
+            abort(403, 'Unauthorized action. Only rental owners can update order status.');
         }
 
-        if (Auth::user()->isRental() && $order->product && $order->product->user_id !== Auth::id()) {
+        if ($order->product && $order->product->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action. You can only update orders for your own products.');
         }
 
@@ -421,11 +198,12 @@ class OrderController extends Controller
 
     public function complete(Order $order)
     {
-        if (!Auth::user()->canAccessDashboard()) {
-            abort(403, 'Unauthorized action.');
+        // Only allow rental users to complete orders
+        if (!Auth::user()->isRental()) {
+            abort(403, 'Unauthorized action. Only rental owners can complete orders.');
         }
 
-        if (Auth::user()->isRental() && $order->product && $order->product->user_id !== Auth::id()) {
+        if ($order->product && $order->product->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action. You can only complete orders for your own products.');
         }
 

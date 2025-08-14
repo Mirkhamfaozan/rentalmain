@@ -232,7 +232,18 @@
                                             <small><i class="bi bi-exclamation-triangle me-1"></i>Silakan pilih tanggal mulai dan selesai untuk menghitung harga.</small>
                                         </div>
                                         <div class="border-top pt-3">
-                                            <strong class="text-success fs-5">Total: Rp <span id="totalHarga">-</span></strong>
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span>Subtotal:</span>
+                                                <span>Rp <span id="subtotalHarga">-</span></span>
+                                            </div>
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span>Biaya Admin:</span>
+                                                <span>Rp <span id="adminFee">5,000</span></span>
+                                            </div>
+                                            <div class="d-flex justify-content-between fw-bold text-success fs-5 mt-2">
+                                                <span>Total:</span>
+                                                <span>Rp <span id="totalHarga">-</span></span>
+                                            </div>
                                             <small class="d-block text-muted mt-1">*Harga final akan dikonfirmasi oleh vendor</small>
                                         </div>
                                     </div>
@@ -375,10 +386,18 @@
                         <div class="card border-primary bg-primary bg-opacity-10 rounded-3">
                             <div class="card-body p-3 text-center">
                                 <h6 class="fw-bold text-primary mb-2">
-                                    <i class="bi bi-wallet2 me-2"></i>Estimasi Total
+                                    <i class="bi bi-wallet2 me-2"></i>Rincian Harga
                                 </h6>
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Subtotal:</span>
+                                    <span>Rp <span id="confirmSubtotal">-</span></span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Biaya Admin:</span>
+                                    <span>Rp <span id="confirmAdminFee">5,000</span></span>
+                                </div>
                                 <div class="fs-4 fw-bold text-success mb-1">
-                                    Rp <span id="confirmTotal">-</span>
+                                    Total: Rp <span id="confirmTotal">-</span>
                                 </div>
                                 <small class="text-muted">*Harga final akan dikonfirmasi oleh vendor</small>
                             </div>
@@ -440,6 +459,7 @@
             const priceInfo = document.getElementById('priceInfo');
             const durasiHari = document.getElementById('durasiHari');
             const totalHarga = document.getElementById('totalHarga');
+            const subtotalHarga = document.getElementById('subtotalHarga');
             const tipeSewaTerpilih = document.getElementById('tipeSewaTerpilih');
             const autoSelectionAlert = document.getElementById('autoSelectionAlert');
             const autoSelectionText = document.getElementById('autoSelectionText');
@@ -454,6 +474,10 @@
             const removeKtpBtn = document.getElementById('removeKtpBtn');
             const currentKtpContainer = document.getElementById('currentKtpContainer');
             const totalHargaInput = document.getElementById('total_harga_input');
+            const adminFeeElement = document.getElementById('adminFee');
+            const confirmSubtotal = document.getElementById('confirmSubtotal');
+            const confirmAdminFee = document.getElementById('confirmAdminFee');
+            const confirmTotal = document.getElementById('confirmTotal');
 
             // Pricing data
             const pricing = {
@@ -461,6 +485,8 @@
                 mingguan: {{ $product->harga_mingguan }},
                 bulanan: {{ $product->harga_bulanan }}
             };
+
+            const adminFee = 5000; // Fixed admin fee
 
             // Auto-hide alerts after 5 seconds
             setTimeout(function() {
@@ -609,9 +635,12 @@
                     `${durasiHari.textContent} hari (${tipeSewaTerpilih.textContent})`;
                 document.getElementById('confirmTime').textContent =
                     `${waktuMulai.value} - ${waktuSelesai.value}`;
-                document.getElementById('confirmTotal').textContent = totalHarga.textContent;
 
-                // Locations
+                // Update price details in modal
+                confirmSubtotal.textContent = subtotalHarga.textContent;
+                confirmAdminFee.textContent = adminFee.toLocaleString('id-ID');
+                confirmTotal.textContent = totalHarga.textContent;
+
                 document.getElementById('confirmPickup').textContent = document.getElementById('lokasi_pengambilan').value;
                 document.getElementById('confirmReturn').textContent = document.getElementById('lokasi_pengembalian').value;
 
@@ -630,19 +659,6 @@
                 confirmOrderBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Ya, Pesan Sekarang!';
                 confirmOrderBtn.disabled = false;
             });
-
-            // Show order submitted modal if session flag exists
-            @if(session('showOrderSubmittedModal'))
-                const orderSubmittedModal = new bootstrap.Modal(document.getElementById('orderSubmittedModal'));
-                orderSubmittedModal.show();
-
-                // Prevent modal from closing when clicking outside
-                document.getElementById('orderSubmittedModal').addEventListener('click', function(event) {
-                    if (event.target === this) {
-                        event.stopPropagation();
-                    }
-                });
-            @endif
 
             // Hybrid rental calculation system
             function determineRentalType(days) {
@@ -701,13 +717,12 @@
                     breakdown.push(`${days} hari`);
                 }
 
-                console.log('Calculated Price:', totalPrice);
-                console.log('Breakdown:', breakdown);
-
                 return {
-                    totalPrice: totalPrice,
+                    totalPrice: totalPrice + adminFee,
                     breakdown: breakdown,
-                    mainType: determineRentalType(days)
+                    mainType: determineRentalType(days),
+                    adminFee: adminFee,
+                    subtotal: totalPrice
                 };
             }
 
@@ -724,8 +739,10 @@
 
                     durasiHari.textContent = daysDiff;
                     tipeSewaTerpilih.textContent = calculation.breakdown.join(' + ');
+                    subtotalHarga.textContent = calculation.subtotal.toLocaleString('id-ID');
+                    adminFeeElement.textContent = calculation.adminFee.toLocaleString('id-ID');
                     totalHarga.textContent = calculation.totalPrice.toLocaleString('id-ID');
-                    totalHargaInput.value = calculation.totalPrice; // Update hidden input
+                    totalHargaInput.value = calculation.totalPrice;
 
                     showAutoSelectionInfo(daysDiff, calculation);
                     priceInfo.style.display = 'block';
@@ -733,10 +750,11 @@
                 } else {
                     priceInfo.style.display = 'none';
                     noPriceAlert.style.display = 'block';
-                    totalHargaInput.value = 0; // Reset hidden input
+                    totalHargaInput.value = 0;
                     durasiHari.textContent = '-';
                     tipeSewaTerpilih.textContent = '-';
                     totalHarga.textContent = '-';
+                    subtotalHarga.textContent = '-';
                     autoSelectionAlert.style.display = 'none';
                 }
             }
@@ -762,7 +780,18 @@
             if (tanggalMulai.value && tanggalSelesai.value) {
                 calculatePrice();
             }
+
+            @if(session('showOrderSubmittedModal'))
+                const orderSubmittedModal = new bootstrap.Modal(document.getElementById('orderSubmittedModal'));
+                orderSubmittedModal.show();
+
+                // Prevent modal from closing when clicking outside
+                document.getElementById('orderSubmittedModal').addEventListener('click', function(event) {
+                    if (event.target === this) {
+                        event.stopPropagation();
+                    }
+                });
+            @endif
         });
     </script>
 @endsection
-    

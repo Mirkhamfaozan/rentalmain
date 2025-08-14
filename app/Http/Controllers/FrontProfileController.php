@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -10,6 +11,7 @@ use Illuminate\Validation\Rules\Password;
 use App\Models\User;
 use App\Models\RentalBiodata;
 use App\Models\Product;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class FrontProfileController extends Controller
 {
@@ -314,4 +316,41 @@ class FrontProfileController extends Controller
 
         return view('frontend.profile.products', compact('products'));
     }
+public function showInvoice($orderId)
+    {
+        $user = Auth::user();
+        $order = Order::with(['product.user.rentalBiodata', 'payment'])
+            ->where('id', $orderId)
+            ->where(function ($query) use ($user) {
+                // Allow access for regular users (their own orders) or rental users (orders for their products)
+                $query->where('user_id', $user->id)
+                      ->orWhereHas('product', function ($subQuery) use ($user) {
+                          $subQuery->where('user_id', $user->id);
+                      });
+            })
+            ->firstOrFail();
+
+        return view('frontend.profile.invoice', compact('order'));
+    }
+
+    /**
+     * Download the invoice as PDF.
+     */
+    public function downloadInvoice($orderId)
+    {
+        $user = Auth::user();
+        $order = Order::with(['product.user.rentalBiodata', 'payment'])
+            ->where('id', $orderId)
+            ->where(function ($query) use ($user) {
+                $query->where('user_id', $user->id)
+                      ->orWhereHas('product', function ($subQuery) use ($user) {
+                          $subQuery->where('user_id', $user->id);
+                      });
+            })
+            ->firstOrFail();
+
+        $pdf = Pdf::loadView('frontend.profile.invoice', compact('order'));
+        return $pdf->download('invoice-' . $order->id . '.pdf');
+    }
 }
+

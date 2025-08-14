@@ -274,8 +274,7 @@
                                                                 </div>
                                                             </td>
                                                             <td>{{ $order->durasi_hari }} hari</td>
-                                                            <td>Rp {{ number_format($order->total_harga, 0, ',', '.') }}
-                                                            </td>
+                                                            <td>Rp {{ number_format($order->total_harga, 0, ',', '.') }}</td>
                                                             <td>
                                                                 @if ($order->status == 'belum_dikonfirmasi')
                                                                     <span class="badge bg-secondary">
@@ -310,21 +309,27 @@
                                                             <td>
                                                                 @if ($order->status == 'pending')
                                                                     <a href="{{ route('payment.create', $order->id) }}"
-                                                                        class="btn btn-sm btn-success rounded-pill">
+                                                                       class="btn btn-sm btn-success rounded-pill mb-1">
                                                                         <i class="bi bi-credit-card me-1"></i> Bayar
                                                                     </a>
                                                                 @elseif($order->status == 'ongoing')
-                                                                    <button class="btn btn-sm btn-outline-primary rounded-pill">
-                                                                        <i class="bi bi-info-circle me-1"></i> Detail
-                                                                    </button>
+                    
+                                                                    <a href="{{ route('profile.order.invoice', $order->id) }}"
+                                                                       class="btn btn-sm btn-outline-info rounded-pill">
+                                                                        <i class="bi bi-receipt me-1"></i> Lihat Invoice
+                                                                    </a>
                                                                 @elseif($order->status == 'completed')
-                                                                    <button class="btn btn-sm btn-outline-secondary rounded-pill">
+                                                                    <button class="btn btn-sm btn-outline-secondary rounded-pill mb-1">
                                                                         <i class="bi bi-star me-1"></i> Beri Rating
                                                                     </button>
+                                                                    <a href="{{ route('profile.order.invoice', $order->id) }}"
+                                                                       class="btn btn-sm btn-outline-info rounded-pill">
+                                                                        <i class="bi bi-receipt me-1"></i> Lihat Invoice
+                                                                    </a>
                                                                 @elseif($order->status == 'ditolak')
-                                                                    <button class="btn btn-sm btn-outline-danger rounded-pill"
-                                                                        data-bs-toggle="modal"
-                                                                        data-bs-target="#rejectionNoteModal{{ $order->id }}">
+                                                                    <button class="btn btn-sm btn-outline-danger rounded-pill mb-1"
+                                                                            data-bs-toggle="modal"
+                                                                            data-bs-target="#rejectionNoteModal{{ $order->id }}">
                                                                         <i class="bi bi-info-circle me-1"></i> Lihat Penolakan
                                                                     </button>
                                                                 @endif

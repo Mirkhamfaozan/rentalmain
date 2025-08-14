@@ -32,6 +32,7 @@ class FrontProductController extends Controller
     public function submitOrder(Request $request)
     {
         $user = Auth::user();
+        $adminFee = 5000; // Admin fee
 
         $validator = Validator::make($request->all(), [
             'product_id' => 'required|exists:products,id',
@@ -102,8 +103,8 @@ class FrontProductController extends Controller
             ]);
 
             // Compare submitted total_harga with calculated price
-            if (abs($request->total_harga - $calculatedPrice) > 0.01) {
-                Log::warning('Price mismatch: Submitted=' . $request->total_harga . ', Calculated=' . $calculatedPrice);
+            if (abs($request->total_harga - $calculatedPrice['totalPrice']) > 0.01) {
+                Log::warning('Price mismatch: Submitted=' . $request->total_harga . ', Calculated=' . $calculatedPrice['totalPrice']);
                 return redirect()->back()->with('error', 'Total harga tidak valid. Silakan coba lagi.')->withInput();
             }
 
@@ -126,6 +127,7 @@ class FrontProductController extends Controller
                 'durasi_hari' => $durasi_hari,
                 'tipe_sewa' => $tipe_sewa,
                 'total_harga' => $request->total_harga,
+                '   fee' => $adminFee,
                 'status' => 'belum_dikonfirmasi',
                 'catatan' => $request->catatan,
                 'lokasi_pengambilan' => $request->lokasi_pengambilan,
@@ -167,7 +169,9 @@ class FrontProductController extends Controller
 
     private function calculateHybridPrice($days, $pricing)
     {
+        $adminFee = 5000;
         $totalPrice = 0;
+        $breakdown = [];
 
         if ($days >= 30) {
             $months = floor($days / 30);
@@ -175,6 +179,7 @@ class FrontProductController extends Controller
 
             if ($months > 0) {
                 $totalPrice += $months * $pricing['bulanan'];
+                $breakdown[] = "${months} bulan";
             }
 
             if ($remainingDays > 7) {
@@ -183,13 +188,16 @@ class FrontProductController extends Controller
 
                 if ($weeks > 0) {
                     $totalPrice += $weeks * $pricing['mingguan'];
+                    $breakdown[] = "${weeks} minggu";
                 }
 
                 if ($extraDays > 0) {
                     $totalPrice += $extraDays * $pricing['harian'];
+                    $breakdown[] = "${extraDays} hari";
                 }
             } else {
                 $totalPrice += $remainingDays * $pricing['harian'];
+                $breakdown[] = "${remainingDays} hari";
             }
         } elseif ($days >= 7) {
             $weeks = floor($days / 7);
@@ -197,16 +205,25 @@ class FrontProductController extends Controller
 
             if ($weeks > 0) {
                 $totalPrice += $weeks * $pricing['mingguan'];
+                $breakdown[] = "${weeks} minggu";
             }
 
             if ($remainingDays > 0) {
                 $totalPrice += $remainingDays * $pricing['harian'];
+                $breakdown[] = "${remainingDays} hari";
             }
         } else {
             $totalPrice = $days * $pricing['harian'];
+            $breakdown[] = "${days} hari";
         }
 
-        return $totalPrice;
+        return [
+            'totalPrice' => $totalPrice + $adminFee,
+            'breakdown' => $breakdown,
+            'mainType' => $this->determineRentalType($days),
+            'adminFee' => $adminFee,
+            'subtotal' => $totalPrice
+        ];
     }
 
     public function showOrder($id)
@@ -257,7 +274,6 @@ class FrontProductController extends Controller
 
         $product = Product::findOrFail($request->product_id);
 
-        // Check if there are any overlapping orders
         $overlappingOrders = Order::where('product_id', $request->product_id)
             ->where(function($query) use ($request) {
                 $query->whereBetween('tanggal_mulai', [$request->tanggal_mulai, $request->tanggal_selesai])

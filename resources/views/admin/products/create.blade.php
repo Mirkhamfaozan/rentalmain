@@ -90,24 +90,6 @@
                         </div>
 
                         <div class="row g-4">
-                            <!-- Nama Motor -->
-                            <div class="col-md-6">
-                                <label for="nama_motor" class="form-label fw-semibold">
-                                    <i class="fas fa-motorcycle me-1 text-primary"></i>Nama Motor
-                                    <span class="text-danger">*</span>
-                                </label>
-                                <input type="text"
-                                       class="form-control @error('nama_motor') is-invalid @enderror"
-                                       id="nama_motor"
-                                       name="nama_motor"
-                                       value="{{ old('nama_motor') }}"
-                                       placeholder="Contoh: Honda Vario 125, Yamaha NMAX, dll."
-                                       required>
-                                @error('nama_motor')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
                             <!-- Merek -->
                             <div class="col-md-6">
                                 <label for="brand" class="form-label fw-semibold">
@@ -127,6 +109,24 @@
                                     <option value="Lainnya" {{ old('brand') == 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
                                 </select>
                                 @error('brand')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Nama Motor -->
+                            <div class="col-md-6">
+                                <label for="nama_motor" class="form-label fw-semibold">
+                                    <i class="fas fa-motorcycle me-1 text-primary"></i>Nama Motor
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input type="text"
+                                       class="form-control @error('nama_motor') is-invalid @enderror"
+                                       id="nama_motor"
+                                       name="nama_motor"
+                                       value="{{ old('nama_motor') }}"
+                                       placeholder="Contoh: Vario 125, NMAX, dll."
+                                       required>
+                                @error('nama_motor')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -550,7 +550,7 @@
                                     <i class="fas fa-check"></i>
                                 </div>
                                 <div class="small">
-                                    <strong>Nama Motor:</strong> Sertakan merek dan model untuk kejelasan
+                                    <strong>Merek & Nama Motor:</strong> Pilih merek terlebih dahulu, lalu masukkan model untuk kejelasan
                                 </div>
                             </div>
                         </div>
