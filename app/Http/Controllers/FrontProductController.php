@@ -127,7 +127,7 @@ class FrontProductController extends Controller
                 'durasi_hari' => $durasi_hari,
                 'tipe_sewa' => $tipe_sewa,
                 'total_harga' => $request->total_harga,
-                '   fee' => $adminFee,
+                'fee' => $adminFee,
                 'status' => 'belum_dikonfirmasi',
                 'catatan' => $request->catatan,
                 'lokasi_pengambilan' => $request->lokasi_pengambilan,
