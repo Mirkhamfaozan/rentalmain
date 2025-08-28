@@ -156,7 +156,11 @@ class OrderController extends Controller
                     'catatan_ditolak' => $request->catatan_ditolak,
                     'ongkir' => 0,
                 ]);
-                $message = 'Pesanan berhasil ditolak.';
+
+                // Kirim notifikasi WhatsApp ke penyewa bahwa pesanan ditolak
+                $this->sendRejectionNotification($order);
+
+                $message = 'Pesanan berhasil ditolak dan notifikasi telah dikirim ke penyewa.';
             }
 
             return redirect()->back()
@@ -166,6 +170,72 @@ class OrderController extends Controller
             return redirect()->back()
                 ->with('error', 'Gagal memproses pesanan: ' . $e->getMessage());
         }
+    }
+
+    // Fungsi untuk mengirim notifikasi WhatsApp saat pesanan ditolak
+    private function sendRejectionNotification($order)
+    {
+        $token = 'o546qXJtsue8HCW5zWMm'; // Token Fonnte Anda
+
+        // Format nomor telepon penyewa
+        $target = $this->formatPhoneNumber($order->phone_number);
+
+        // Format pesan notifikasi penolakan
+        $message = "❌ Pesanan Anda Ditolak\n";
+        $message .= "Halo " . $order->name . ", mohon maaf pesanan motor Anda tidak dapat diproses.\n";
+        $message .= "Alasan: " . $order->catatan_ditolak . ".\n\n";
+        $message .= "Silakan coba pilih motor lain atau hubungi admin rental.";
+
+        // Mengirim notifikasi menggunakan cURL
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'https://api.fonnte.com/send',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => array(
+                'target' => $target,
+                'message' => $message,
+                'countryCode' => '62', //optional
+            ),
+            CURLOPT_HTTPHEADER => array(
+                'Authorization: ' . $token
+            ),
+        ));
+
+        $response = curl_exec($curl);
+        if (curl_errno($curl)) {
+            $error_msg = curl_error($curl);
+            Log::error('WhatsApp rejection notification error: ' . $error_msg);
+        }
+        curl_close($curl);
+
+        // Log respons untuk debugging
+        Log::info('WhatsApp rejection notification response: ' . $response);
+    }
+
+    // Fungsi untuk memformat nomor telepon
+    private function formatPhoneNumber($phone)
+    {
+        // Hapus karakter non-digit
+        $phone = preg_replace('/[^0-9]/', '', $phone);
+
+        // Jika diawali dengan 0, ubah menjadi 62
+        if (substr($phone, 0, 1) === '0') {
+            $phone = '62' . substr($phone, 1);
+        }
+
+        // Jika tidak diawali dengan 62, tambahkan
+        if (substr($phone, 0, 2) !== '62') {
+            $phone = '62' . $phone;
+        }
+
+        return $phone;
     }
 
     public function markAsOngoing(Order $order)

@@ -34,5 +34,10 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'fonte' => [
+    'base_url' => env('FONTE_BASE_URL'),
+    'api_key' => env('FONTE_API_KEY'),
+    'default_rental_number' => env('RENTAL_PHONE_NUMBER'),
+],
 
 ];

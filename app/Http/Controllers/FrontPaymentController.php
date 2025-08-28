@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\Product;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -530,6 +532,9 @@ class FrontPaymentController extends Controller
                         $updateData['status'] = 'success';
                         $payment->order->update(['status' => 'confirmed']);
                         $payment->order->product->update(['is_available' => 0]);
+
+                        // Kirim notifikasi WhatsApp ke rental bahwa pembayaran berhasil
+                        $this->sendPaymentSuccessNotification($payment);
                     }
                     break;
 
@@ -537,6 +542,9 @@ class FrontPaymentController extends Controller
                     $updateData['status'] = 'success';
                     $payment->order->update(['status' => 'confirmed']);
                     $payment->order->product->update(['is_available' => 0]);
+
+                    // Kirim notifikasi WhatsApp ke rental bahwa pembayaran berhasil
+                    $this->sendPaymentSuccessNotification($payment);
                     break;
 
                 case 'expire':
@@ -570,6 +578,83 @@ class FrontPaymentController extends Controller
             ]);
             return false;
         }
+    }
+
+    // Fungsi untuk mengirim notifikasi WhatsApp saat pembayaran berhasil
+    private function sendPaymentSuccessNotification($payment)
+    {
+        $token = 'o546qXJtsue8HCW5zWMm'; // Token Fonnte Anda
+
+        // Dapatkan user rental yang memiliki produk
+        $rentalUser = $payment->order->product->user;
+
+        // Pastikan rental memiliki biodata dan nomor WhatsApp
+        if (!$rentalUser || !$rentalUser->rentalBiodata || !$rentalUser->rentalBiodata->no_wa) {
+            Log::error('Rental WhatsApp number not found for payment: ' . $payment->id);
+            return;
+        }
+
+        $target = $this->formatPhoneNumber($rentalUser->rentalBiodata->no_wa);
+
+        // Format pesan notifikasi pembayaran berhasil
+        $message = "💳 Pembayaran Telah Diterima\n";
+        $message .= "Penyewa " . $payment->order->name . " telah menyelesaikan pembayaran untuk pesanan motor.\n\n";
+        $message .= "Detail pesanan:\n";
+        $message .= "- Motor: " . $payment->order->product->nama_motor . "\n";
+        $message .= "- Total Bayar: Rp " . number_format($payment->gross_amount, 0, ',', '.') . "\n";
+        $message .= "- Tanggal Sewa: " . $payment->order->tanggal_mulai . " - " . $payment->order->tanggal_selesai . "\n\n";
+        $message .= "Silakan siapkan motor untuk penyewa.";
+
+        // Mengirim notifikasi menggunakan cURL
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'https://api.fonnte.com/send',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => array(
+                'target' => $target,
+                'message' => $message,
+                'countryCode' => '62', //optional
+            ),
+            CURLOPT_HTTPHEADER => array(
+                'Authorization: ' . $token
+            ),
+        ));
+
+        $response = curl_exec($curl);
+        if (curl_errno($curl)) {
+            $error_msg = curl_error($curl);
+            Log::error('WhatsApp payment success notification error: ' . $error_msg);
+        }
+        curl_close($curl);
+
+        // Log respons untuk debugging
+        Log::info('WhatsApp payment success notification response: ' . $response);
+    }
+
+    // Fungsi untuk memformat nomor telepon
+    private function formatPhoneNumber($phone)
+    {
+        // Hapus karakter non-digit
+        $phone = preg_replace('/[^0-9]/', '', $phone);
+
+        // Jika diawali dengan 0, ubah menjadi 62
+        if (substr($phone, 0, 1) === '0') {
+            $phone = '62' . substr($phone, 1);
+        }
+
+        // Jika tidak diawali dengan 62, tambahkan
+        if (substr($phone, 0, 2) !== '62') {
+            $phone = '62' . $phone;
+        }
+
+        return $phone;
     }
 
     public function confirm(Request $request, $paymentId)
@@ -618,6 +703,9 @@ class FrontPaymentController extends Controller
             $payment->update($updateData);
             $payment->order->update(['status' => 'confirmed']);
             $payment->order->product->update(['is_available' => 0]);
+
+            // Kirim notifikasi WhatsApp ke rental bahwa pembayaran berhasil
+            $this->sendPaymentSuccessNotification($payment);
 
             Log::info('Payment confirmed successfully', [
                 'payment_id' => $paymentId,

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Order;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -113,7 +114,8 @@ class FrontProductController extends Controller
                 $ktpPath = $this->uploadKtpPhoto($request->file('foto_ktp'), $user->id);
             }
 
-            Order::create([
+            // Membuat pesanan
+            $order = Order::create([
                 'user_id' => $user->id,
                 'name' => $name,
                 'email' => $email,
@@ -134,6 +136,9 @@ class FrontProductController extends Controller
                 'lokasi_pengembalian' => $request->lokasi_pengembalian,
             ]);
 
+            // Kirim notifikasi WhatsApp
+            $this->sendOrderNotification($order, $product);
+
             return redirect()->route('profile.show')
                 ->with('showOrderSubmittedModal', true)
                 ->with('success', 'Pesanan berhasil dikirim! Silakan tunggu verifikasi dari rental.');
@@ -143,6 +148,86 @@ class FrontProductController extends Controller
                 ->with('error', 'Terjadi kesalahan saat memproses pesanan. Silakan coba lagi.')
                 ->withInput();
         }
+    }
+
+    // Fungsi untuk mengirim notifikasi WhatsApp ke rental
+    private function sendOrderNotification($order, $product)
+    {
+        // Dapatkan user rental yang memiliki produk
+        $rentalUser = $product->user;
+
+        // Pastikan rental memiliki biodata dan nomor WhatsApp
+        if (!$rentalUser || !$rentalUser->rentalBiodata || !$rentalUser->rentalBiodata->no_wa) {
+            Log::error('Rental WhatsApp number not found for product: ' . $product->id);
+            // Fallback ke nomor default jika tidak ada nomor rental
+            $target = '085600292325';
+        } else {
+            $target = $this->formatPhoneNumber($rentalUser->rentalBiodata->no_wa);
+        }
+
+        $token = 'o546qXJtsue8HCW5zWMm'; // Token Fonnte Anda
+
+        // Format pesan notifikasi
+        $message = "📢 Notifikasi Pesanan Baru\n";
+        $message .= "Ada penyewa yang baru saja memesan motor melalui sistem.\n";
+        $message .= "Detail pesanan:\n";
+        $message .= "- Nama: " . $order->name . "\n";
+        $message .= "- Motor: " . $product->nama . "\n";
+        $message .= "- Tanggal Sewa: " . $order->tanggal_mulai . " - " . $order->tanggal_selesai . "\n";
+        $message .= "- No. HP: " . $order->phone_number . "\n";
+        $message .= "- Total Harga: Rp " . number_format($order->total_harga, 0, ',', '.') . "\n";
+        $message .= "- Lokasi Pengambilan: " . $order->lokasi_pengambilan;
+
+        // Mengirim notifikasi menggunakan cURL
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'https://api.fonnte.com/send',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => array(
+                'target' => $target,
+                'message' => $message,
+                'countryCode' => '62', //optional
+            ),
+            CURLOPT_HTTPHEADER => array(
+                'Authorization: ' . $token
+            ),
+        ));
+
+        $response = curl_exec($curl);
+        if (curl_errno($curl)) {
+            $error_msg = curl_error($curl);
+            Log::error('WhatsApp notification error: ' . $error_msg);
+        }
+        curl_close($curl);
+
+        // Log respons untuk debugging
+        Log::info('WhatsApp notification response: ' . $response);
+    }
+
+    // Fungsi untuk memformat nomor telepon
+    private function formatPhoneNumber($phone)
+    {
+        // Hapus karakter non-digit
+        $phone = preg_replace('/[^0-9]/', '', $phone);
+
+        // Jika diawali dengan 0, ubah menjadi 62
+        if (substr($phone, 0, 1) === '0') {
+            $phone = '62' . substr($phone, 1);
+        }
+
+        // Jika tidak diawali dengan 62, tambahkan
+        if (substr($phone, 0, 2) !== '62') {
+            $phone = '62' . $phone;
+        }
+
+        return $phone;
     }
 
     private function uploadKtpPhoto($file, $userId)
